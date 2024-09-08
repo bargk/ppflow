@@ -96,7 +96,7 @@ void CorrFunc(const int a ,const char* fileList){
         hzdc->Fill(sum);
         //determine effective energy bin
         float m_eff_energy_percent = GetEffectiveEnergy(sum);
-        if(m_eff_energy_percent < 0.0 || m_eff_energy_percent > 100.0) continue;
+        if(m_eff_energy_percent < 0.0 || m_eff_energy_percent > 99.9) continue;
         m_cent_i          =Bins::GetCentBin(m_eff_energy_percent);
 
         if(m_use_multiplicity){
