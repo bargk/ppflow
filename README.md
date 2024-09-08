@@ -1,5 +1,5 @@
 # ppFlow
-
+V2 dependance on  effective energy
 
 
 ## Getting started
