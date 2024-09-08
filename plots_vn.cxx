@@ -25,6 +25,7 @@ int m_har;
 //int m_correlation_type;
 int m_vn_type;
 bool m_do_shifts;
+bool m_use_multiplicity;
 
 
 
@@ -45,7 +46,7 @@ void plots_vn(int  ihar        = 2,//ihar=2,3,4 = v2,v3,v4
     m_har             =ihar;
     m_vn_type         =l_vn_type;
     m_do_shifts       =l_do_shifts;
-
+    m_use_multiplicity = true; 
 
     m_format["YTitleOffset"]=1.3;
     m_format["XTitleOffset"]=1.3;
@@ -72,6 +73,12 @@ void plots_vn(int  ihar        = 2,//ihar=2,3,4 = v2,v3,v4
       std::cout<<__PRETTY_FUNCTION__<<" Unsupported vn_type="<<m_vn_type<<std::endl;
       throw std::exception();
     }
+
+    if(m_use_multiplicity){
+      sprintf(name1,"%s/TemplateFits_ntrkPeriph_vnn.root" ,base1.c_str());
+      sprintf(name2,"%s/TemplateFits_ntrkPeriph_vnn.root" ,base2.c_str());
+    }
+
                      InFile1=new TFile(name1,"read");Common::CheckFile(InFile1,name1);
     if(base2!=base1){InFile2=new TFile(name2,"read");Common::CheckFile(InFile2,name2);}
     else             InFile2=InFile1;
@@ -79,7 +86,6 @@ void plots_vn(int  ihar        = 2,//ihar=2,3,4 = v2,v3,v4
     std::vector<int>cent_periph=Bins::CentBinsPeriph();
     Peripheraldep_Centdep(Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph);
     Peripheraldep_Centdep(Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(1.0,2.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph);
-    Peripheraldep_Centdep(Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(2.0,3.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph);
     base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots";
     Common::SaveCanvas(m_can_vec,base1);
 }
@@ -100,6 +106,7 @@ void Peripheraldep_Centdep(int ipt1,int ipt2,int ich, int ideta, std::vector<int
   if     (m_vn_type==Bins::VN_TEMPLATE         ) sprintf(name,"%s_template_%s"        ,name1,name2);
   else if(m_vn_type==Bins::VN_TEMPLATE_PEDESTAL) sprintf(name,"%s_templatepedestal_%s",name1,name2);
   else if(m_vn_type==Bins::VN_PERISUB          ) sprintf(name,"%s_perisub_%s"         ,name1,name2);
+  if     (m_use_multiplicity         ) sprintf(name,"%s_multiplicitytemplate_%s"        ,name1,name2);
   TCanvas *Can1=new TCanvas(name,name,1200,900);
   //TCanvas *Can1=new TCanvas(name,name,1200,600);
   Can1->Divide(2,2);

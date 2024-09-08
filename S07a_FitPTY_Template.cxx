@@ -155,23 +155,23 @@ void S07a_FitPTY_Template(int l_use_peripheral_pp = 0) {
                         }
                         OutFile2->cd();
                         sprintf(name, "h_v22_pericent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
-                        if (l_use_peripheral_pp == 1) {sprintf(name, "h_v22_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
+                        //if (l_use_peripheral_pp == 1) {sprintf(name, "h_v22_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
                         h_v22->SetName(name);
                         h_v22->Write();
                         sprintf(name, "h_v33_pericent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
-                        if (l_use_peripheral_pp == 1) {sprintf(name, "h_v33_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
+                        //if (l_use_peripheral_pp == 1) {sprintf(name, "h_v33_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
                         h_v33->SetName(name);
                         h_v33->Write();
                         sprintf(name, "h_v44_pericent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
-                        if (l_use_peripheral_pp == 1) {sprintf(name, "h_v44_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
+                        //if (l_use_peripheral_pp == 1) {sprintf(name, "h_v44_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
                         h_v44->SetName(name);
                         h_v44->Write();
                         sprintf(name, "h_v55_pericent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
-                        if (l_use_peripheral_pp == 1) {sprintf(name, "h_v55_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
+                        //if (l_use_peripheral_pp == 1) {sprintf(name, "h_v55_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
                         h_v55->SetName(name);
                         h_v55->Write();
                         sprintf(name, "h_v00_pericent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
-                        if (l_use_peripheral_pp == 1) {sprintf(name, "h_v00_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
+                        //if (l_use_peripheral_pp == 1) {sprintf(name, "h_v00_PPperiph%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);}
                         h_scale->SetName(name);
                         h_scale->Write();
                     }
@@ -183,6 +183,7 @@ void S07a_FitPTY_Template(int l_use_peripheral_pp = 0) {
     InFilePeripheral->Close();
     OutFile1->Close();
     OutFile2->Close();
+    
 
 
     /* 
@@ -224,5 +225,8 @@ void S07a_FitPTY_Template(int l_use_peripheral_pp = 0) {
         }
        OutFile2->Close();
     */
-
+    std::cout << "finished" << std::endl;
+    sprintf(name,"kill -9 %d",gSystem->GetPid());
+    std::cout<<name<<std::endl;
+    gSystem->Exec(name);
 }

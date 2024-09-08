@@ -143,4 +143,10 @@ void S04b_PeripheralScales(int m_use_multiplicity = 0) {
             }
         }
     }
+    output->Close();
+    output2->Close();
+    std::cout << "finished" << std::endl;
+    sprintf(name,"kill -9 %d",gSystem->GetPid());
+    std::cout<<name<<std::endl;
+    gSystem->Exec(name);
 }

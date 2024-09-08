@@ -8,17 +8,17 @@ std::vector<TCanvas*> m_can_vec;
 TStyle* AtlasStyle();
 void SetAtlasStyle();
 
-void plots_TemplateFits(int l_vn_type = Bins::VN_TEMPLATE) {
+void plots_TemplateFits(int l_use_multiplicity =0) {
     //SetAtlasStyle();
     std::string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
     std::string base2 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/TemplateFits_plots";
     char name [600];
     char name1[600];
 
-    if      (l_vn_type == Bins::VN_TEMPLATE         ) sprintf(name , "%s/TemplateFits.root"           , base.c_str());
-    else if (l_vn_type == Bins::VN_TEMPLATE_PEDESTAL) sprintf(name , "%s/TemplateFits_pedestal.root"  , base.c_str());
+    if      (l_use_multiplicity == 0         ) sprintf(name , "%s/TemplateFits.root"           , base.c_str());
+    else if (l_use_multiplicity == 1) sprintf(name , "%s/TemplateFits_ntrkPeriph.root"  , base.c_str());
     else {
-        std::cout << __PRETTY_FUNCTION__ << " Unsupported VN Type=" << l_vn_type << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << " Unsupported VN Type=" << l_use_multiplicity << std::endl;
         throw std::exception();
     }
 
@@ -37,7 +37,7 @@ void plots_TemplateFits(int l_vn_type = Bins::VN_TEMPLATE) {
     std::vector<int> deta_bins = Bins::DetaBins();
 
     for (int ipt1 : {Bins::GetPtaIndex(0.5, 5.0)}) {
-        for (int ipt2 : pt2_bins) {
+        for (int ipt2 : {Bins::GetPtaIndex(0.5, 5.0)}) {
             for (int ich = 2; ich < 3; ich++) {
                 for (int ideta : deta_bins) {
                     std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << std::endl;
@@ -82,23 +82,23 @@ void plots_TemplateFits(int l_vn_type = Bins::VN_TEMPLATE) {
                             leg->SetFillStyle(0);
                             std::string label_central   = "C(#Delta#phi)  "; //+label_cent(icent1);
                             //label_central += "(" + Bins::HH_LABEL + ")";
-                            if (l_vn_type == Bins::VN_TEMPLATE)
-                            {
+                            // if (l_vn_type == Bins::VN_TEMPLATE)
+                            // {
                                 std::string label_peripheral = "FC^{periph}(#Delta#phi) + G"; //+label_cent(icent2);
                                 leg->AddEntry(h_central           , label_central.c_str()    , "p");
                                 leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
                                 leg->AddEntry(h_fit_func          , "C^{templ}(#Delta#phi)"  , "l");
                                 leg->AddEntry(f_vnn_combined      , "C^{ridge}(#Delta#phi) +FC^{periph}(0)", "l");
                                 leg->AddEntry(f_pedestal          , "G + FC^{periph}(0)"       , "l");
-                            }
-                            else {
-                                std::string label_peripheral = "FC^{periph}(#Delta#phi)"; //+label_cent(icent2);
-                                leg->AddEntry(h_central           , label_central.c_str()    , "p");
-                                leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
-                                leg->AddEntry(h_fit_func          , "C^{templ}(#Delta#phi)"  , "l");
-                                leg->AddEntry(f_vnn_combined      , "C^{ridge}(#Delta#phi)", "l");
-                                leg->AddEntry(f_pedestal          , "G"       , "l");
-                            }
+                            //}
+                            // else {
+                            //     std::string label_peripheral = "FC^{periph}(#Delta#phi)"; //+label_cent(icent2);
+                            //     leg->AddEntry(h_central           , label_central.c_str()    , "p");
+                            //     leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
+                            //     leg->AddEntry(h_fit_func          , "C^{templ}(#Delta#phi)"  , "l");
+                            //     leg->AddEntry(f_vnn_combined      , "C^{ridge}(#Delta#phi)", "l");
+                            //     leg->AddEntry(f_pedestal          , "G"       , "l");
+                            // }
                             leg->Draw();
 
 

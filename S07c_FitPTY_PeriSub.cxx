@@ -206,4 +206,8 @@ void S07c_FitPTY_PeriSub(int m_use_multiplicity =0){
     }
     //------------------------------------------------------------------------------
 */
+    std::cout << "finished" << std::endl;
+    sprintf(name,"kill -9 %d",gSystem->GetPid());
+    std::cout<<name<<std::endl;
+    gSystem->Exec(name);
 }

@@ -216,4 +216,11 @@ void S06_ZYAM1D(int m_use_multiplicity = 0){
        }
      }
    }
+   output1->Close();
+   output2->Close();
+   output3->Close();
+   std::cout << "finished" << std::endl;
+    sprintf(name,"kill -9 %d",gSystem->GetPid());
+    std::cout<<name<<std::endl;
+    gSystem->Exec(name);
 }

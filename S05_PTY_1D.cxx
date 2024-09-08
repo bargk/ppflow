@@ -107,4 +107,9 @@ void S05_PTY_1D(int m_use_multiplicity = 0){
       }
     }
   }
+  output->Close();
+  std::cout << "finished" << std::endl;
+    sprintf(name,"kill -9 %d",gSystem->GetPid());
+    std::cout<<name<<std::endl;
+    gSystem->Exec(name);
 }
