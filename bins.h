@@ -873,7 +873,7 @@ std::vector<int> CentBins() {
 std::vector<int> CentBinsPeriph() {
   std::vector<int> full_set_cent;
   // full_set_cent.push_back(GetCentIndex(80, 100));
-  full_set_cent.push_back(GetCentIndex(0, 10 ));
+  full_set_cent.push_back(GetCentIndex(0, 20 ));
   return full_set_cent;
 }
 

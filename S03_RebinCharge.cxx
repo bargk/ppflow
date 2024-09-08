@@ -1,5 +1,5 @@
 #include "bins.h"
-#include "Defs.h"
+
 
 TH2D *fg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 + Bins::NPT2_ADD][Bins::NCH + Bins::NCH_ADD];
 TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 + Bins::NPT2_ADD][Bins::NCH + Bins::NCH_ADD];
@@ -8,8 +8,9 @@ TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 
  *  Adds together the same-charge and opposite-charge histograms
  *  to get the combined charge histograms
  *-----------------------------------------------------------------------------*/
-void S03_RebinCharge() {
-    string base = directory;
+void S03_RebinCharge(int m_use_multiplicity = 0) {
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity == 1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     char name [600];
     char name1[600];
     sprintf(name , "%s/Rebin_pT.root"   , base.c_str());

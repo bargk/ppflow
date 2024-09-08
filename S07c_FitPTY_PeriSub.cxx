@@ -1,10 +1,11 @@
 #include "bins.h"
-#include "Defs.h"
+
 /*-----------------------------------------------------------------------------
  *  Evaluates the peripheral-subtracted vnn
  *-----------------------------------------------------------------------------*/
-void S07c_FitPTY_PeriSub(){
-    string base = directory;
+void S07c_FitPTY_PeriSub(int m_use_multiplicity =0){
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity ==1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
 
     const std::vector<int> cent_bins=Bins::CentBins();
     const std::vector<int> pt1_bins =Bins::PtaBins ();

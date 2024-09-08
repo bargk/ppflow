@@ -1,5 +1,5 @@
 #include "bins.h"
-#include "Defs.h"
+
 TH1D *fg[Bins::NCENT+Bins::NCENT_ADD][Bins::NPT1+Bins::NPT1_ADD][Bins::NPT2+Bins::NPT2_ADD][Bins::NCH+Bins::NCH_ADD][Bins::NDETA];
 TH1D *bg[Bins::NCENT+Bins::NCENT_ADD][Bins::NPT1+Bins::NPT1_ADD][Bins::NPT2+Bins::NPT2_ADD][Bins::NCH+Bins::NCH_ADD][Bins::NDETA];
 double NTrigs[Bins::NCENT+Bins::NCENT_ADD][Bins::NPT1+Bins::NPT1_ADD];
@@ -7,8 +7,9 @@ double NTrigs[Bins::NCENT+Bins::NCENT_ADD][Bins::NPT1+Bins::NPT1_ADD];
 /*-----------------------------------------------------------------------------
  *  Makes PTY distributions from the 1D-pair distributions
  *-----------------------------------------------------------------------------*/
-void S05_PTY_1D(){
-   string base = directory;
+void S05_PTY_1D(int m_use_multiplicity = 0){
+   string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+   if(m_use_multiplicity == 1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
    char name [600];
    char name1[600];
    sprintf(name,"%s/RebinEff.root",base.c_str());

@@ -1,5 +1,4 @@
 #include "bins.h"
-#include "Defs.h"
 
 TH2D *fg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1][Bins::NPT2][Bins::NCH];
 TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1][Bins::NPT2][Bins::NCH];
@@ -9,8 +8,9 @@ TH1D *N_trigger[Bins::NCENT + Bins::NCENT_ADD];
 /*-----------------------------------------------------------------------------
  *  Reads in original 2D histograms and adds more effective energy bins
  *------------------------------------------------------- ---------------------*/
-void S01_RebinEff() {
-    string base = directory;
+void S01_RebinEff(int m_use_multiplicity = 0) {
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity ==1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     char name [600];
     char name1[600];
     TFile *input;

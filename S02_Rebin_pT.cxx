@@ -1,5 +1,5 @@
 #include "bins.h"
-#include "Defs.h"
+
 
 //  0,  1,  2,  3,  4,       5,  6,  7
 //0.3,0.5,1.0,2.0,3.0,     0.5,1.0,2.0
@@ -12,8 +12,9 @@ TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 
 /*-----------------------------------------------------------------------------
  *  Adds more pTa and pTb bins
  *-----------------------------------------------------------------------------*/
-void S02_Rebin_pT() {
-    string base =  directory;
+void S02_Rebin_pT(int m_use_multiplicity = 0) {
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity == 1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     char name [600];
     char name1[600];
     sprintf(name , "%s/RebinEff.root", base.c_str());

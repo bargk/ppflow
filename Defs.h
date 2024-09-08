@@ -15,6 +15,7 @@ using namespace std;
 
 std::string path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/user.steinber.data22_13p6TeV.00435229.physics_MinBias.merge.AOD.r14470_p5587.4zdc_EXT0"; //zdc
 bool m_run_on_grid    =false;
+bool m_use_multiplicity    =false;
 TChain *fChain        =nullptr;
 int nmix;
 TFile *tmpf;
@@ -45,6 +46,7 @@ int dep =20; //each pool have size of 20
 TH1* h_Zvtx;
 TH1* hNtrk;
 TH1* heff;
+TH1* hzdc;
 TH1* N_trigger[Bins::NCENT];
 TH1* N_ntrk[Bins::NCENT];
 TH1* h_eta[Bins::NCENT];
@@ -81,6 +83,8 @@ bool isBitSet(int x, int s){
 void InitHistos(){
     //create output file
     std::string directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity) directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
+    gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
     tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
 
     
@@ -88,6 +92,7 @@ void InitHistos(){
      *  Global monitor histograms
      *-----------------------------------------------------------------------------*/
     h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
+    hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     //heff   = new TH1D("heff", "heff;Eff energy [GeV]", Bins::NCENT, -0.5 , Bins::NCENT - 0.5);
     //hNtrk  = new TH1D("hNtrk", "hNtrk;nTracks;Events" , 300, -0.5 , 300 );
     hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [%];N_{ch}" , 10, 0 , 100, 30,0,150);

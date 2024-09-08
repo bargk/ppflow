@@ -93,16 +93,17 @@ void CorrFunc(const int a ,const char* fileList){
         for(int i = 0; i<8; i++){
                 if(isBitSet(*BitMask,i)){ sum+= zdcWei.at(i)*ModAmp[i];}
         }
-
+        hzdc->Fill(sum);
         //determine effective energy bin
         float m_eff_energy_percent = GetEffectiveEnergy(sum);
-        if(m_eff_energy_percent < 0 || m_eff_energy_percent > 100) continue;
+        if(m_eff_energy_percent < 0.0 || m_eff_energy_percent > 100.0) continue;
         m_cent_i          =Bins::GetCentBin(m_eff_energy_percent);
-        //m_cent_i          =Bins::GetCentBin(float(ntrk));
+
+        if(m_use_multiplicity){
+            m_cent_i          =Bins::GetCentBin(float(ntrk)); // Still throw events with "bad" effective energy
+                                                              // since you use it as peripheral bin
+        }
         if(m_cent_i <0 || m_cent_i >=Bins::NCENT) continue;
-
-
-        
 
         //Z-vtx cuts
         m_zvtx=vtx_z->at(0);

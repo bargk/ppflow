@@ -1,5 +1,5 @@
 #include"TemplateFitting.h"
-#include "Defs.h"
+
 
 //#define TEST // ONLY do few bins, for debugging
 
@@ -9,8 +9,9 @@ std::vector<TCanvas*>        m_can_vec;
 /*-----------------------------------------------------------------------------
  *  Does the template fits and stores the fits as well as the vnn
  *-----------------------------------------------------------------------------*/
-void S07a_FitPTY_Template(bool no_ZYAM = false, int l_use_peripheral_pp = 0) {
-    string base = directory;
+void S07a_FitPTY_Template(int l_use_peripheral_pp = 0) {
+    bool no_ZYAM = false;
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
     char name [600];
     char name1[600];
 
@@ -18,8 +19,9 @@ void S07a_FitPTY_Template(bool no_ZYAM = false, int l_use_peripheral_pp = 0) {
     sprintf(name1, "%s/ZYAM1D.root", base.c_str());
 
     if (l_use_peripheral_pp == 1) {
+        
         if (no_ZYAM) sprintf(name1, "01RootFiles/Data_5TeV_eff1_trig2_PTY1D.root");
-        else         sprintf(name1, "01RootFiles/Data_5TeV_eff1_trig2_ZYAM1D.root");
+        else         sprintf(name1, "%s/multiplicity/ZYAM1D.root", base.c_str());
     }
 
     TFile *InFileCentral    = new TFile(name , "read");
@@ -33,8 +35,8 @@ void S07a_FitPTY_Template(bool no_ZYAM = false, int l_use_peripheral_pp = 0) {
             sprintf(name1, "01RootFiles/%s_TemplateFits_ppPeriph_pedestal_vnn.root" , base.c_str());
         }
         else {
-            sprintf(name , "01RootFiles/%s_TemplateFits_ppPeriph.root"     , base.c_str());
-            sprintf(name1, "01RootFiles/%s_TemplateFits_ppPeriph_vnn.root" , base.c_str());
+            sprintf(name , "%s/TemplateFits_ntrkPeriph.root"     , base.c_str());
+            sprintf(name1, "%s/TemplateFits_ntrkPeriph_vnn.root" , base.c_str());
         }
     }
     TFile *OutFile1 = new TFile(name , "recreate"); OutFile1->cd();

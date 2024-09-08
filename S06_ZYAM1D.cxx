@@ -1,7 +1,7 @@
 
 #include "bins.h"
 #include "common.C"
-#include "Defs.h"
+
 #define CORRECT_METHOD //Proper ZYAM error propagation
 #define QUADRATURE_ADD_ZYAM
 #define REDUCE_ZYAM_ERROR //Reduce ZYAM error by factor of 2 as for unfolded PTY it is counted twice
@@ -9,8 +9,9 @@
 /*-----------------------------------------------------------------------------
  *  Makes ZYAM subtraction on the PTYs
  *-----------------------------------------------------------------------------*/
-void S06_ZYAM1D(){
-   string base = directory;
+void S06_ZYAM1D(int m_use_multiplicity = 0){
+   string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+   if(m_use_multiplicity == 1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
    char name [600];
 
    sprintf(name,"%s/PTY1D.root"         ,base.c_str());

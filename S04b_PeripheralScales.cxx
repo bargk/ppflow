@@ -1,6 +1,6 @@
 #include "bins.h"
 #include "common.C"
-#include "Defs.h"
+
 
 TH2D *fg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 + Bins::NPT2_ADD][Bins::NCH + Bins::NCH_ADD];
 TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 + Bins::NPT2_ADD][Bins::NCH + Bins::NCH_ADD];
@@ -13,8 +13,9 @@ double NTrigs[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD] = {{0}
  *  The peripheral scales are determined by matching the near-side peak
  *  in the 2D PTYs for the peripheral reference and signal centrality
  *-----------------------------------------------------------------------------*/
-void S04b_PeripheralScales() {
-    string base = directory;
+void S04b_PeripheralScales(int m_use_multiplicity = 0) {
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity == 1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     char name [600];
     char name1[600];
     char name2[600];

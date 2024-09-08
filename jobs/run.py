@@ -51,8 +51,8 @@ if len(sys.argv) !=2:
   sys.exit(-1)
     
 
-macro = "/gpfs0/citron/users/bargl/ZDC/lhcf22/analysis/CorrFunc.cxx"
-file_list_path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/analysis/files.txt"
+macro = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/CorrFunc.cxx"
+file_list_path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/files.txt"
 
 
 # Specify the range of lines to read (0-indexed)

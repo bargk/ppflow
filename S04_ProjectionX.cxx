@@ -1,5 +1,5 @@
 #include "bins.h"
-#include "Defs.h"
+
 
 TH2D *fg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 + Bins::NPT2_ADD][Bins::NCH + Bins::NCH_ADD];
 TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 + Bins::NPT2_ADD][Bins::NCH + Bins::NCH_ADD];
@@ -8,8 +8,9 @@ TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 
 /*-----------------------------------------------------------------------------
  *  Makes 1D Pair distributions for several Deta ranges from the 2D pair distributions
  *-----------------------------------------------------------------------------*/
-void S04_ProjectionX() {
-    string base = directory;
+void S04_ProjectionX(int m_use_multiplicity = 0) {
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(m_use_multiplicity ==1 ) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     char name [600];
     char name1[600];
 
