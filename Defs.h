@@ -114,7 +114,7 @@ void InitHistos(){
             for(int ipt1=0; ipt1<Bins::NPT1; ipt1++){
                 for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
                     for(int it=0; it<Bins::NCH; it++){
-                    sprintf(histname,"fg_cent%.2d_trk_%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+                    sprintf(histname,"fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
                     fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
                     fg[icent][itrk][ipt1][ipt2][it]->Sumw2();
 
