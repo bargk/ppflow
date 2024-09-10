@@ -1,21 +1,21 @@
 #include "bins.h"
 
-TH2D *fg[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK][Bins::NPT1][Bins::NPT2][Bins::NCH];
-TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK][Bins::NPT1][Bins::NPT2][Bins::NCH];
-TH1D *N_trigger[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK];
+TH2D *fg[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD][Bins::NPT1][Bins::NPT2][Bins::NCH];
+TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD][Bins::NPT1][Bins::NPT2][Bins::NCH];
+TH1D *N_trigger[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD];
 
 
 /*-----------------------------------------------------------------------------
- *  Reads in original 2D histograms and adds more effective energy bins
+ *  add more multiplicity bins
  *------------------------------------------------------- ---------------------*/
-void S01_RebinEff() {
+void S02_RebinTrk() {
     string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
     char name [600];
     char name1[600];
     TFile *input;
     TFile *output;
-    sprintf(name , "%s/histograms.root"   , base.c_str());
-    sprintf(name1, "%s/RebinEff.root", base.c_str());
+    sprintf(name, "%s/RebinEff.root", base.c_str());
+    sprintf(name1 , "%s/RebinTrk.root"   , base.c_str());
     input  = new TFile(name);
     output = new TFile(name1, "recreate");
     output->cd();
@@ -26,7 +26,7 @@ void S01_RebinEff() {
 
 //Read in All Histograms
     cout << "Reading histograms" << endl;
-    for (int icent = 0; icent < Bins::NCENT; icent++) {
+    for (int icent = 0; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
         for (int itrk = 0; itrk < Bins::NTRK; itrk++) {
             for (int ipt1 = 0; ipt1 < Bins::NPT1; ipt1++) {
                 for (int ipt2 = 0; ipt2 < Bins::NPT2; ipt2++) {
@@ -43,20 +43,20 @@ void S01_RebinEff() {
         }
     }
 
-//Add more effective energy bins
-    cout << "Adding more effective energy bins" << endl;
-    for (int icent = Bins::NCENT; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
-        for (int itrk = 0; itrk < Bins::NTRK; itrk++) {
+//Add more multiplicity  bins
+    cout << "Adding more multiplicity bins" << endl;
+    for (int icent = 0; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
+        for (int itrk =  Bins::NTRK; itrk < Bins::NTRK + Bins::NTRK_ADD; itrk++) {
             for (int ipt1 = 0; ipt1 < Bins::NPT1; ipt1++) {
                 for (int ipt2 = 0; ipt2 < Bins::NPT2; ipt2++) {
                     for (int ich = 0; ich < Bins::NCH; ich++) {
-                        for (int icent_add = Bins::cent_add_lo[icent - Bins::NCENT];
-                                icent_add < Bins::cent_add_up[icent - Bins::NCENT];
-                                icent_add++) {
-                            TH2D* fg_add = fg[icent_add][itrk][ipt1][ipt2][ich];
-                            TH2D* bg_add = bg[icent_add][itrk][ipt1][ipt2][ich];
+                        for (int itrk_add = Bins::trk_add_lo[itrk - Bins::NTRK];
+                                itrk_add < Bins::trk_add_up[itrk - Bins::NTRK];
+                                itrk_add++) {
+                            TH2D* fg_add = fg[icent][itrk_add][ipt1][ipt2][ich];
+                            TH2D* bg_add = bg[icent][itrk_add][ipt1][ipt2][ich];
 
-                            if (icent_add == Bins::cent_add_lo[icent - Bins::NCENT]) {
+                            if (itrk_add == Bins::trk_add_lo[itrk - Bins::NTRK]) {
                                 sprintf(fgname, "fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d", icent, itrk, ipt1, ipt2, ich);
                                 sprintf(bgname, "bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d", icent, itrk, ipt1, ipt2, ich);
                                 fg[icent][itrk][ipt1][ipt2][ich] = (TH2D*)fg_add->Clone(fgname);
@@ -68,6 +68,7 @@ void S01_RebinEff() {
                                 fg[icent][itrk][ipt1][ipt2][ich]->Add(fg_add);
                                 bg[icent][itrk][ipt1][ipt2][ich]->Add(bg_add);
                             }
+                        
                         }
                     }
                 }
@@ -79,7 +80,7 @@ void S01_RebinEff() {
 //Write All Histograms
 cout << "Writing new histograms" << endl;
     for (int icent = 0; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
-        for (int itrk = 0; itrk < Bins::NTRK; itrk++) {
+        for (int itrk = 0; itrk < Bins::NTRK + Bins::NTRK_ADD; itrk++) {
             for (int ipt1 = 0; ipt1 < Bins::NPT1; ipt1++) {
                 for (int ipt2 = 0; ipt2 < Bins::NPT2; ipt2++) {
                     for (int ich = 0; ich < Bins::NCH; ich++) {
@@ -94,7 +95,7 @@ cout << "Writing new histograms" << endl;
 
 
 //Trigger particle spectra
-    for (int icent = 0; icent < Bins::NCENT; icent++) {
+    for (int icent = 0; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
         for (int itrk = 0; itrk < Bins::NTRK; itrk++) {
             sprintf(n_tname, "N_trigger_cent%.2d_trk%.2d", icent, itrk);
             N_trigger[icent][itrk] = (TH1D*)input->Get(n_tname);
@@ -103,14 +104,14 @@ cout << "Writing new histograms" << endl;
     }
 
 
-    for (int icent = Bins::NCENT; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
-        for (int itrk = 0; itrk < Bins::NTRK; itrk++) {
-            for (int icent_add = Bins::cent_add_lo[icent - Bins::NCENT];
-                    icent_add < Bins::cent_add_up[icent - Bins::NCENT];
-                    icent_add++) {
-                TH1D *n_t = N_trigger[icent_add][itrk];
+    for (int icent = 0; icent < Bins::NCENT + Bins::NCENT_ADD; icent++) {
+        for (int itrk = Bins::NTRK; itrk < Bins::NTRK + Bins::NTRK_ADD; itrk++) {
+            for (int itrk_add = Bins::trk_add_lo[itrk - Bins::NTRK];
+                    itrk_add < Bins::trk_add_up[itrk - Bins::NTRK];
+                    itrk_add++) {
+                TH1D *n_t = N_trigger[icent][itrk_add];
 
-            if (icent_add == Bins::cent_add_lo[icent - Bins::NCENT]) {
+            if (itrk_add == Bins::trk_add_lo[itrk - Bins::NTRK]) {
                 sprintf(n_tname, "N_trigger_cent%.2d_trk%.2d", icent, itrk);
                 N_trigger[icent][itrk] = (TH1D*)n_t->Clone(n_tname);
                 N_trigger[icent][itrk]->SetTitle(n_tname);

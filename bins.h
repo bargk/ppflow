@@ -1034,6 +1034,7 @@ int Initialize() {
   Initialize_Pt1Add();
   Initialize_Pt2Add();
   Initialize_CentAdd();
+  Initialize_TrkAdd();
   return 1;
 }
 int m_is_initialized = Initialize();
