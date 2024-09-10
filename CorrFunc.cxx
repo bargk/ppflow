@@ -79,7 +79,7 @@ void CorrFunc(const int a ,const char* fileList){
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
 
-        //if(!(*HLT_noalg_L1ZDC_A_AND_C)) continue;
+        if(!(*HLT_noalg_L1ZDC_A_AND_C)) continue;
         //if(!(*HLT_noalg_L1ZDC_OR)) continue;
         if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
         if((*nvtx) != 2) continue; // right now i make sure only one primary vertex
@@ -100,12 +100,11 @@ void CorrFunc(const int a ,const char* fileList){
         if(m_eff_energy < 0.0 || m_eff_energy > 13.6) continue;
         m_cent_i          =Bins::GetCentBin(m_eff_energy);
 
-        if(m_use_multiplicity){
-            m_cent_i          =Bins::GetCentBin(float(ntrk)); // Still throw events with "bad" effective energy
-                                                              // since you use it as peripheral bin
-        }
         if(m_cent_i <0 || m_cent_i >=Bins::NCENT) continue;
 
+        //get multiplicity bin
+        nbin = Bins::GetTrkBin(float(ntrk));
+        if(nbin <0 || nbin >=Bins::NTRK) continue;
         //Z-vtx cuts
         m_zvtx=vtx_z->at(0);
         int zbin   = get_zPool(m_zvtx);
@@ -144,7 +143,7 @@ void CorrFunc(const int a ,const char* fileList){
             int ptbin1 = Bins::GetPtBin1(pt);
             int ptbin2 = Bins::GetPtBin2(pt);
             if(ptbin1==-1 && ptbin2==-1) continue;
-            N_trigger[m_cent_i]->Fill(pt,trk_eff);
+            N_trigger[m_cent_i][nbin]->Fill(pt,trk_eff);
             h_eta[m_cent_i]->Fill(eta,trk_eff);
             //N_ntrk[m_cent_i]->Fill(ntrk,trk_eff);
             if(ptbin1>=0) h_EtaPhi[ptbin1]->Fill(eta,phi);

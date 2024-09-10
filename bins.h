@@ -131,6 +131,7 @@ namespace Bins{
 
     enum {
     NCENT = 11,
+    NTRK = 13,
     NPT1 = 5,
     NPT2 = 5,
     NCH  = 2,
@@ -138,6 +139,7 @@ namespace Bins{
     OPPOSITE_CHARGE = 1,
 
     NCENT_ADD = 1,
+    NTRK_ADD = 2,
 
     NPT1_ADD = 1,
     NPT2_ADD = 2,
@@ -195,8 +197,7 @@ void Initialize_CentAdd() {
 }
 
 std::string label_cent(int icent) {
-  sprintf(label, "%d-%d%%", CENT_LO[icent], CENT_HI[icent]);
-  //sprintf(label, "%d-%d", CENT_LO[icent], CENT_HI[icent]); // in case of multiplicity
+  sprintf(label, "%f-%f TeV", CENT_LO[icent], CENT_HI[icent]);
   std::string ret = label;
   return ret;
 }
@@ -227,6 +228,83 @@ std::pair<double, double> GetCentVals(int icent) {
     throw std::exception();
   }
   return std::make_pair(CENT_LO[icent], CENT_HI[icent]);
+}
+//---------------------------------------------------------------------------------------------------------------------
+
+// Multiplicity BINS
+//---------------------------------------------------------------------------------------------------------------------
+//LABELS                        0,  1,  2,  3,  4,  5,  6,  7,  8,  9,   10,  11,  12
+int TRK_LO[NTRK + NTRK_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110, 120 }; 
+int TRK_HI[NTRK + NTRK_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 1000};
+int trk_add_lo[NTRK_ADD]     = {0};
+int trk_add_up[NTRK_ADD]     = {0};
+
+
+void Initialize_TrkAdd() {
+  std::vector<std::pair<double, double>> new_trk_bins = {
+    //13,      14,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
+    { 0, 20}, {0, 1000}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    //37,       38,       39,       40,       41,       42,       43,       44,       
+    //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
+  };
+    if (new_trk_bins.size() != NTRK_ADD) {
+    std::cout << "Initialize_TrkAdd()::new_trk_bins.size()!=NTRK_ADD " << new_trk_bins.size() << "  " << NTRK_ADD << std::endl;
+    throw std::exception();
+  }
+
+  int ibin = 0;
+  for (auto new_bin : new_trk_bins) {
+    int low = -1, high = -1;
+    for (int itrk = 0; itrk < NTRK; itrk++) {
+      if (fabs(TRK_LO[itrk] - new_bin.first ) < 0.001 ) low = itrk;
+      if (fabs(TRK_HI[itrk] - new_bin.second) < 0.001 ) high = itrk + 1;
+    }
+    
+    if (low == -1 || high == -1 || low >= high) {
+      std::cout << "Initialize_TrkAdd():: Problem adding new bin" << std::endl;
+      throw std::exception();
+    }
+
+    trk_add_lo[ibin] = low;
+    trk_add_up[ibin] = high;
+    TRK_LO[NTRK + ibin] = new_bin.first;
+    TRK_HI[NTRK + ibin] = new_bin.second;
+    ibin++;
+  }
+}
+
+std::string label_trk(int itrk) {
+  sprintf(label, "%d-%d", TRK_LO[itrk], TRK_HI[itrk]);
+  std::string ret = label;
+  return ret;
+}
+int GetTrkIndex(double trk_low, double trk_high) {
+  for (int index = 0; index < NTRK + NTRK_ADD; index++) {
+    if ( fabs(TRK_LO[index] - trk_low) < 0.001 && fabs(TRK_HI[index] - trk_high) < 0.001 ) return index;
+  }
+  std::cout << "This multiplicity does not exist " << trk_low << "," << trk_high << std::endl;
+  throw std::exception();
+}
+std::vector<int> GetTrkIndex(std::vector<std::pair<int, int>> input) {
+  std::vector<int> ret;
+  for (auto& mult_bin : input) {
+    ret.push_back(GetTrkIndex(mult_bin.first, mult_bin.second));
+  }
+  return ret;
+}
+std::vector<int> GetTrkIndex(std::vector<int> input) {
+  std::vector<int> ret;
+  for (int i = 0; i < (int)(input.size()) - 1; i++) {
+    ret.push_back(GetTrkIndex(input[i], input[i + 1]));
+  }
+  return ret;
+}
+std::pair<double, double> GetTrkVals(int itrk) {
+  if (itrk >= (NTRK + NTRK_ADD) || itrk < 0) {
+    std::cout << "This multiplicity index doesnot exist :" << itrk << std::endl;
+    throw std::exception();
+  }
+  return std::make_pair(TRK_LO[itrk], TRK_HI[itrk]);
 }
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -497,6 +575,13 @@ int GetPtBin2(float pt) {
 int GetCentBin(float cent_onepercent) {
   for (int i = 0; i < NCENT; i++) {
     if (cent_onepercent >= CENT_LO[i] && cent_onepercent < CENT_HI[i]) return i;
+  }
+  return -1;
+}
+
+int GetTrkBin(float ntrk) {
+  for (int i = 0; i < NTRK; i++) {
+    if (ntrk >= TRK_LO[i] && ntrk < TRK_HI[i]) return i;
   }
   return -1;
 }

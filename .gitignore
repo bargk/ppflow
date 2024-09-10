@@ -4,3 +4,4 @@ TemplateFits_plots/
 vn_plots/
 nohup.out
 files.txt
+jobs/run.py.*

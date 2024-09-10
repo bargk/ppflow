@@ -15,7 +15,6 @@ using namespace std;
 
 std::string path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/user.steinber.data22_13p6TeV.00435229.physics_MinBias.merge.AOD.r14470_p5587.4zdc_EXT0"; //zdc
 bool m_run_on_grid    =false;
-bool m_use_multiplicity    =false;
 TChain *fChain        =nullptr;
 int nmix;
 TFile *tmpf;
@@ -34,9 +33,10 @@ enum TWOPCTYPE {
 enum {
   //pool bins:
   nc  = Bins::NCENT,
+  n_multiplicity = 10,
   nz  =40,          
   ZMAX=200,
-  plnbr = nc*nz,
+  plnbr = nc*nz*n_multiplicity,
 };
 vector< EVENT_PTR > pool[plnbr];
 int dep =20; //each pool have size of 20
@@ -47,13 +47,13 @@ TH1* h_Zvtx;
 TH1* hNtrk;
 TH1* heff;
 TH1* hzdc;
-TH1* N_trigger[Bins::NCENT];
-TH1* N_ntrk[Bins::NCENT];
+TH1* N_trigger[Bins::NCENT][Bins::NTRK];
+//TH1* N_ntrk[Bins::NCENT];
 TH1* h_eta[Bins::NCENT];
 TH2* hNtrkEff;
 TH2* h_EtaPhi[Bins::NPT1];
-TH2* fg [Bins::NCENT][Bins::NPT1][Bins::NPT2][Bins::NCH];
-TH2* bg [Bins::NCENT][Bins::NPT1][Bins::NPT2][Bins::NCH];
+TH2* fg [Bins::NCENT][Bins::NTRK][Bins::NPT1][Bins::NPT2][Bins::NCH];
+TH2* bg [Bins::NCENT][Bins::NTRK][Bins::NPT1][Bins::NPT2][Bins::NCH];
 
 float m_zvtx;
 int m_nz              =20; // each zvtx bin has width 10 mm
@@ -63,6 +63,7 @@ unsigned int    lumiBlock;
 int             nvtx;
 unsigned int     ntrk;
 int             m_cent_i;
+int             nbin;
 double sqrt_s = 13600.0; //13.6 TeV
 
 //TODO define it as part of class
@@ -79,7 +80,6 @@ bool isBitSet(int x, int s){
 void InitHistos(){
     //create output file
     std::string directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
-    if(m_use_multiplicity) directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
     tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
 
@@ -89,17 +89,9 @@ void InitHistos(){
      *-----------------------------------------------------------------------------*/
     h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
     hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
-    //heff   = new TH1D("heff", "heff;Eff energy [GeV]", Bins::NCENT, -0.5 , Bins::NCENT - 0.5);
-    //hNtrk  = new TH1D("hNtrk", "hNtrk;nTracks;Events" , 300, -0.5 , 300 );
-    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , 10, 0 , 13.6, 30,0,140);
+    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
     
-    //multiplicity per eff energy bin
-    // for(int icent=0; icent<Bins::NCENT; icent++){
-    //     sprintf(histname,"N_ntrk_cent%.2d",icent);
-    //     N_ntrk[icent]=new TH1D(histname,";ntrk;",150,0,150);
-    //     N_ntrk[icent]->Sumw2();
-    // }
-
+    
     //eta per effective energy bin
     for(int icent=0; icent<Bins::NCENT; icent++){
         sprintf(histname,"h_eta_cent%.2d",icent);
@@ -118,27 +110,30 @@ void InitHistos(){
     int nBinsPhi = 36;
     int nBinsEta = 50;
     for(int icent=0; icent<Bins::NCENT; icent++){
-        for(int ipt1=0; ipt1<Bins::NPT1; ipt1++){
-        for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
-            for(int it=0; it<Bins::NCH; it++){
-            sprintf(histname,"fg_cent%.2d_pta%d_ptb%.2d_ch%d",icent,ipt1,ipt2,it);
-            fg[icent][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
-            fg[icent][ipt1][ipt2][it]->Sumw2();
+        for(int itrk =0; itrk<Bins::NTRK; itrk++){
+            for(int ipt1=0; ipt1<Bins::NPT1; ipt1++){
+                for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
+                    for(int it=0; it<Bins::NCH; it++){
+                    sprintf(histname,"fg_cent%.2d_trk_%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+                    fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+                    fg[icent][itrk][ipt1][ipt2][it]->Sumw2();
 
-            sprintf(histname,"bg_cent%.2d_pta%d_ptb%.2d_ch%d",icent,ipt1,ipt2,it);
-            bg[icent][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
-            bg[icent][ipt1][ipt2][it]->Sumw2();
+                    sprintf(histname,"bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+                    bg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+                    bg[icent][itrk][ipt1][ipt2][it]->Sumw2();
+                    }
+                }
             }
-        }
         }
     }
 
-
     //Trigger particle counter (for PTY)
     for(int icent=0; icent<Bins::NCENT; icent++){
-        sprintf(histname,"N_trigger_cent%.2d",icent);
-        N_trigger[icent]=new TH1D(histname,"N_trigger;pT_trigger;",200,0,20);
-        N_trigger[icent]->Sumw2();
+        for(int itrk=0; itrk<Bins::NTRK; itrk++){
+            sprintf(histname,"N_trigger_cent%.2d_trk%.2d",icent,itrk);
+            N_trigger[icent][itrk] = new TH1D(histname,"N_trigger;pT_trigger;",200,0,20);
+            N_trigger[icent][itrk]->Sumw2();
+        }
     }
 
 
@@ -158,17 +153,13 @@ int get_zPool(float z){
   return bin;
 }
 
-// int get_cPool(int eff_energy) {
-//   int ret=(cent_onepercent*m_nc)/100;
-//   if(ret<0 || ret>=m_nc) return -1;
-//   return ret;
-// }
-
-
 void Fill(Event* event1, Event* event2, int mixtype) {
 
     int icent = (m_cent_i);
     if (icent < 0 || icent >= Bins::NCENT) return;
+
+    int itrk = (nbin);
+    if (itrk < 0 || itrk >= Bins::NTRK) return;
 
     int ntrk1 = event1->get_npart();
     int ntrk2 = event2->get_npart();
@@ -208,12 +199,12 @@ void Fill(Event* event1, Event* event2, int mixtype) {
             else if (dphi0 < -0.5 * Common::PI) dphi0 += 2 * Common::PI;
 
             if (mixtype == TWOPCTYPE::FG_HADRON_HADRON) {
-                if ((qop1 * qop2) > 0) fg[icent][ptbin1][ptbin2][0]->Fill(dphi0, deta, eff1 * eff2);
-                else                   fg[icent][ptbin1][ptbin2][1]->Fill(dphi0, deta, eff1 * eff2);
+                if ((qop1 * qop2) > 0) fg[icent][itrk][ptbin1][ptbin2][0]->Fill(dphi0, deta, eff1 * eff2);
+                else                   fg[icent][itrk][ptbin1][ptbin2][1]->Fill(dphi0, deta, eff1 * eff2);
             }
             else if (mixtype == TWOPCTYPE::BG_HADRON_HADRON) {
-                if ((qop1 * qop2) > 0) bg[icent][ptbin1][ptbin2][0]->Fill(dphi0, deta, wei * eff1 * eff2);
-                else                   bg[icent][ptbin1][ptbin2][1]->Fill(dphi0, deta, wei * eff1 * eff2);
+                if ((qop1 * qop2) > 0) bg[icent][itrk][ptbin1][ptbin2][0]->Fill(dphi0, deta, wei * eff1 * eff2);
+                else                   bg[icent][itrk][ptbin1][ptbin2][1]->Fill(dphi0, deta, wei * eff1 * eff2);
             }
         }
     }
@@ -223,7 +214,7 @@ void Fill(Event* event1, Event* event2, int mixtype) {
 
 bool FillMixed(EVENT_PTR event) {
     int zbin    = get_zPool   (m_zvtx);
-    int indx    = zbin + m_cent_i * nz;
+    int indx    = zbin + nbin*nz + m_cent_i * nz*n_multiplicity; //a * n_B * n_C + b * n_C + c
     //int dep     = depth[m_cent_i];
 
     if (zbin == -1) {
