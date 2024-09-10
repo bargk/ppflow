@@ -95,9 +95,10 @@ void CorrFunc(const int a ,const char* fileList){
         }
         hzdc->Fill(sum);
         //determine effective energy bin
-        float m_eff_energy_percent = GetEffectiveEnergy(sum);
-        if(m_eff_energy_percent < 0.0 || m_eff_energy_percent > 99.9) continue;
-        m_cent_i          =Bins::GetCentBin(m_eff_energy_percent);
+        float m_eff_energy = sqrt_s-sum;
+        m_eff_energy = m_eff_energy/1000; //convert to TeV
+        if(m_eff_energy < 0.0 || m_eff_energy > 13.6) continue;
+        m_cent_i          =Bins::GetCentBin(m_eff_energy);
 
         if(m_use_multiplicity){
             m_cent_i          =Bins::GetCentBin(float(ntrk)); // Still throw events with "bad" effective energy
@@ -116,7 +117,7 @@ void CorrFunc(const int a ,const char* fileList){
         h_Zvtx->Fill(m_zvtx);
         //hNtrk->Fill(ntrk);
         //heff->Fill(m_cent_i);
-        hNtrkEff->Fill(m_eff_energy_percent,ntrk/0.8);
+        hNtrkEff->Fill(m_eff_energy,ntrk/0.8);
 
         //TODO write number of good tracks based on bitword in trk_quality
 

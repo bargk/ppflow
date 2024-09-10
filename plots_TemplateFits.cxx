@@ -80,16 +80,16 @@ void plots_TemplateFits(int l_use_multiplicity =0) {
                             leg->SetTextSize(0.04);
                             leg->SetBorderSize(0);
                             leg->SetFillStyle(0);
-                            std::string label_central   = "C(#Delta#phi)  "; //+label_cent(icent1);
+                            std::string label_central   = "Y(#Delta#phi)  "; //+label_cent(icent1);
                             //label_central += "(" + Bins::HH_LABEL + ")";
                             // if (l_vn_type == Bins::VN_TEMPLATE)
                             // {
-                                std::string label_peripheral = "FC^{periph}(#Delta#phi) + G"; //+label_cent(icent2);
+                                std::string label_peripheral = "FY^{periph}(#Delta#phi) + G"; //+label_cent(icent2);
                                 leg->AddEntry(h_central           , label_central.c_str()    , "p");
                                 leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
-                                leg->AddEntry(h_fit_func          , "C^{templ}(#Delta#phi)"  , "l");
-                                leg->AddEntry(f_vnn_combined      , "C^{ridge}(#Delta#phi) +FC^{periph}(0)", "l");
-                                leg->AddEntry(f_pedestal          , "G + FC^{periph}(0)"       , "l");
+                                leg->AddEntry(h_fit_func          , "Y^{templ}(#Delta#phi)"  , "l");
+                                leg->AddEntry(f_vnn_combined      , "Y^{ridge}(#Delta#phi) +FY^{periph}(0)", "l");
+                                leg->AddEntry(f_pedestal          , "G + FY^{periph}(0)"       , "l");
                             //}
                             // else {
                             //     std::string label_peripheral = "FC^{periph}(#Delta#phi)"; //+label_cent(icent2);

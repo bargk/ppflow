@@ -130,14 +130,14 @@ namespace Bins{
 
 
     enum {
-    NCENT = 12,
+    NCENT = 11,
     NPT1 = 5,
     NPT2 = 5,
     NCH  = 2,
     SAME_CHARGE = 0,
     OPPOSITE_CHARGE = 1,
 
-    NCENT_ADD = 2,
+    NCENT_ADD = 1,
 
     NPT1_ADD = 1,
     NPT2_ADD = 2,
@@ -150,17 +150,21 @@ namespace Bins{
     char label[600];
     // CENTRALITY BINS
 //---------------------------------------------------------------------------------------------------------------------
-//LABELS                           0,  1,  2,  3,  4,  5,  6,  7,  8,  9,   10,  11 
-int CENT_LO[NCENT + NCENT_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110};
-int CENT_HI[NCENT + NCENT_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120};
-// int CENT_LO[NCENT + NCENT_ADD] = { 0, 1, 2, 3, 4,  5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, };
-// int CENT_HI[NCENT + NCENT_ADD] = { 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, };
-int cent_add_lo[NCENT_ADD]     = {0};
-int cent_add_up[NCENT_ADD]     = {0};
+//LABELS                            0,  1,  2,  3,  4,  5,  6,  7,  8,  9,   10,  11 
+// int CENT_LO[NCENT + NCENT_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110}; //multiplicity bins
+// int CENT_HI[NCENT + NCENT_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120};
+// int cent_add_lo[NCENT_ADD]     = {0};
+// int cent_add_up[NCENT_ADD]     = {0};
+
+//LABELS                            0,    1,    2,    3,    4,    5,    6,    7,    8,      9 
+float CENT_LO[NCENT + NCENT_ADD] = { 0.0,  1.36, 2.72, 4.08, 5.44, 6.80, 8.16, 9.52,  10.88, 12.24 };  // bins for effective energy 
+float CENT_HI[NCENT + NCENT_ADD] = { 1.36, 2.72, 4.08, 5.44, 6.80, 8.16, 9.52, 10.88, 12.24, 13.61 }; // in TeV
+float cent_add_lo[NCENT_ADD]     = {0.0};
+float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
     //12,      13,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 0, 20}, {0, 30}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    { 1.36, 4.08}, //{0.0, 6.80}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -176,6 +180,7 @@ void Initialize_CentAdd() {
       if (fabs(CENT_LO[icent] - new_bin.first ) < 0.001 ) low = icent;
       if (fabs(CENT_HI[icent] - new_bin.second) < 0.001 ) high = icent + 1;
     }
+    
     if (low == -1 || high == -1 || low >= high) {
       std::cout << "Initialize_CentAdd():: Problem adding new bin" << std::endl;
       throw std::exception();
@@ -190,8 +195,8 @@ void Initialize_CentAdd() {
 }
 
 std::string label_cent(int icent) {
-  //sprintf(label, "%d-%d%%", CENT_LO[icent], CENT_HI[icent]);
-  sprintf(label, "%d-%d", CENT_LO[icent], CENT_HI[icent]); // in case of multiplicity
+  sprintf(label, "%d-%d%%", CENT_LO[icent], CENT_HI[icent]);
+  //sprintf(label, "%d-%d", CENT_LO[icent], CENT_HI[icent]); // in case of multiplicity
   std::string ret = label;
   return ret;
 }
@@ -873,6 +878,7 @@ std::vector<int> CentBins() {
 std::vector<int> CentBinsPeriph() {
   std::vector<int> full_set_cent;
   // full_set_cent.push_back(GetCentIndex(80, 100));
+  //full_set_cent.push_back(GetCentIndex(0, 10 ));
   full_set_cent.push_back(GetCentIndex(0, 20 ));
   return full_set_cent;
 }

@@ -71,10 +71,6 @@ double sqrt_s = 13600.0; //13.6 TeV
 vector<float> zdcWei ={0,2.78128,2.37211,3.31743,0,3.80388,3.26592,5.26164}; //EM on both sides set to 0
 
 
-float GetEffectiveEnergy(double sum){
-    return (sqrt_s - sum)*100/sqrt_s;
-}
-
 bool isBitSet(int x, int s){
   int mask = x >> s;
   return mask % 2;
@@ -95,7 +91,7 @@ void InitHistos(){
     hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     //heff   = new TH1D("heff", "heff;Eff energy [GeV]", Bins::NCENT, -0.5 , Bins::NCENT - 0.5);
     //hNtrk  = new TH1D("hNtrk", "hNtrk;nTracks;Events" , 300, -0.5 , 300 );
-    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [%];N_{ch}" , 10, 0 , 100, 30,0,150);
+    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , 10, 0 , 13.6, 30,0,140);
     
     //multiplicity per eff energy bin
     // for(int icent=0; icent<Bins::NCENT; icent++){
