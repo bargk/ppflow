@@ -8,7 +8,7 @@ TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NPT1 + Bins::NPT1_ADD][Bins::NPT2 
  *  Adds together the same-charge and opposite-charge histograms
  *  to get the combined charge histograms
  *-----------------------------------------------------------------------------*/
-void S03_RebinCharge(int m_use_multiplicity = 0) {
+void S04_RebinCharge(int m_use_multiplicity = 0) {
     string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
     if(m_use_multiplicity == 1) base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/multiplicity";
     char name [600];
