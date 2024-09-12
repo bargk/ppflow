@@ -49,6 +49,7 @@ namespace Bins{
 //     //TODO modify to multiplicity
 //     int GetCentrality(float FCal_Et, int data_type);
     int GetCentBin(float cent_onepercent);
+    int GetTrktBin(float cent_onepercent);
 
 //     TH1D* PtadepHist(std::vector<int>ipt1_vec, std::string name);
 //     TH1D* PtbdepHist(std::vector<int>ipt2_vec, std::string name);
@@ -130,7 +131,7 @@ namespace Bins{
 
 
     enum {
-    NCENT = 11,
+    NCENT = 10,
     NTRK = 13,
     NPT1 = 5,
     NPT2 = 5,
@@ -158,7 +159,7 @@ namespace Bins{
 // int cent_add_lo[NCENT_ADD]     = {0};
 // int cent_add_up[NCENT_ADD]     = {0};
 
-//LABELS                            0,    1,    2,    3,    4,    5,    6,    7,    8,      9 
+//LABELS                              0,    1,    2,    3,    4,    5,    6,    7,    8,      9 
 float CENT_LO[NCENT + NCENT_ADD] = { 0.0,  1.36, 2.72, 4.08, 5.44, 6.80, 8.16, 9.52,  10.88, 12.24 };  // bins for effective energy 
 float CENT_HI[NCENT + NCENT_ADD] = { 1.36, 2.72, 4.08, 5.44, 6.80, 8.16, 9.52, 10.88, 12.24, 13.61 }; // in TeV
 float cent_add_lo[NCENT_ADD]     = {0.0};
@@ -166,7 +167,7 @@ float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
     //12,      13,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 1.36, 4.08}, //{0.0, 6.80}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    { 0.0, 13.61}, //{0.0, 6.80}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -197,7 +198,7 @@ void Initialize_CentAdd() {
 }
 
 std::string label_cent(int icent) {
-  sprintf(label, "%f-%f TeV", CENT_LO[icent], CENT_HI[icent]);
+  sprintf(label, "%.2f-%.2f TeV", CENT_LO[icent], CENT_HI[icent]);
   std::string ret = label;
   return ret;
 }
@@ -208,14 +209,14 @@ int GetCentIndex(double cent_low, double cent_high) {
   std::cout << "This Centrality does not exist " << cent_low << "," << cent_high << std::endl;
   throw std::exception();
 }
-std::vector<int> GetCentIndex(std::vector<std::pair<int, int>> input) {
+std::vector<int> GetCentIndex(std::vector<std::pair<float, float>> input) {
   std::vector<int> ret;
   for (auto& mult_bin : input) {
     ret.push_back(GetCentIndex(mult_bin.first, mult_bin.second));
   }
   return ret;
 }
-std::vector<int> GetCentIndex(std::vector<int> input) {
+std::vector<int> GetCentIndex(std::vector<float> input) {
   std::vector<int> ret;
   for (int i = 0; i < (int)(input.size()) - 1; i++) {
     ret.push_back(GetCentIndex(input[i], input[i + 1]));
@@ -959,13 +960,22 @@ std::vector<int> CentBins() {
   for (int icent = 0; icent < NCENT + NCENT_ADD; icent++) full_set_cent.push_back(icent);
   return full_set_cent;
 }
+std::vector<int> TrkBins() {
+  std::vector<int> full_set_cent;
+  std::vector<int> min_set_cent;
+  for (int itrk = 0; itrk < NTRK + NTRK_ADD; itrk++) full_set_cent.push_back(itrk);
+  return full_set_cent;
+}
 
 std::vector<int> CentBinsPeriph() {
   std::vector<int> full_set_cent;
-  // full_set_cent.push_back(GetCentIndex(80, 100));
-  //full_set_cent.push_back(GetCentIndex(0, 10 ));
-  full_set_cent.push_back(GetCentIndex(0, 20 ));
+  full_set_cent.push_back(GetCentIndex(0.0, 1.36 ));
   return full_set_cent;
+}
+std::vector<int> TrkBinsPeriph() {
+  std::vector<int> full_set_trk;
+  full_set_trk.push_back(GetTrkIndex(0, 20 ));
+  return full_set_trk;
 }
 
 
