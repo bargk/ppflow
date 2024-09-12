@@ -131,7 +131,7 @@ namespace Bins{
 
 
     enum {
-    NCENT = 10,
+    NCENT = 20,
     NTRK = 13,
     NPT1 = 5,
     NPT2 = 5,
@@ -153,21 +153,17 @@ namespace Bins{
     char label[600];
     // CENTRALITY BINS
 //---------------------------------------------------------------------------------------------------------------------
-//LABELS                            0,  1,  2,  3,  4,  5,  6,  7,  8,  9,   10,  11 
-// int CENT_LO[NCENT + NCENT_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110}; //multiplicity bins
-// int CENT_HI[NCENT + NCENT_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120};
-// int cent_add_lo[NCENT_ADD]     = {0};
-// int cent_add_up[NCENT_ADD]     = {0};
 
-//LABELS                              0,    1,    2,    3,    4,    5,    6,    7,    8,      9 
-float CENT_LO[NCENT + NCENT_ADD] = { 0.0,  1.36, 2.72, 4.08, 5.44, 6.80, 8.16, 9.52,  10.88, 12.24 };  // bins for effective energy 
-float CENT_HI[NCENT + NCENT_ADD] = { 1.36, 2.72, 4.08, 5.44, 6.80, 8.16, 9.52, 10.88, 12.24, 13.61 }; // in TeV
+//LABELS                              0,    1,    2,    3,    4,    5,    6,    7,    8,     9,   10,   11,   12,   13,   14    ,15,   16,     17,    18,    19    
+float CENT_LO[NCENT + NCENT_ADD] = { 0.0,  0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88,  11.56, 12.24, 12.92 };  // bins for effective energy 
+float CENT_HI[NCENT + NCENT_ADD] = { 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.60 }; //in TeV
+ 
 float cent_add_lo[NCENT_ADD]     = {0.0};
 float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
     //12,      13,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 0.0, 13.61}, //{0.0, 6.80}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    { 0.0, 13.60}, //{0.0, 6.80}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -183,7 +179,7 @@ void Initialize_CentAdd() {
       if (fabs(CENT_LO[icent] - new_bin.first ) < 0.001 ) low = icent;
       if (fabs(CENT_HI[icent] - new_bin.second) < 0.001 ) high = icent + 1;
     }
-    
+    //cout << low << " " << high <<endl;
     if (low == -1 || high == -1 || low >= high) {
       std::cout << "Initialize_CentAdd():: Problem adding new bin" << std::endl;
       throw std::exception();
@@ -610,7 +606,7 @@ TH1D* CentdepHist(std::vector<int>centbins, std::string name) {
   Xbins[NXbins] = CENT_HI[centbins[NXbins - 1]];
 
   TH1D* hist = new TH1D(name.c_str(), "", NXbins, Xbins);
-  hist->GetXaxis()->SetTitle("Effective energy [%]");
+  hist->GetXaxis()->SetTitle("Effective energy [TeV]");
   //hist->GetXaxis()->SetTitle("N_{ch}");
 
   return hist;
@@ -687,12 +683,12 @@ TH1D* CentdepHist(std::vector<int>centbins, std::string name) {
 
 
 //Returns the vnn and its stat error for a given index
-std::pair<float, float> GetVnn(int icent, int ipt1, int ipt2, int ich, int ideta, int ihar, int icent_periph, TFile *FourierFile) {
+std::pair<float, float> GetVnn(int icent,int itrk, int ipt1, int ipt2, int ich, int ideta, int ihar, int icent_periph,int itrk_periph, TFile *FourierFile) {
   std::pair<float, float> ret;
   char name[600];
 
   if (icent_periph == Bins::NO_PERIPHERAL_BIN) sprintf(name, "h_v%d%d_pta%d_ptb%.2d_ch%d_deta%.2d"             , ihar, ihar,               ipt1, ipt2, ich, ideta);
-  else                                         sprintf(name, "h_v%d%d_pericent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", ihar, ihar, icent_periph, ipt1, ipt2, ich, ideta);
+  else                                         sprintf(name, "h_v%d%d_pericent%.2d_peritrk%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", ihar, ihar, icent_periph,itrk_periph,itrk, ipt1, ipt2, ich, ideta);
   TH1* hVnn = (TH1*)FourierFile->Get(name);
   if (!Common::CheckObject(hVnn, name, FourierFile)) throw std::exception();
 
@@ -706,7 +702,7 @@ std::pair<float, float> GetVnn(int icent, int ipt1, int ipt2, int ich, int ideta
 
 
 //Returns the vn{ptb} and its stat error for a given index
-std::pair<float, float> GetVnPtb(int icent, int ipt1, int ipt2, int ich, int ideta, int ihar, int icent_periph, TFile *FourierFile1, TFile *FourierFile2) {
+std::pair<float, float> GetVnPtb(int icent,int itrk, int ipt1, int ipt2, int ich, int ideta, int ihar, int icent_periph,int itrk_periph, TFile *FourierFile1, TFile *FourierFile2) {
   static TH1D *h_vnn = nullptr, *h_vnn_diag = nullptr;
   if (!h_vnn) {
     h_vnn     = new TH1D(Common::UniqueName().c_str(), "", 1, 0, 1);
@@ -715,7 +711,7 @@ std::pair<float, float> GetVnPtb(int icent, int ipt1, int ipt2, int ich, int ide
 
 
   int ipt2_for_ipt1 = GetPtbIndex(PT1_LO[ipt1], PT1_HI[ipt1]);
-  std::pair<float, float> vnn_diag = GetVnn(icent, ipt1, ipt2_for_ipt1, ich, ideta, ihar, icent_periph, FourierFile2);
+  std::pair<float, float> vnn_diag = GetVnn(icent,itrk, ipt1, ipt2_for_ipt1, ich, ideta, ihar, icent_periph,itrk_periph, FourierFile2);
   h_vnn_diag->SetBinContent(1, vnn_diag.first);
   h_vnn_diag->SetBinError  (1, vnn_diag.second);
   Common::Take_Sqrt(h_vnn_diag);
@@ -730,7 +726,7 @@ std::pair<float, float> GetVnPtb(int icent, int ipt1, int ipt2, int ich, int ide
   }
   //for off-diagonal input
   else {
-    std::pair<float, float> vnn = GetVnn(icent, ipt1, ipt2, ich, ideta, ihar, icent_periph, FourierFile1);
+    std::pair<float, float> vnn = GetVnn(icent,itrk, ipt1, ipt2, ich, ideta, ihar, icent_periph,itrk_periph, FourierFile1);
     h_vnn->SetBinContent(1, vnn.first);
     h_vnn->SetBinError  (1, vnn.second);
 
