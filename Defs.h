@@ -33,7 +33,7 @@ enum TWOPCTYPE {
 enum {
   //pool bins:
   nc  = Bins::NCENT,
-  n_multiplicity = 10,
+  n_multiplicity = Bins::NTRK,
   nz  =40,          
   ZMAX=200,
   plnbr = nc*nz*n_multiplicity,
