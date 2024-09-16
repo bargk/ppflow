@@ -78,8 +78,7 @@ void CorrFunc(const int a ,const char* fileList){
         if(i>iend) {cout<<"Event loop finished! Analyzed "<< iend<<" events"<<endl;break;}
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
-
-        if(!(*HLT_noalg_L1ZDC_A_AND_C)) continue;
+        //if(!(*HLT_noalg_L1ZDC_A_AND_C)) continue;
         //if(!(*HLT_noalg_L1ZDC_OR)) continue;
         if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
         if((*nvtx) != 2) continue; // right now i make sure only one primary vertex
@@ -94,6 +93,7 @@ void CorrFunc(const int a ,const char* fileList){
                 if(isBitSet(*BitMask,i)){ sum+= zdcWei.at(i)*ModAmp[i];}
         }
         hzdc->Fill(sum);
+        
         //determine effective energy bin
         float m_eff_energy = sqrt_s-sum;
         m_eff_energy = m_eff_energy/1000; //convert to TeV
@@ -139,7 +139,6 @@ void CorrFunc(const int a ,const char* fileList){
 
             float trk_eff=1/0.8;//eventually this stores 1/eff. TODO get this value
 
-            
             int ptbin1 = Bins::GetPtBin1(pt);
             int ptbin2 = Bins::GetPtBin2(pt);
             if(ptbin1==-1 && ptbin2==-1) continue;
@@ -151,7 +150,6 @@ void CorrFunc(const int a ,const char* fileList){
             //push track into event
             ev->AddTrack(pt,eta,phi,charge,trk_eff,ptbin1,ptbin2);
         }
-
         Fill(ev,ev,0);
         FillMixed(ev);
      }

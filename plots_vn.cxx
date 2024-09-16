@@ -82,7 +82,8 @@ void plots_vn(int  ihar        = 2,//ihar=2,3,4 = v2,v3,v4
     std::vector<int>cent_periph=Bins::CentBinsPeriph();
     std::vector<int>trk_periph=Bins::TrkBinsPeriph();
     Peripheraldep_Centdep(Bins::GetTrkIndex(0,1000),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
-    Peripheraldep_Centdep(Bins::GetTrkIndex(0,1000),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(1.0,2.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+    Peripheraldep_Centdep(Bins::GetTrkIndex(30,40),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+    Peripheraldep_Centdep(Bins::GetTrkIndex(100,110),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
     base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots";
     Common::SaveCanvas(m_can_vec,base1);
 }
@@ -93,7 +94,14 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
     std::cout<<" Function doesnot make sense for this m_vn_type="<<m_vn_type<<std::endl;
     return ;
   }
-  std::vector<int> centbins_central=Bins::GetCentIndex({1.36,1.36*2,1.36*3,1.36*4,1.36*5,1.36*6,1.36*7,1.36*8,1.36*9});
+  std::vector<int> centbins_central;
+  for(int i=1; i<10; i++){
+  centbins_central.push_back(Bins::GetCentIndex(1.36*i,1.36*(i+1)));
+  }
+
+
+  //std::vector<int> centbins_central=Bins::GetCentIndex({1.36,1.36*2,1.36*3,0.68*10});
+  //std::vector<int> centbins_central=Bins::GetCentIndex(points);
 
   char name [600];
   char name1[600];
@@ -105,7 +113,7 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
   else if(m_vn_type==Bins::VN_PERISUB          ) sprintf(name,"%s_perisub_%s"         ,name1,name2);
 
   TCanvas *Can1=new TCanvas(name,name,1200,900);
-  //TCanvas *Can1=new TCanvas(name,name,1200,600);
+  //TCanvas *Can1=new TCanvas(name,name,1300,600);
   Can1->Divide(2,2);
   m_can_vec.push_back(Can1);
 
@@ -135,7 +143,7 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
           h_vnn_vn->SetBinContent(icent_bin+1,vnn.first );
           h_vnn_vn->SetBinError  (icent_bin+1,vnn.second);
         }
-        if(h_vnn_vn->GetMaximum()>max) max=h_vnn_vn->GetMaximum();
+        if(h_vnn_vn->GetMaximum()>max) max=1.3*h_vnn_vn->GetMaximum();
         if(h_vnn_vn->GetMinimum()<min) min=h_vnn_vn->GetMinimum();
 
 
@@ -185,13 +193,12 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
         }
 
           //Draw Legend
-        //  if(vnn_vn==0){
-        //    Can1->cd(1);
-        //    //std::string legend=Bins::label_cent_peri(icent2);
-        //    std::string legend="legend";
-        //    if(idraw<3) Common::myMarkerText(0.48,0.49-idraw*0.06    ,col[idraw],sty[idraw],legend,1,0.040);
-        //    else        Common::myMarkerText(0.73,0.49-(idraw-3)*0.06,col[idraw],sty[idraw],legend,1,0.040);
-        //  }
+         if(vnn_vn==0){
+           Can1->cd(1);
+           std::string legend=Bins::label_cent_peri(icent2);
+           if(idraw<3) Common::myMarkerText(0.51,0.90-idraw*0.06    ,col[idraw],sty[idraw],legend,1,0.040);
+           else        Common::myMarkerText(0.73,0.49-(idraw-3)*0.06,col[idraw],sty[idraw],legend,1,0.040);
+         }
        idraw++;
       }
      }

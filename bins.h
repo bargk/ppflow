@@ -139,7 +139,7 @@ namespace Bins{
     SAME_CHARGE = 0,
     OPPOSITE_CHARGE = 1,
 
-    NCENT_ADD = 1,
+    NCENT_ADD = 11,
     NTRK_ADD = 2,
 
     NPT1_ADD = 1,
@@ -162,8 +162,8 @@ float cent_add_lo[NCENT_ADD]     = {0.0};
 float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
-    //12,      13,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 0.0, 13.60}, //{0.0, 6.80}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    //20,           21,          22,          23,           24,          25,          26,             27,            28,             29,             30,        35,       36,
+    { 0.0, 13.60}, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.80}, {6.80, 8.16}, {8.16, 9.52}, {9.52, 10.88}, {10.88, 12.24}, {12.24, 13.60}//, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -606,7 +606,7 @@ TH1D* CentdepHist(std::vector<int>centbins, std::string name) {
   Xbins[NXbins] = CENT_HI[centbins[NXbins - 1]];
 
   TH1D* hist = new TH1D(name.c_str(), "", NXbins, Xbins);
-  hist->GetXaxis()->SetTitle("Effective energy [TeV]");
+  hist->GetXaxis()->SetTitle("#sqrt{#it{s}_{eff}} [TeV]");
   //hist->GetXaxis()->SetTitle("N_{ch}");
 
   return hist;
@@ -794,12 +794,13 @@ std::pair<float, float> GetVnPtb(TFile *TemplateFile, int icent, int ipt1, int i
   }
 }
 
-// std::string label_cent_peri(int icent) {
-//   if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
-//   else                            sprintf(label, "#it{N}_{ ch}^{ rec,periph}#geq%d"   , NTRACK_PPB_LO[icent]);
-//   std::string ret = label;
-//   return ret;
-// }
+std::string label_cent_peri(int icent) {
+  //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
+  //else                            
+  sprintf(label, "%.2f#leq#sqrt{#it{s}_{eff}}#leq%.2f TeV"   , CENT_LO[icent],CENT_HI[icent]);
+  std::string ret = label;
+  return ret;
+}
 
 // std::pair<float, float> GetVnn_selfNtrk(TFile *TemplateFile, int icent, int ipt1, int ipt2, int ich, int ideta, int ihar, int icent_periph) {
 //   std::pair<float, float> ret;
@@ -965,6 +966,7 @@ std::vector<int> TrkBins() {
 
 std::vector<int> CentBinsPeriph() {
   std::vector<int> full_set_cent;
+  full_set_cent.push_back(GetCentIndex(0.0, 0.68 ));
   full_set_cent.push_back(GetCentIndex(0.0, 1.36 ));
   return full_set_cent;
 }

@@ -5,6 +5,7 @@ using namespace Bins;
 
 
 std::vector<TCanvas*> m_can_vec;
+std::vector<TCanvas*> m_can_vec_cuts; // for same multiplicity and pT cuts
 TStyle* AtlasStyle();
 void SetAtlasStyle();
 
@@ -36,7 +37,7 @@ void plots_TemplateFits() {
     std::vector<int> pt2_bins = Bins::PtbBins ();
     std::vector<int> deta_bins = Bins::DetaBins();
 
-    for (int itrk1 : {Bins::GetTrkIndex(0,1000)}){
+    for (int itrk1 : {Bins::GetTrkIndex(0,1000),Bins::GetTrkIndex(30,40),Bins::GetTrkIndex(100,110)}){
         for (int ipt1 : {Bins::GetPtaIndex(0.5, 5.0)}) {
             for (int ipt2 : {Bins::GetPtaIndex(0.5, 5.0)}) {
                 for (int ich = 2; ich < 3; ich++) {
@@ -44,7 +45,8 @@ void plots_TemplateFits() {
                         std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << std::endl;
                         for (auto icent2 : centbins_peripheral) {
                             for (auto itrk2 : trkbins_peripheral) {
-                                for (int icent1 = 0; icent1 < NCENT + NCENT_ADD; icent1++) {
+                                m_can_vec_cuts.clear();
+                                for (int icent1 = NCENT; icent1 < NCENT+ NCENT_ADD; icent1++) {
                                     std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << "  " << icent2 << "  " << icent1 << std::endl;
 
                                     sprintf(name , "cent%.2d_pericent%.2d_peritrk%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent1, icent2,itrk2,itrk1, ipt1, ipt2, ich, ideta);
@@ -83,24 +85,14 @@ void plots_TemplateFits() {
                                     leg->SetBorderSize(0);
                                     leg->SetFillStyle(0);
                                     std::string label_central   = "Y(#Delta#phi)  "; //+label_cent(icent1);
-                                    //label_central += "(" + Bins::HH_LABEL + ")";
-                                    // if (l_vn_type == Bins::VN_TEMPLATE)
-                                    // {
+                                  
                                         std::string label_peripheral = "FY^{periph}(#Delta#phi) + G"; //+label_cent(icent2);
                                         leg->AddEntry(h_central           , label_central.c_str()    , "p");
                                         leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
                                         leg->AddEntry(h_fit_func          , "Y^{templ}(#Delta#phi)"  , "l");
                                         leg->AddEntry(f_vnn_combined      , "Y^{ridge}(#Delta#phi) +FY^{periph}(0)", "l");
                                         leg->AddEntry(f_pedestal          , "G + FY^{periph}(0)"       , "l");
-                                    //}
-                                    // else {
-                                    //     std::string label_peripheral = "FC^{periph}(#Delta#phi)"; //+label_cent(icent2);
-                                    //     leg->AddEntry(h_central           , label_central.c_str()    , "p");
-                                    //     leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
-                                    //     leg->AddEntry(h_fit_func          , "C^{templ}(#Delta#phi)"  , "l");
-                                    //     leg->AddEntry(f_vnn_combined      , "C^{ridge}(#Delta#phi)", "l");
-                                    //     leg->AddEntry(f_pedestal          , "G"       , "l");
-                                    // }
+                                   
                                     leg->Draw();
 
 
@@ -146,9 +138,8 @@ void plots_TemplateFits() {
     }
 
     std::cout << "Saving" << std::endl;
-    // std::string base2 = "pedestal" + base;
-    // if (l_vn_type == Bins::VN_TEMPLATE) base2 = base;
     Common::SaveCanvas(m_can_vec, base2);
+
 
     //InFile->Close();
     //OutFile->Close();
