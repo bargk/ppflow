@@ -8,8 +8,16 @@ TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD][Bins::NPT1 
 /*-----------------------------------------------------------------------------
  *  Makes 1D Pair distributions for several Deta ranges from the 2D pair distributions
  *-----------------------------------------------------------------------------*/
-void S05_ProjectionX() {
-    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+void S05_ProjectionX(bool minbias =0) {
+    std::string base;
+    if(minbias){
+        std::cout << "Working on Minbias triggers!" << std::endl;
+         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    }
     char name [600];
     char name1[600];
 

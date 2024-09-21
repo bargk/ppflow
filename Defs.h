@@ -65,79 +65,81 @@ unsigned int     ntrk;
 int             m_cent_i;
 int             nbin;
 double sqrt_s = 13600.0; //13.6 TeV
+bool minbias;
 
 //TODO define it as part of class
 
 //ZDC weights
 vector<float> zdcWei ={0,2.78128,2.37211,3.31743,0,3.80388,3.26592,5.26164}; //EM on both sides set to 0
 
+void InitHistos();
 
 bool isBitSet(int x, int s){
   int mask = x >> s;
   return mask % 2;
 }
 
-void InitHistos(){
-    //create output file
-    std::string directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
-    gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
-    tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
+// void InitHistos(){
+//     //create output file
+//     std::string directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+//     gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
+//     tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
 
     
-    /*-----------------------------------------------------------------------------
-     *  Global monitor histograms
-     *-----------------------------------------------------------------------------*/
-    h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
-    hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
-    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
+//     /*-----------------------------------------------------------------------------
+//      *  Global monitor histograms
+//      *-----------------------------------------------------------------------------*/
+//     h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
+//     hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+//     hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
     
     
-    //eta per effective energy bin
-    for(int icent=0; icent<Bins::NCENT; icent++){
-        sprintf(histname,"h_eta_cent%.2d",icent);
-        h_eta[icent]=new TH1D(histname,";#eta;counts",50,-3.0,3.0);
-        h_eta[icent]->Sumw2();
-    }
+//     //eta per effective energy bin
+//     for(int icent=0; icent<Bins::NCENT; icent++){
+//         sprintf(histname,"h_eta_cent%.2d",icent);
+//         h_eta[icent]=new TH1D(histname,";#eta;counts",50,-3.0,3.0);
+//         h_eta[icent]->Sumw2();
+//     }
 
-    //Eta-phi map of tracks
-    for(int ipt=0;ipt<Bins::NPT1;ipt++){
-        sprintf(histname ,"h_EtaPhi_pt%d",ipt);
-        sprintf(histtitle,"h_EtaPhi;#eta;#phi;N_{Tracks};Events");
-        h_EtaPhi[ipt]=new TH2D(histname,histtitle,50,-2.5,2.5,64,-acos(-1.0),acos(-1.0));
-    }
+//     //Eta-phi map of tracks
+//     for(int ipt=0;ipt<Bins::NPT1;ipt++){
+//         sprintf(histname ,"h_EtaPhi_pt%d",ipt);
+//         sprintf(histtitle,"h_EtaPhi;#eta;#phi;N_{Tracks};Events");
+//         h_EtaPhi[ipt]=new TH2D(histname,histtitle,50,-2.5,2.5,64,-acos(-1.0),acos(-1.0));
+//     }
 
-    //main fg and bg distributions
-    int nBinsPhi = 36;
-    int nBinsEta = 50;
-    for(int icent=0; icent<Bins::NCENT; icent++){
-        for(int itrk =0; itrk<Bins::NTRK; itrk++){
-            for(int ipt1=0; ipt1<Bins::NPT1; ipt1++){
-                for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
-                    for(int it=0; it<Bins::NCH; it++){
-                    sprintf(histname,"fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
-                    fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
-                    fg[icent][itrk][ipt1][ipt2][it]->Sumw2();
+//     //main fg and bg distributions
+//     int nBinsPhi = 36;
+//     int nBinsEta = 50;
+//     for(int icent=0; icent<Bins::NCENT; icent++){
+//         for(int itrk =0; itrk<Bins::NTRK; itrk++){
+//             for(int ipt1=0; ipt1<Bins::NPT1; ipt1++){
+//                 for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
+//                     for(int it=0; it<Bins::NCH; it++){
+//                     sprintf(histname,"fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+//                     fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+//                     fg[icent][itrk][ipt1][ipt2][it]->Sumw2();
 
-                    sprintf(histname,"bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
-                    bg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
-                    bg[icent][itrk][ipt1][ipt2][it]->Sumw2();
-                    }
-                }
-            }
-        }
-    }
+//                     sprintf(histname,"bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+//                     bg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+//                     bg[icent][itrk][ipt1][ipt2][it]->Sumw2();
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
-    //Trigger particle counter (for PTY)
-    for(int icent=0; icent<Bins::NCENT; icent++){
-        for(int itrk=0; itrk<Bins::NTRK; itrk++){
-            sprintf(histname,"N_trigger_cent%.2d_trk%.2d",icent,itrk);
-            N_trigger[icent][itrk] = new TH1D(histname,"N_trigger;pT_trigger;",200,0,20);
-            N_trigger[icent][itrk]->Sumw2();
-        }
-    }
+//     //Trigger particle counter (for PTY)
+//     for(int icent=0; icent<Bins::NCENT; icent++){
+//         for(int itrk=0; itrk<Bins::NTRK; itrk++){
+//             sprintf(histname,"N_trigger_cent%.2d_trk%.2d",icent,itrk);
+//             N_trigger[icent][itrk] = new TH1D(histname,"N_trigger;pT_trigger;",200,0,20);
+//             N_trigger[icent][itrk]->Sumw2();
+//         }
+//     }
 
 
-}
+// }
 
 void SaveHistos(){
   tmpf->cd();

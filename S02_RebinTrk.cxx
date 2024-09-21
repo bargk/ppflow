@@ -8,8 +8,16 @@ TH1D *N_trigger[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD];
 /*-----------------------------------------------------------------------------
  *  add more multiplicity bins
  *------------------------------------------------------- ---------------------*/
-void S02_RebinTrk() {
-    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+void S02_RebinTrk(bool minbias =0) {
+    std::string base;
+    if(minbias){
+        std::cout << "Working on Minbias triggers!" << std::endl;
+         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    }
     char name [600];
     char name1[600];
     TFile *input;

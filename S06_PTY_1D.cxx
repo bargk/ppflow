@@ -7,8 +7,16 @@ double NTrigs[Bins::NCENT+Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD][Bins::NP
 /*-----------------------------------------------------------------------------
  *  Makes PTY distributions from the 1D-pair distributions
  *-----------------------------------------------------------------------------*/
-void S06_PTY_1D(){
-   string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+void S06_PTY_1D(bool minbias =0){
+   std::string base;
+    if(minbias){
+        std::cout << "Working on Minbias triggers!" << std::endl;
+         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    }
    char name [600];
    char name1[600];
    sprintf(name,"%s/RebinTrk.root",base.c_str());

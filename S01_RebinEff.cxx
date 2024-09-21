@@ -8,8 +8,17 @@ TH1D *N_trigger[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK];
 /*-----------------------------------------------------------------------------
  *  Reads in original 2D histograms and adds more effective energy bins
  *------------------------------------------------------- ---------------------*/
-void S01_RebinEff() {
-    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+void S01_RebinEff(bool minbias =0) {
+    std::string base;
+    if(minbias){
+        std::cout << "Working on Minbias trigger!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    }
+
     char name [600];
     char name1[600];
     TFile *input;

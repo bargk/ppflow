@@ -6,9 +6,15 @@
 
 
 
-void CorrFunc(const int a ,const char* fileList){
+void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
+    minbias = minbias1;
     sprintf(output_name,"histograms_%d.root",a);
-
+    if(minbias){
+        cout << "Working on minbias triggers!" << endl;
+    }
+    else{
+        cout << "working on ZDC triggers!" << endl;
+    }
     // Split the file paths into a vector
     std::vector<std::string> files;
     std::istringstream ss(fileList);
@@ -23,7 +29,7 @@ void CorrFunc(const int a ,const char* fileList){
     }
     // loading data
     fChain = new TChain("zdcTree");
-    char base[200] ="/gpfs0/citron/users/bargl/ZDC/lhcf22/user.steinber.data22_13p6TeV.00435229.physics_MinBias.merge.AOD.r14470_p5587.4zdc_EXT0";
+    char base[200] ="/gpfs0/citron/users/bargl/ZDC/lhcf22/user.bglik.data22_13p6TeV.00435229.ANALAYSIS_noLhcf_EXT0";
     // Open the files
     for (const auto file : files) {
         fChain->Add(Form("%s/%s",base,file.c_str()),0);
@@ -56,10 +62,13 @@ void CorrFunc(const int a ,const char* fileList){
     TTreeReaderValue<unsigned int> ntrk_ptr(myreader, "ntrk");
     TTreeReaderValue<int> nvtx(myreader, "t_nvtx");
     TTreeReaderValue<unsigned int> lumiblock(myreader, "lumiBlock");
-    TTreeReaderValue<bool> L1_ZDC_XOR_E1_E3(myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
+    //triggers
+    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E1_E3(myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
+    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E2(myreader, "HLT_noalg_L1ZDC_XOR_E2");
     TTreeReaderValue<bool> HLT_noalg_L1ZDC_A_AND_C(myreader, "HLT_noalg_L1ZDC_A_AND_C");
-    TTreeReaderValue<bool> HLT_noalg_L1ZDC_OR(myreader, "HLT_noalg_L1ZDC_OR");
-    TTreeReaderValue<bool> trk30(myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+    TTreeReaderValue<bool> HLT_noalg_L1MBTS_1(myreader, "HLT_noalg_L1MBTS_1");
+    TTreeReaderValue<bool> HLT_noalg_mb_L1MBTS_1(myreader, "HLT_noalg_mb_L1MBTS_1");
+    //zdc
     TTreeReaderArray<float> ModAmp(myreader, "zdc_ZdcModuleFitAmp"); // First 4 lower bits corressponds to side C
     TTreeReaderValue<unsigned int> BitMask(myreader, "zdc_ZdcModuleMask");
 
@@ -78,8 +87,8 @@ void CorrFunc(const int a ,const char* fileList){
         if(i>iend) {cout<<"Event loop finished! Analyzed "<< iend<<" events"<<endl;break;}
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
-        //if(!(*HLT_noalg_L1ZDC_A_AND_C)) continue;
-        //if(!(*HLT_noalg_L1ZDC_OR)) continue;
+        if(!minbias && !(((*HLT_L1_ZDC_XOR_E1_E3) || (*HLT_L1_ZDC_XOR_E2)) || (*HLT_noalg_L1ZDC_A_AND_C))) continue;
+        if(minbias && (!((*HLT_noalg_L1MBTS_1) || (*HLT_noalg_mb_L1MBTS_1)))) continue; //minbias
         if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
         if((*nvtx) != 2) continue; // right now i make sure only one primary vertex
 
@@ -155,6 +164,71 @@ void CorrFunc(const int a ,const char* fileList){
      }
     SaveHistos();
     
+}
+
+void InitHistos(){
+    //create output file
+    
+    std::string directory;
+    directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    if(minbias) directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
+    tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
+
+    
+    /*-----------------------------------------------------------------------------
+     *  Global monitor histograms
+     *-----------------------------------------------------------------------------*/
+    h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
+    hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
+    
+    
+    //eta per effective energy bin
+    for(int icent=0; icent<Bins::NCENT; icent++){
+        sprintf(histname,"h_eta_cent%.2d",icent);
+        h_eta[icent]=new TH1D(histname,";#eta;counts",50,-3.0,3.0);
+        h_eta[icent]->Sumw2();
+    }
+
+    //Eta-phi map of tracks
+    for(int ipt=0;ipt<Bins::NPT1;ipt++){
+        sprintf(histname ,"h_EtaPhi_pt%d",ipt);
+        sprintf(histtitle,"h_EtaPhi;#eta;#phi;N_{Tracks};Events");
+        h_EtaPhi[ipt]=new TH2D(histname,histtitle,50,-2.5,2.5,64,-acos(-1.0),acos(-1.0));
+    }
+
+    //main fg and bg distributions
+    int nBinsPhi = 36;
+    int nBinsEta = 50;
+    for(int icent=0; icent<Bins::NCENT; icent++){
+        for(int itrk =0; itrk<Bins::NTRK; itrk++){
+            for(int ipt1=0; ipt1<Bins::NPT1; ipt1++){
+                for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
+                    for(int it=0; it<Bins::NCH; it++){
+                    sprintf(histname,"fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+                    fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+                    fg[icent][itrk][ipt1][ipt2][it]->Sumw2();
+
+                    sprintf(histname,"bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
+                    bg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+                    bg[icent][itrk][ipt1][ipt2][it]->Sumw2();
+                    }
+                }
+            }
+        }
+    }
+
+    //Trigger particle counter (for PTY)
+    for(int icent=0; icent<Bins::NCENT; icent++){
+        for(int itrk=0; itrk<Bins::NTRK; itrk++){
+            sprintf(histname,"N_trigger_cent%.2d_trk%.2d",icent,itrk);
+            N_trigger[icent][itrk] = new TH1D(histname,"N_trigger;pT_trigger;",200,0,20);
+            N_trigger[icent][itrk]->Sumw2();
+        }
+    }
+
+
 }
 
 
