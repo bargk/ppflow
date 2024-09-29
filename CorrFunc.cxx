@@ -152,7 +152,8 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
             int ptbin2 = Bins::GetPtBin2(pt);
             if(ptbin1==-1 && ptbin2==-1) continue;
             N_trigger[m_cent_i][nbin]->Fill(pt,trk_eff);
-            h_eta[m_cent_i]->Fill(eta,trk_eff);
+            h_pt[nbin]->Fill(pt,trk_eff);
+            h_eta[nbin]->Fill(eta,trk_eff);
             //N_ntrk[m_cent_i]->Fill(ntrk,trk_eff);
             if(ptbin1>=0) h_EtaPhi[ptbin1]->Fill(eta,phi);
 
@@ -184,12 +185,20 @@ void InitHistos(){
     hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
     
     
-    //eta per effective energy bin
-    for(int icent=0; icent<Bins::NCENT; icent++){
-        sprintf(histname,"h_eta_cent%.2d",icent);
-        h_eta[icent]=new TH1D(histname,";#eta;counts",50,-3.0,3.0);
-        h_eta[icent]->Sumw2();
+    //eta map of tracks
+    for(int itrk=0; itrk<Bins::NTRK; itrk++){
+        sprintf(histname,"h_eta_itrk%.2d",itrk);
+        h_eta[itrk]=new TH1D(histname,";#eta;counts",50,-3.0,3.0);
+        h_eta[itrk]->Sumw2();
     }
+
+    //pt map of tracks
+    for(int itrk=0; itrk<Bins::NTRK; itrk++){
+        sprintf(histname,"h_pt_itrk%.2d",itrk);
+        h_pt[itrk]=new TH1D(histname,";p_{T} [GeV];counts",50,0,21);
+        h_pt[itrk]->Sumw2();
+    }
+    
 
     //Eta-phi map of tracks
     for(int ipt=0;ipt<Bins::NPT1;ipt++){
