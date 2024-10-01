@@ -1,5 +1,5 @@
 #include"TemplateFitting.h"
-
+#define TEST
 
 //#define TEST // ONLY do few bins, for debugging
 
@@ -9,36 +9,23 @@ std::vector<TCanvas*>        m_can_vec;
 /*-----------------------------------------------------------------------------
  *  Does the template fits and stores the fits as well as the vnn
  *-----------------------------------------------------------------------------*/
-void S08a_FitPTY_Template(int l_use_peripheral_pp = 0) {
+void S08a_FitPTY_Template() {
     bool no_ZYAM = false;
-    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
     char name [600];
     char name1[600];
 
     sprintf(name , "%s/PTY1D.root" , base.c_str());
     sprintf(name1, "%s/ZYAM1D.root", base.c_str());
 
-    if (l_use_peripheral_pp == 1) {
-        
-        if (no_ZYAM) sprintf(name1, "01RootFiles/Data_5TeV_eff1_trig2_PTY1D.root");
-        else         sprintf(name1, "%s/multiplicity/ZYAM1D.root", base.c_str());
-    }
+    
 
     TFile *InFileCentral    = new TFile(name , "read");
     TFile *InFilePeripheral = new TFile(name1, "read");
 
     sprintf(name , "%s/TemplateFits.root"     , base.c_str());
     sprintf(name1, "%s/TemplateFits_vnn.root" , base.c_str());
-    if (l_use_peripheral_pp == 1) {
-        if (no_ZYAM) {
-            sprintf(name , "01RootFiles/%s_TemplateFits_ppPeriph_pedestal.root"     , base.c_str());
-            sprintf(name1, "01RootFiles/%s_TemplateFits_ppPeriph_pedestal_vnn.root" , base.c_str());
-        }
-        else {
-            sprintf(name , "%s/TemplateFits_ntrkPeriph.root"     , base.c_str());
-            sprintf(name1, "%s/TemplateFits_ntrkPeriph_vnn.root" , base.c_str());
-        }
-    }
+    
     TFile *OutFile1 = new TFile(name , "recreate"); OutFile1->cd();
     TFile *OutFile2 = new TFile(name1, "recreate");
     std::cout << name << "  " << name1 << std::endl;
@@ -47,14 +34,14 @@ void S08a_FitPTY_Template(int l_use_peripheral_pp = 0) {
 
 
 #ifdef TEST
-    const std::vector<int> cent_bins = Bins::CentBins();
-    const std::vector<int> trk_bins = Bins::TrktBins();
+    const std::vector<int> cent_bins = {Bins::GetCentIndex(0.0,13.6)};
+    const std::vector<int> trk_bins = Bins::TrkBins();
     const std::vector<int> pt1_bins  = {Bins::GetPtaIndex(0.5, 5.0)};
     const std::vector<int> pt2_bins  = {Bins::GetPtbIndex(0.5, 5.0)};
     const std::vector<int> ch_bins   = {2};
     const std::vector<int> deta_bins = {Bins::GetDetaIndex(2.0, 5.0)};
-    const std::vector<int> centbins_peripheral = Bins::CentBinsPeriph();
-    const std::vector<int> trkbins_peripheral = Bins::TrkBinsPeriph();
+    const std::vector<int> centbins_peripheral = {Bins::GetCentIndex(0.0,13.6)};
+    const std::vector<int> trkbins_peripheral =  {Bins::GetTrkIndex(0,20)};
 #else
     const std::vector<int> cent_bins = Bins::CentBins();
     const std::vector<int> trk_bins = Bins::TrkBins();
@@ -89,12 +76,12 @@ void S08a_FitPTY_Template(int l_use_peripheral_pp = 0) {
                                     sprintf(hCentname, "PTY_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent1, itrk1, ipt1, ipt2, ich, ideta);
                                     sprintf(hPeriname, "PTY_ZYAM_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, itrk2, ipt1, ipt2, ich, ideta);
 
-                                    if (l_use_peripheral_pp == 1) {
-                                        if (no_ZYAM) {
-                                            sprintf(hPeriname, "PTY_cent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d"      , icent2, ipt1, ipt2, ich, ideta);
-                                        }
-                                        else sprintf(hPeriname, "PTY_ZYAM_cent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
-                                    }
+                                    // if (l_use_peripheral_pp == 1) {
+                                    //     if (no_ZYAM) {
+                                    //         sprintf(hPeriname, "PTY_cent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d"      , icent2, ipt1, ipt2, ich, ideta);
+                                    //     }
+                                    //     else sprintf(hPeriname, "PTY_ZYAM_cent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent2, ipt1, ipt2, ich, ideta);
+                                    // }
                                     TH1D* h_central      = (TH1D*)InFileCentral   ->Get(hCentname)->Clone(Common::UniqueName().c_str());
                                     TH1D* h_peripheral   = (TH1D*)InFilePeripheral->Get(hPeriname)->Clone(Common::UniqueName().c_str());
                                     if (!h_central   ) {std::cout << hCentname << " Not Found" << std::endl; throw std::exception();}

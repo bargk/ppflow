@@ -9,8 +9,16 @@
 /*-----------------------------------------------------------------------------
  *  Makes ZYAM subtraction on the PTYs
  *-----------------------------------------------------------------------------*/
-void S07_ZYAM1D(){
-   string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+void S07_ZYAM1D(bool minbias =0){
+   std::string base;
+    if(minbias){
+        std::cout << "Working on Minbias triggers!" << std::endl;
+         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    }
    char name [600];
 
    sprintf(name,"%s/PTY1D.root"         ,base.c_str());

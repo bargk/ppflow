@@ -29,12 +29,12 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
     }
     // loading data
     fChain = new TChain("zdcTree");
-    char base[200] ="/gpfs0/citron/users/bargl/ZDC/lhcf22/user.bglik.data22_13p6TeV.00435229.ANALAYSIS_noLhcf_EXT0";
+    char base[200] ="/gpfs0/citron/users/bargl/ZDC/lhcf22/user.bglik.data22_13p6TeV.00435229.ANALAYSIS_1_noLhcf_EXT0.566478889.566478889";
     // Open the files
     for (const auto file : files) {
         fChain->Add(Form("%s/%s",base,file.c_str()),0);
         if (!fChain || fChain->IsZombie()) {
-            std::cerr << "Error opening file: " << file << std::endl;
+            std::cerr << "Error opening file: " << file <<" Check files.txt content"<< std::endl;
             //continue;
         }
         std::cout << "Opened file: " << file << std::endl;
@@ -59,15 +59,41 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
     TTreeReaderValue<std::vector<signed char>> trk_charge(myreader, "trk_charge");
     TTreeReaderValue<std::vector<short>> trk_quality(myreader, "trk_quality");
     TTreeReaderValue<std::vector<float>> vtx_z(myreader, "vtx_z");
-    TTreeReaderValue<unsigned int> ntrk_ptr(myreader, "ntrk");
+    // TTreeReaderValue<unsigned int> ntrk_ptr(myreader, "ntrk");
     TTreeReaderValue<int> nvtx(myreader, "t_nvtx");
     TTreeReaderValue<unsigned int> lumiblock(myreader, "lumiBlock");
-    //triggers
+    //zdc triggers
     TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E1_E3(myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
     TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E2(myreader, "HLT_noalg_L1ZDC_XOR_E2");
     TTreeReaderValue<bool> HLT_noalg_L1ZDC_A_AND_C(myreader, "HLT_noalg_L1ZDC_A_AND_C");
+    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E2(myreader,"HLT_mb_sptrk_L1ZDC_XOR_E2");
+	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E1_E3(myreader,"HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_A_AND_C(myreader, "HLT_mb_sptrk_L1ZDC_A_AND_C");
+	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2(myreader,"HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
+	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3(myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
+	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C(myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+
+
+    //minbias triggers
     TTreeReaderValue<bool> HLT_noalg_L1MBTS_1(myreader, "HLT_noalg_L1MBTS_1");
     TTreeReaderValue<bool> HLT_noalg_mb_L1MBTS_1(myreader, "HLT_noalg_mb_L1MBTS_1");
+	TTreeReaderValue<bool> HLT_noalg_L1MBTS_1_1(myreader, "HLT_noalg_L1MBTS_1_1");
+	TTreeReaderValue<bool> HLT_noalg_mb_L1MBTS_1_1(myreader, "HLT_noalg_mb_L1MBTS_1_1");
+	TTreeReaderValue<bool> HLT_noalg_mb_L1MBTS_2(myreader, "HLT_noalg_mb_L1MBTS_2");
+	TTreeReaderValue<bool> HLT_noalg_L1MBTS_A(myreader, "HLT_noalg_L1MBTS_A");
+	TTreeReaderValue<bool> HLT_noalg_L1MBTS_C(myreader, "HLT_noalg_L1MBTS_C");
+    TTreeReaderValue<bool> HLT_mb_sptrk_pt2_L1MBTS_2(myreader, "HLT_mb_sptrk_pt2_L1MBTS_2");
+	TTreeReaderValue<bool> HLT_mb_sptrk_pt4_L1MBTS_2(myreader, "HLT_mb_sptrk_pt4_L1MBTS_2");
+	TTreeReaderValue<bool> HLT_mb_sptrk_pt6_L1MBTS_2(myreader, "HLT_mb_sptrk_pt6_L1MBTS_2");
+	TTreeReaderValue<bool> HLT_mb_sptrk_pt8_L1MBTS_2(myreader, "HLT_mb_sptrk_pt8_L1MBTS_2");
+	TTreeReaderValue<bool> HLT_mb_mbts_L1MBTS_1(myreader, "HLT_mb_mbts_L1MBTS_1");
+	TTreeReaderValue<bool> HLT_mb_mbts_L1MBTS_1_1(myreader, "HLT_mb_mbts_L1MBTS_1_1");
+	TTreeReaderValue<bool> HLT_mb_mbts_L1MBTS_2(myreader, "HLT_mb_mbts_L1MBTS_2");
+	TTreeReaderValue<bool> HLT_mb_mbts_L1RD0_FILLED(myreader, "HLT_mb_mbts_L1RD0_FILLED");
+    TTreeReaderValue<bool> HLT_mb_sptrk_vetombts2in_L1RD0_FILLED(myreader, "HLT_mb_sptrk_vetombts2in_L1RD0_FILLED");
+	TTreeReaderValue<bool> HLT_mb_mbts_all_L1MBTS_A(myreader, "HLT_mb_mbts_all_L1MBTS_A");
+	TTreeReaderValue<bool> HLT_mb_mbts_all_L1MBTS_C(myreader, "HLT_mb_mbts_all_L1MBTS_C");
+    
     //zdc
     TTreeReaderArray<float> ModAmp(myreader, "zdc_ZdcModuleFitAmp"); // First 4 lower bits corressponds to side C
     TTreeReaderValue<unsigned int> BitMask(myreader, "zdc_ZdcModuleMask");
@@ -79,11 +105,45 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
     cout << "Total events : "<< nentries << endl;
     
       while (myreader.Next()){
+        //retrive trigger information
+        std::vector<bool> m_trig;
+        if(minbias){
+            m_trig.push_back(*HLT_noalg_L1MBTS_1);
+            m_trig.push_back(*HLT_noalg_mb_L1MBTS_1);
+            m_trig.push_back(*HLT_noalg_L1MBTS_1_1);
+            m_trig.push_back(*HLT_noalg_mb_L1MBTS_1_1);
+            m_trig.push_back(*HLT_noalg_mb_L1MBTS_2);
+            m_trig.push_back(*HLT_noalg_L1MBTS_A);
+            m_trig.push_back(*HLT_noalg_L1MBTS_C);
+            m_trig.push_back(*HLT_mb_sptrk_pt2_L1MBTS_2);
+            m_trig.push_back(*HLT_mb_sptrk_pt4_L1MBTS_2);
+            m_trig.push_back(*HLT_mb_sptrk_pt6_L1MBTS_2);
+            m_trig.push_back(*HLT_mb_sptrk_pt8_L1MBTS_2);
+            m_trig.push_back(*HLT_mb_mbts_L1MBTS_1);
+            m_trig.push_back(*HLT_mb_mbts_L1MBTS_1_1);
+            m_trig.push_back(*HLT_mb_mbts_L1MBTS_2);
+            m_trig.push_back(*HLT_mb_mbts_L1RD0_FILLED);
+            m_trig.push_back(*HLT_mb_sptrk_vetombts2in_L1RD0_FILLED);
+            m_trig.push_back(*HLT_mb_mbts_all_L1MBTS_A);
+            m_trig.push_back(*HLT_mb_mbts_all_L1MBTS_C);
+        }
+        else{
+            m_trig.push_back(*HLT_L1_ZDC_XOR_E1_E3);
+            m_trig.push_back(*HLT_L1_ZDC_XOR_E2);
+            m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);
+            m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E2);
+            m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E1_E3);
+            m_trig.push_back(*HLT_mb_sptrk_L1ZDC_A_AND_C);
+            m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2);
+            m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3);
+            m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C);
+        }
+
+        if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         
         lumiBlock = *lumiblock;
-        ntrk = *ntrk_ptr;
-        int i = myreader.GetCurrentEntry();
-        
+        ntrk = trk_pt->size();
+        int i = myreader.GetCurrentEntry();  
         if(i>iend) {cout<<"Event loop finished! Analyzed "<< iend<<" events"<<endl;break;}
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
@@ -128,7 +188,6 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         hNtrkEff->Fill(m_eff_energy,ntrk/0.8);
 
         //TODO write number of good tracks based on bitword in trk_quality
-
         /*-----------------------------------------------------------------------------
          *  Information about tracks in the event
          *-----------------------------------------------------------------------------*/
@@ -152,8 +211,8 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
             int ptbin2 = Bins::GetPtBin2(pt);
             if(ptbin1==-1 && ptbin2==-1) continue;
             N_trigger[m_cent_i][nbin]->Fill(pt,trk_eff);
-            h_pt[nbin]->Fill(pt,trk_eff);
-            h_eta[nbin]->Fill(eta,trk_eff);
+            h_pt[nbin]->Fill(pt,trk_eff/ntrk);
+            h_eta[nbin]->Fill(eta,trk_eff/ntrk);
             //N_ntrk[m_cent_i]->Fill(ntrk,trk_eff);
             if(ptbin1>=0) h_EtaPhi[ptbin1]->Fill(eta,phi);
 
@@ -188,14 +247,14 @@ void InitHistos(){
     //eta map of tracks
     for(int itrk=0; itrk<Bins::NTRK; itrk++){
         sprintf(histname,"h_eta_itrk%.2d",itrk);
-        h_eta[itrk]=new TH1D(histname,";#eta;counts",50,-3.0,3.0);
+        h_eta[itrk]=new TH1D(histname,";#eta;counts per event",50,-3.0,3.0);
         h_eta[itrk]->Sumw2();
     }
 
     //pt map of tracks
     for(int itrk=0; itrk<Bins::NTRK; itrk++){
         sprintf(histname,"h_pt_itrk%.2d",itrk);
-        h_pt[itrk]=new TH1D(histname,";p_{T} [GeV];counts",50,0,21);
+        h_pt[itrk]=new TH1D(histname,";p_{T} [GeV];counts per event",100,0,20);
         h_pt[itrk]->Sumw2();
     }
     
@@ -237,8 +296,17 @@ void InitHistos(){
         }
     }
 
-
 }
+ bool passTrigger(std::vector<bool> trigger){
+        bool pass = false;
+        for(const auto &itrg : trigger){
+            if(itrg){
+            pass = true;
+            break;
+            }
+        }
+        return pass;
+ }
 
 
 

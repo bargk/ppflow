@@ -11,8 +11,8 @@ void SetAtlasStyle();
 
 void plots_TemplateFits() {
     //SetAtlasStyle();
-    std::string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
-    std::string base2 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/TemplateFits_plots";
+    std::string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    std::string base2 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/TemplateFits_plots/minbias";
     char name [600];
     char name1[600];
 
@@ -35,9 +35,10 @@ void plots_TemplateFits() {
     std::vector<int> centbins_peripheral = Bins::CentBinsPeriph();
     std::vector<int> trkbins_peripheral = Bins::TrkBinsPeriph();
     std::vector<int> pt2_bins = Bins::PtbBins ();
+    std::vector<int> trk_bins = Bins::TrkBins ();
     std::vector<int> deta_bins = Bins::DetaBins();
 
-    for (int itrk1 : {Bins::GetTrkIndex(0,1000),Bins::GetTrkIndex(30,40),Bins::GetTrkIndex(100,110)}){
+    for (int itrk1 : trk_bins){
         for (int ipt1 : {Bins::GetPtaIndex(0.5, 5.0)}) {
             for (int ipt2 : {Bins::GetPtaIndex(0.5, 5.0)}) {
                 for (int ich = 2; ich < 3; ich++) {
@@ -45,8 +46,8 @@ void plots_TemplateFits() {
                         std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << std::endl;
                         for (auto icent2 : centbins_peripheral) {
                             for (auto itrk2 : trkbins_peripheral) {
-                                m_can_vec_cuts.clear();
-                                for (int icent1 = NCENT; icent1 < NCENT+ NCENT_ADD; icent1++) {
+                                  for (int icent1 = 20; icent1 < 21; icent1++) {
+                                //for (int icent1 = NCENT; icent1 < NCENT+ NCENT_ADD; icent1++) {
                                     std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << "  " << icent2 << "  " << icent1 << std::endl;
 
                                     sprintf(name , "cent%.2d_pericent%.2d_peritrk%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d", icent1, icent2,itrk2,itrk1, ipt1, ipt2, ich, ideta);
@@ -112,7 +113,8 @@ void plots_TemplateFits() {
 
                                     X = 0.455 + 0.02;
                                     Y = 0.91;
-                                    Common::myText2(X       , Y     , 1, label_cent     (icent1), SIZE, 43); Y = Y - 0.06;
+                                    //Common::myText2(X       , Y     , 1, label_cent     (icent1), SIZE, 43); Y = Y - 0.06;
+                                    Common::myText2(X       , Y     , 1, label_trk     (itrk1), SIZE, 43); Y = Y - 0.06;
                                     //Common::myText2(X       ,Y     ,1,label_cent_peri(icent2),SIZE,43);
 
                                     c1->cd();

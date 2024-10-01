@@ -6,8 +6,9 @@ import sys
 #.......................................
 #             for edit                        
 #.......................................
-total_files = 2663 #number of files in directory (cd to directory and type "ls -1 | wc -l")
+total_files = 1329 #number of files in directory (cd to directory and type "ls -1 | wc -l")
 jobs = 83 #number of jobs to submit
+
 bin=int(total_files/jobs)
 res = total_files%bin
 if(int(sys.argv[1]) > 83):
