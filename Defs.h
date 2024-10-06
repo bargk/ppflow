@@ -45,6 +45,7 @@ int dep =20; //each pool have size of 20
 //global information
 TH1* h_Zvtx;
 TH1* hNtrk;
+TH1* hNtrk_no_cut;
 TH1* heff;
 TH1* hzdc;
 TH1* N_trigger[Bins::NCENT][Bins::NTRK];
@@ -67,6 +68,9 @@ int             m_cent_i;
 int             nbin;
 double sqrt_s = 13600.0; //13.6 TeV
 bool minbias;
+int prescale;
+int trig_index;
+
 
 // std::vector<TTreeReaderValue<bool>> m_trig_minbias;
 // std::vector<TTreeReaderValue<bool>> m_trig_zdc;
@@ -76,8 +80,11 @@ bool minbias;
 //ZDC weights
 vector<float> zdcWei ={0,2.78128,2.37211,3.31743,0,3.80388,3.26592,5.26164}; //EM on both sides set to 0
 
+
+
 void InitHistos();
 bool passTrigger(std::vector<bool> trigger);
+int triggerIndex(std::vector<bool> trigger);
 bool isBitSet(int x, int s){
   int mask = x >> s;
   return mask % 2;

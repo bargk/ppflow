@@ -77,8 +77,7 @@ void S06_PTY_1D(bool minbias =0){
             for(int ieta:deta_bins){
               sprintf(PjXfgname,"PjX_fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d",icent,itrk,ipt1,ipt2,ich,ieta);
               sprintf(PjXbgname,"PjX_bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d",icent,itrk,ipt1,ipt2,ich,ieta);
-            //sprintf(PjXconame,"PjX_co_cent%.2d_pta%d_ptb%.2d_ch%d_deta%.2d",icent,ipt1,ipt2,ich,ieta);
-
+              
               obj=next();
               fg[icent][itrk][ipt1][ipt2][ich][ieta] = (TH1D*)obj;
               if(!Common::CheckObject(obj,PjXfgname)) throw std::exception();
@@ -87,12 +86,9 @@ void S06_PTY_1D(bool minbias =0){
               bg[icent][itrk][ipt1][ipt2][ich][ieta] = (TH1D*)obj;
               if(!Common::CheckObject(obj,PjXbgname)) throw std::exception();
 
-            //obj=next();
-            //TH1D* htemp = (TH1D*)obj;
-            //if(!Common::CheckObject(obj,PjXconame)) throw std::exception();
 
               double integral1=fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral();
-                              fg[icent][itrk][ipt1][ipt2][ich][ieta]->Divide(bg[icent][itrk][ipt1][ipt2][ich][ieta]);
+              fg[icent][itrk][ipt1][ipt2][ich][ieta]->Divide(bg[icent][itrk][ipt1][ipt2][ich][ieta]);
               double integral2=fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral();
               double width    =fg[icent][itrk][ipt1][ipt2][ich][ieta]->GetBinWidth(1);
 

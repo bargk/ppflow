@@ -1,5 +1,5 @@
 #include"TemplateFitting.h"
-#define TEST
+// #define TEST
 
 //#define TEST // ONLY do few bins, for debugging
 
@@ -9,9 +9,17 @@ std::vector<TCanvas*>        m_can_vec;
 /*-----------------------------------------------------------------------------
  *  Does the template fits and stores the fits as well as the vnn
  *-----------------------------------------------------------------------------*/
-void S08a_FitPTY_Template() {
+void S08a_FitPTY_Template(bool minbias =0) {
     bool no_ZYAM = false;
-    string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    std::string base;
+    if(minbias){
+        std::cout << "Working on Minbias triggers!" << std::endl;
+         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+    }
     char name [600];
     char name1[600];
 

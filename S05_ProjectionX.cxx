@@ -20,7 +20,7 @@ void S05_ProjectionX(bool minbias =0) {
     }
     char name [600];
     char name1[600];
-
+    
     const std::vector<int> cent_bins = Bins::CentBins();
     const std::vector<int> trk_bins = Bins::TrkBins();
     const std::vector<int> pt1_bins = Bins::PtaBins ();

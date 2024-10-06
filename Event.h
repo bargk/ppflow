@@ -50,10 +50,14 @@ class Event{
   void AddTrack( float pt1, float eta1, float phi01, int charge1, float eff1,int ptbin11, int ptbin21);
   int get_id();
   int get_npart();
+  float get_zvtx();
+  int get_cent();
   Track* GetTrack(int i);
 };
 
 int Event::get_id(){return id;}
+int Event::get_cent(){return cent;}
+float Event::get_zvtx(){return zvtx;}
 int Event::get_npart(){return Tracks.size();}
 
 Track* Event::GetTrack(int i){return Tracks.at(i);}

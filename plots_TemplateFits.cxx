@@ -9,10 +9,20 @@ std::vector<TCanvas*> m_can_vec_cuts; // for same multiplicity and pT cuts
 TStyle* AtlasStyle();
 void SetAtlasStyle();
 
-void plots_TemplateFits() {
+void plots_TemplateFits(bool minbias =0) {
     //SetAtlasStyle();
-    std::string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
-    std::string base2 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/TemplateFits_plots/minbias";
+    std::string base; 
+    std::string base2;
+    if(minbias){
+        std::cout << "Working on Minbias triggers!" << std::endl;
+         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+         base2 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/TemplateFits_plots/minbias";
+    }
+    else{
+        std::cout << "Working on ZDC triggers!" << std::endl;
+        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+        base2 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/TemplateFits_plots";
+    }
     char name [600];
     char name1[600];
 

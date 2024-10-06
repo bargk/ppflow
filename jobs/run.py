@@ -6,12 +6,12 @@ import sys
 #.......................................
 #             for edit                        
 #.......................................
-total_files = 1329 #number of files in directory (cd to directory and type "ls -1 | wc -l")
-jobs = 83 #number of jobs to submit
+total_files = 2274 #number of files in directory (cd to directory and type "ls -1 | wc -l")
+jobs = 159 #number of jobs to submit (include 0 index)
 
 bin=int(total_files/jobs)
 res = total_files%bin
-if(int(sys.argv[1]) > 83):
+if(int(sys.argv[1]) > jobs):
     print(f'Error: Maximum job number is: {jobs} but input readed is {sys.argv[1]}')
     sys.exit(-1)
 def read_file_paths(file_path, start_line, end_line):
