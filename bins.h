@@ -139,7 +139,7 @@ namespace Bins{
     SAME_CHARGE = 0,
     OPPOSITE_CHARGE = 1,
 
-    NCENT_ADD = 11,
+    NCENT_ADD = 1,
     NTRK_ADD = 2,
 
     NPT1_ADD = 1,
@@ -156,14 +156,14 @@ namespace Bins{
 
 //LABELS                              0,    1,    2,    3,    4,    5,    6,    7,    8,     9,   10,   11,   12,   13,   14    ,15,   16,     17,    18,    19    
 float CENT_LO[NCENT + NCENT_ADD] = { 0.0,  0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88,  11.56, 12.24, 12.92 };  // bins for effective energy 
-float CENT_HI[NCENT + NCENT_ADD] = { 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.60 }; //in TeV
- 
+float CENT_HI[NCENT + NCENT_ADD] = { 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.6001 }; //in TeV
+
 float cent_add_lo[NCENT_ADD]     = {0.0};
 float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
     //20,           21,          22,          23,           24,          25,          26,             27,            28,             29,             30,        35,       36,
-    { 0.0, 13.60}, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.80}, {6.80, 8.16}, {8.16, 9.52}, {9.52, 10.88}, {10.88, 12.24}, {12.24, 13.60}//, {0, 60}, { 0, 10},
+    { 0.0, 13.6}//, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.80}, {6.80, 8.16}, {8.16, 9.52}, {9.52, 10.88}, {10.88, 12.24}, {12.24, 13.60}//, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -271,7 +271,7 @@ void Initialize_TrkAdd() {
 }
 
 std::string label_trk(int itrk) {
-  sprintf(label, "%d-%d", TRK_LO[itrk], TRK_HI[itrk]);
+  sprintf(label, "%d #leq N_{ch}^{rec} <%d", TRK_LO[itrk], TRK_HI[itrk]);
   std::string ret = label;
   return ret;
 }
@@ -576,7 +576,7 @@ int GetCentBin(float cent_onepercent) {
   return -1;
 }
 
-int GetTrkBin(float ntrk) {
+int GetTrkBin(int ntrk) {
   for (int i = 0; i < NTRK; i++) {
     if (ntrk >= TRK_LO[i] && ntrk < TRK_HI[i]) return i;
   }
@@ -797,7 +797,14 @@ std::pair<float, float> GetVnPtb(TFile *TemplateFile, int icent, int ipt1, int i
 std::string label_cent_peri(int icent) {
   //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
   //else                            
-  sprintf(label, "%.2f#leq#sqrt{#it{s}_{eff}}#leq%.2f TeV"   , CENT_LO[icent],CENT_HI[icent]);
+  sprintf(label, "%.2f#leq#sqrt{#it{s}_{eff}} < %.2f TeV"   , CENT_LO[icent],CENT_HI[icent]);
+  std::string ret = label;
+  return ret;
+}
+std::string label_trk_peri(int icent) {
+  //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
+  //else                            
+  sprintf(label, "%d#leq N_{ch}^{rec} < %d "   , TRK_LO[icent],TRK_HI[icent]);
   std::string ret = label;
   return ret;
 }
@@ -967,12 +974,15 @@ std::vector<int> TrkBins() {
 std::vector<int> CentBinsPeriph() {
   std::vector<int> full_set_cent;
   full_set_cent.push_back(GetCentIndex(0.0, 0.68 ));
-  full_set_cent.push_back(GetCentIndex(0.0, 1.36 ));
+  //full_set_cent.push_back(GetCentIndex(0.0, 1.36 ));
+  full_set_cent.push_back(GetCentIndex(0.0, 13.6 ));
   return full_set_cent;
 }
 std::vector<int> TrkBinsPeriph() {
   std::vector<int> full_set_trk;
+  full_set_trk.push_back(GetTrkIndex(0, 10 ));
   full_set_trk.push_back(GetTrkIndex(0, 20 ));
+  //full_set_trk.push_back(GetTrkIndex(0, 1000 ));
   return full_set_trk;
 }
 
