@@ -195,7 +195,7 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         for(int i = 4; i<8; i++){
             if(isBitSet(*BitMask,i)) sumA+= zdcWei.at(i)*ModAmp[i];
         }
-        if(sumC >0.01) continue;
+        //if(sumC >0.01) continue;
         sum = sumA + sumC;
         hzdc->Fill(sum,prescale);
         hZdcCorr->Fill(sumA,sumC,prescale);
