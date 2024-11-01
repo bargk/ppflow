@@ -50,7 +50,7 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
 
     
     
-
+    load_weights();
     // getting branches
     TTreeReader myreader(fChain);
     TTreeReaderValue<std::vector<float>> trk_pt(myreader, "trk_pt"); // units of MeV
@@ -144,10 +144,10 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
             m_trig.push_back(*HLT_noalg_mb_L1MBTS_2);                               m_trig_ps.push_back(*ps_HLT_noalg_mb_L1MBTS_2);
             m_trig.push_back(*HLT_noalg_L1MBTS_A);                                  m_trig_ps.push_back(*ps_HLT_noalg_L1MBTS_A);
             m_trig.push_back(*HLT_noalg_L1MBTS_C);                                  m_trig_ps.push_back(*ps_HLT_noalg_L1MBTS_C);
-            m_trig.push_back(*HLT_mb_sptrk_pt2_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt2_L1MBTS_2);
-            m_trig.push_back(*HLT_mb_sptrk_pt4_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt4_L1MBTS_2);
-            m_trig.push_back(*HLT_mb_sptrk_pt6_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt6_L1MBTS_2);
-            m_trig.push_back(*HLT_mb_sptrk_pt8_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt8_L1MBTS_2);
+            //m_trig.push_back(*HLT_mb_sptrk_pt2_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt2_L1MBTS_2);
+            //m_trig.push_back(*HLT_mb_sptrk_pt4_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt4_L1MBTS_2);
+            //m_trig.push_back(*HLT_mb_sptrk_pt6_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt6_L1MBTS_2);
+            //m_trig.push_back(*HLT_mb_sptrk_pt8_L1MBTS_2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_pt8_L1MBTS_2);
             m_trig.push_back(*HLT_mb_mbts_L1MBTS_1);                                m_trig_ps.push_back(*ps_HLT_mb_mbts_L1MBTS_1);
             m_trig.push_back(*HLT_mb_mbts_L1MBTS_1_1);                              m_trig_ps.push_back(*ps_HLT_mb_mbts_L1MBTS_1_1);
             m_trig.push_back(*HLT_mb_mbts_L1MBTS_2);                                m_trig_ps.push_back(*ps_HLT_mb_mbts_L1MBTS_2);
@@ -173,32 +173,41 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         prescale = m_trig_ps.at(trig_index);
         lumiBlock = *lumiblock;
         ntrk = trk_pt->size();
+
         int i = myreader.GetCurrentEntry();  
         if(i>iend) {cout<<"Event loop finished! Analyzed "<< iend<<" events"<<endl;break;}
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
         if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
-        //if((*nvtx) != 2) continue; // right now i make sure only one primary vertex
+        if((*nvtx) != 2) continue; // right now i make sure only one primary vertex
 
         #ifdef check
         cout<<"pt="<<trk_pt->size()<<"  eta="<<trk_eta->size()<<"  phi="<<trk_phi->size()<<"  qop="<<trk_charge->size()
             <<"  quality="<<trk_quality->size()<<endl;
         #endif
-        int sum =0;
+        float sum =0;
+        float sumA =0;
+        float sumC =0;
         //sum the energy in the zdc
-        for(int i = 0; i<8; i++){
-            if(isBitSet(*BitMask,i)) sum+= zdcWei.at(i)*ModAmp[i];
+        for(int i = 0; i<4; i++){
+            if(isBitSet(*BitMask,i)) sumC+= zdcWei.at(i)*ModAmp[i];
         }
+        for(int i = 4; i<8; i++){
+            if(isBitSet(*BitMask,i)) sumA+= zdcWei.at(i)*ModAmp[i];
+        }
+        if(sumC >0.01) continue;
+        sum = sumA + sumC;
         hzdc->Fill(sum,prescale);
+        hZdcCorr->Fill(sumA,sumC,prescale);
 
         //determine effective energy bin
         float m_eff_energy = sqrt_s - sum;
         m_eff_energy = m_eff_energy/1000; //convert to TeV
-        if(m_eff_energy < 0.0 || m_eff_energy > 13.6) continue;
+        if(m_eff_energy < 0.0 || m_eff_energy > 13.6001) continue;
         m_cent_i          =Bins::GetCentBin(m_eff_energy);
-
         if(m_cent_i <0 || m_cent_i >=Bins::NCENT) continue;
 
+        hzdc_after_cut->Fill(sum,prescale);
         //get multiplicity bin
         nbin = Bins::GetTrkBin(ntrk);
         if(nbin <0 || nbin >=Bins::NTRK) continue;
@@ -206,7 +215,6 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         m_zvtx=vtx_z->at(0);
         int zbin   = get_zPool(m_zvtx);
         if(zbin<0) continue;
-
         /*-----------------------------------------------------------------------------
          *  Fill some Monitor histograms
          *-----------------------------------------------------------------------------*/
@@ -214,7 +222,7 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         hNtrk->Fill(ntrk);
         hNtrk_no_cut->Fill((*ntrk_ptr));
         //heff->Fill(m_cent_i);
-        hNtrkEff->Fill(m_eff_energy,ntrk,prescale);
+        hNtrkEff->Fill(m_eff_energy,ntrk);
 
 
         /*-----------------------------------------------------------------------------
@@ -240,8 +248,8 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
             int ptbin2 = Bins::GetPtBin2(pt);
             if(ptbin1==-1 && ptbin2==-1) continue;
             N_trigger[m_cent_i][nbin]->Fill(pt,trk_eff);
-            h_pt[nbin]->Fill(pt,trk_eff/ntrk);
-            h_eta[nbin]->Fill(eta,trk_eff/ntrk);
+            h_pt[m_cent_i]->Fill(pt);
+            h_eta[m_cent_i]->Fill(eta);
             //N_ntrk[m_cent_i]->Fill(ntrk,trk_eff);
             if(ptbin1>=0) h_EtaPhi[ptbin1]->Fill(eta,phi);
 
@@ -251,6 +259,11 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         Fill(ev,ev,0);
         FillMixed(ev);
      }
+     //Normalize the histograms per event
+    for(int icent=0; icent<Bins::NCENT; icent++){
+        h_pt[icent]->Scale(1.0/iend);
+        h_eta[icent]->Scale(1.0/iend);
+    }
     SaveHistos();
     
 }
@@ -270,23 +283,25 @@ void InitHistos(){
      *-----------------------------------------------------------------------------*/
     h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
     hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+    hzdc_after_cut = new TH1D("hzdc_cut", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     hNtrk = new TH1D("hNtrk", ";N_{ch}^{rec}; Events" , 200 , 0 , 200);hNtrk->Sumw2();
     hNtrk_no_cut = new TH1D("hNtrkNoCut", ";N_{ch}; Events" , 200 , 0 , 200);hNtrk_no_cut->Sumw2();
     hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}^{rec}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
+    hZdcCorr  = new TH2D("hZdcCorr", ";side A;side C" , 200, 0 , 25000, 200,0,25000);
     
     
     //eta map of tracks
-    for(int itrk=0; itrk<Bins::NTRK; itrk++){
-        sprintf(histname,"h_eta_itrk%.2d",itrk);
-        h_eta[itrk]=new TH1D(histname,";#eta;counts per event",50,-3.0,3.0);
-        h_eta[itrk]->Sumw2();
+    for(int icent=0; icent<Bins::NCENT; icent++){
+        sprintf(histname,"h_eta_icent%.2d",icent);
+        h_eta[icent]=new TH1D(histname,";#eta;counts per event",50,-3.0,3.0);
+        h_eta[icent]->Sumw2();
     }
 
     //pt map of tracks
-    for(int itrk=0; itrk<Bins::NTRK; itrk++){
-        sprintf(histname,"h_pt_itrk%.2d",itrk);
-        h_pt[itrk]=new TH1D(histname,";p_{T} [GeV];counts per event",100,0,20);
-        h_pt[itrk]->Sumw2();
+    for(int icent=0; icent<Bins::NCENT; icent++){
+        sprintf(histname,"h_pt_icent%.2d",icent);
+        h_pt[icent]=new TH1D(histname,";p_{T} [GeV];counts per event",50,0,5);
+        h_pt[icent]->Sumw2();
     }
     
 
