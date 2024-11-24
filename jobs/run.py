@@ -6,7 +6,7 @@ import sys
 #.......................................
 #             for edit                        
 #.......................................
-total_files = 2274 #number of files in directory (cd to directory and type "ls -1 | wc -l")
+total_files = 6051 #number of files in directory (cd to directory and type "ls -1 | wc -l")
 jobs = 159 #number of jobs to submit (include 0 index)
 
 bin=int(total_files/jobs)
