@@ -282,14 +282,14 @@ TH1* Take_Sqrt( TH1* MyHist, int flag = 0) { //Symmetric errors!
 
 std::map<std::string, double> StandardFormat() {
     std::map<std::string, double> _format = {
-        {"XTitleSize"  , 0.06},
-        {"YTitleSize"  , 0.06},
-        {"XLabelSize"  , 0.05},
-        {"YLabelSize"  , 0.05},
+        {"XTitleSize"  , 0.05},
+        {"YTitleSize"  , 0.05},
+        {"XLabelSize"  , 0.04},
+        {"YLabelSize"  , 0.04},
         {"XNdivisions" , 505},
         {"YNdivisions" , 505},
-        {"YTitleOffset", 1.0},
-        {"XTitleOffset", 1.0},
+        {"YTitleOffset", 0.9},
+        {"XTitleOffset", 0.9},
     };
     return _format;
 }
