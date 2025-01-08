@@ -247,6 +247,24 @@ void FormatHist(TH1* hist1, std::map<std::string, double> f) {
     hist1->SetTitle("");
 }
 
+void FormatGraph(TMultiGraph* hist1, std::map<std::string, double> f) {
+    if (f.find("XLabelSize"  ) != f.end()) hist1->GetXaxis()->SetLabelSize  (f["XLabelSize"]);
+    if (f.find("YLabelSize"  ) != f.end()) hist1->GetYaxis()->SetLabelSize  (f["YLabelSize"]);
+    if (f.find("XLabelOffset") != f.end()) hist1->GetXaxis()->SetLabelOffset(f["XLabelOffset"]);
+    if (f.find("YLabelOffset") != f.end()) hist1->GetYaxis()->SetLabelOffset(f["YLabelOffset"]);
+    if (f.find("XTitleOffset") != f.end()) hist1->GetXaxis()->SetTitleOffset(f["XTitleOffset"]);
+    if (f.find("YTitleOffset") != f.end()) hist1->GetYaxis()->SetTitleOffset(f["YTitleOffset"]);
+    if (f.find("XTitleSize"  ) != f.end()) hist1->GetXaxis()->SetTitleSize  (f["XTitleSize"]);
+    if (f.find("YTitleSize"  ) != f.end()) hist1->GetYaxis()->SetTitleSize  (f["YTitleSize"]);
+    if (f.find("XNdivisions")  != f.end()) hist1->GetXaxis()->SetNdivisions (int(f["XNdivisions"]));
+    if (f.find("YNdivisions")  != f.end()) hist1->GetYaxis()->SetNdivisions (int(f["YNdivisions"]));
+
+    //hist1->GetXaxis()->CenterTitle();
+    //hist1->GetYaxis()->CenterTitle();
+    //hist1->SetStats(0);
+    //hist1->SetTitle("");
+}
+
 TH1* Take_Sqrt( TH1* MyHist, int flag = 0) { //Symmetric errors!
   TH1* NewHist;
   if (flag) { //create new one
