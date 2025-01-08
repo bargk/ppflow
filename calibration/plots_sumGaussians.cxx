@@ -15,17 +15,19 @@ void plots_sumGaussians(){
     std::string data = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles";
 
     gSystem->Exec(Form("mkdir -p %s",base.c_str()));
-    TFile *input1 = new TFile(Form("%s/2.0sigma/zdc_calibrated.root",data.c_str()),"READ");
+    TFile *input1 = new TFile(Form("%s/sameSide/1.5sigma/zdc_calibrated.root",data.c_str()),"READ");
     sum[0] = (TH1D*)input1->Get("h_c");
     sum[1] = (TH1D*)input1->Get("h_a");
-    int side = 1;
+    sum[0]->GetXaxis()->SetRangeUser(500,8000);
+    sum[1]->GetXaxis()->SetRangeUser(500,8000);
+    int side = 0;
     TF1* gFit = new TF1("gFit","gaus");
         gFit->SetRange(2400,2900);
         sum[side]->Fit("gFit","Rqn");
 
 
 
-        TF1 *fit = new TF1("fit", "[0]*TMath::Gaus(x, [1], [2]) + [3]*[0]*TMath::Gaus(x, 2*[1], [4]) + [5]*[0]*TMath::Gaus(x, 3*[1], [6]) ");
+        TF1 *fit = new TF1("fit", "[0]*TMath::Gaus(x, [1], [2]) + [3]*[0]*TMath::Gaus(x, 2*[1], [4]) + [5]*[0]*TMath::Gaus(x, 3*[1], [6])");
         
         //fit->SetParameters(6500,hist_mean,400,0.3,900,0.1,1500);
         fit->SetParameter(0,gFit->GetParameter(0));
@@ -46,10 +48,10 @@ void plots_sumGaussians(){
         //fit->SetParLimits(0,5e5,7e5);
         //fit->SetParLimits(1,hist_mean-5,hist_mean+5);
         fit->SetParLimits(2,0,1000);
-        fit->SetParLimits(3,0,0.3);
-        fit->SetParLimits(4,500,1000);
-        fit->SetParLimits(5,0,0.1);
-        fit->SetParLimits(6,600,3000);
+        fit->SetParLimits(3,0,0.7);
+        fit->SetParLimits(4,0,1000);
+        fit->SetParLimits(5,0,0.05);
+        fit->SetParLimits(6,0,3000);
         //fit->SetParLimits(7,1e-8,1e2);
         //fit->SetParLimits(8,1e-6,1e2);
 
@@ -65,7 +67,15 @@ void plots_sumGaussians(){
         sigma2_arr[side] = fit->GetParameter(4);
         sigma3_arr[side] = fit->GetParameter(6);
         sum[side]->Draw();
-        cout << mean1_arr[side] << endl;
-        cout << sigma1_arr[side]/mean1_arr[side] << endl;
+
+
+        // //fit for 1n peak
+        // TF1 *fit_1n = new TF1("fit_1n","gaus");
+        // fit_1n->SetLineColor(kRed);
+        // fit_1n->SetLineWidth(5);
+        // fit_1n->SetRange(2400,3100);
+        // sum[side]->Fit("fit_1n","R");
+        // sum[side]->Draw();
+
 
 }

@@ -1,4 +1,5 @@
-void gains_extrapolated(){
+void gains_extrapolated(float sigma = 1.5){
+    cout << "working on : " << sigma <<" sigma data" <<endl;
     //Side 81
     //...............................81HAD1.......................................
     TF1 *had1_81 = new TF1("f81HAD1", "TMath::Exp([0]+[1]*x+[2]*x**2)",1200,1800);
@@ -64,12 +65,12 @@ void gains_extrapolated(){
 
 
     //load weights for side C
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles");
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide");
     TVectorD *gains12;
     TVectorD *gains12_err;
     TVectorD *gains12_corrected;
     TVectorD *gains12_err_corrected;
-    TFile *input = new TFile(Form("%s/2.0sigma/zdcWeights_side0.root",base.c_str()));
+    TFile *input = new TFile(Form("%s/%.1fsigma/zdcWeights_side0.root",base.c_str(),sigma));
     gains12 = (TVectorD*)input->Get("gains_avg");
     gains12_err = (TVectorD*)input->Get("gains_std");
     gains12_corrected = (TVectorD*)input->Get("gains_avg");
@@ -79,7 +80,7 @@ void gains_extrapolated(){
     (*gains12_corrected)[2]= ((had2_12->Eval(1500))/had2_12->Eval(1450))*((*gains12)[2]); //12HAD2
     // TODO add error propagation
 
-    TFile *output = new TFile(Form("%s/2.0sigma/zdcWeights_side0_corrected.root",base.c_str()),"RECREATE");
+    TFile *output = new TFile(Form("%s/%.1fsigma/zdcWeights_side0_corrected.root",base.c_str(),sigma),"RECREATE");
     output->cd();
     gains12_corrected->Write("gains_avg");
     gains12_err_corrected->Write("gains_std");
