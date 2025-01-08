@@ -4,16 +4,22 @@
 //#define check
 
 
+int Trig;
+float sigma = 1.5; // 2.0,1.5,1.0 sigma cut for calibration factors
+bool same_side = true; // use same or opposite side calibration method
 
-
-void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
-    minbias = minbias1;
+void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
+    Trig = Trig1;
     sprintf(output_name,"histograms_%d.root",a);
-    if(minbias){
-        cout << "Working on minbias triggers!" << endl;
+
+    if(Trig ==0){
+        cout << "working on ZDC trigger!" << endl;
     }
-    else{
-        cout << "working on ZDC triggers!" << endl;
+    else if(Trig ==1){
+        cout << "Working on minbias trigger!" << endl;
+    }
+    else if(Trig == 2){
+        cout << "Working on xorE2 trigger!" << endl;
     }
     // Split the file paths into a vector
     std::vector<std::string> files;
@@ -48,9 +54,7 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
       exit(-1);
     }
 
-    
-    
-    load_weights();
+    load_weights(sigma , same_side);
     // getting branches
     TTreeReader myreader(fChain);
     TTreeReaderValue<std::vector<float>> trk_pt(myreader, "trk_pt"); // units of MeV
@@ -63,24 +67,24 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
     TTreeReaderValue<int> nvtx(myreader, "t_nvtx");
     TTreeReaderValue<unsigned int> lumiblock(myreader, "lumiBlock");
     //zdc triggers
-    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E1_E3(myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
-    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E2(myreader, "HLT_noalg_L1ZDC_XOR_E2");
-    TTreeReaderValue<bool> HLT_noalg_L1ZDC_A_AND_C(myreader, "HLT_noalg_L1ZDC_A_AND_C");
-    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E2(myreader,"HLT_mb_sptrk_L1ZDC_XOR_E2");
-	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E1_E3(myreader,"HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
-	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_A_AND_C(myreader, "HLT_mb_sptrk_L1ZDC_A_AND_C");
-	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2(myreader,"HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
-	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3(myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C(myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
-    TTreeReaderValue<float> ps_HLT_L1_ZDC_XOR_E1_E3(myreader, "ps_HLT_noalg_L1ZDC_XOR_E1_E3");
-    TTreeReaderValue<float> ps_HLT_L1_ZDC_XOR_E2(myreader, "ps_HLT_noalg_L1ZDC_XOR_E2");
-    TTreeReaderValue<float> ps_HLT_noalg_L1ZDC_A_AND_C(myreader, "ps_HLT_noalg_L1ZDC_A_AND_C");
-    TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_XOR_E2(myreader,"ps_HLT_mb_sptrk_L1ZDC_XOR_E2");
-	TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3(myreader,"ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
-	TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_A_AND_C(myreader, "ps_HLT_mb_sptrk_L1ZDC_A_AND_C");
-	TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2(myreader,"ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
-	TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3(myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-	TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C(myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E1_E3                         (myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
+    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E2                            (myreader, "HLT_noalg_L1ZDC_XOR_E2");
+    TTreeReaderValue<bool> HLT_noalg_L1ZDC_A_AND_C                      (myreader, "HLT_noalg_L1ZDC_A_AND_C");
+    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E2                    (myreader,"HLT_mb_sptrk_L1ZDC_XOR_E2");
+	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E1_E3                 (myreader,"HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_A_AND_C                   (myreader, "HLT_mb_sptrk_L1ZDC_A_AND_C");
+	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2          (myreader,"HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
+	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3       (myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
+	TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C         (myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+    TTreeReaderValue<float> ps_HLT_L1_ZDC_XOR_E1_E3                     (myreader, "ps_HLT_noalg_L1ZDC_XOR_E1_E3");
+    TTreeReaderValue<float> ps_HLT_L1_ZDC_XOR_E2                        (myreader, "ps_HLT_noalg_L1ZDC_XOR_E2");
+    TTreeReaderValue<float> ps_HLT_noalg_L1ZDC_A_AND_C                  (myreader, "ps_HLT_noalg_L1ZDC_A_AND_C");
+    TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_XOR_E2                (myreader,"ps_HLT_mb_sptrk_L1ZDC_XOR_E2");
+	TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3             (myreader,"ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+	TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_A_AND_C               (myreader, "ps_HLT_mb_sptrk_L1ZDC_A_AND_C");
+	TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2      (myreader,"ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
+	TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3   (myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
+	TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C     (myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
 
 
     //minbias triggers
@@ -124,6 +128,7 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
     //zdc
     TTreeReaderArray<float> ModAmp(myreader, "zdc_ZdcModuleFitAmp"); // First 4 lower bits corressponds to side C
     TTreeReaderArray<float> Amp(myreader, "zdc_ZdcAmp"); 
+    TTreeReaderArray<short> LucrodTriggerSideAmp(myreader, "zdc_ZdcLucrodTriggerSideAmp"); 
     TTreeReaderValue<unsigned int> BitMask(myreader, "zdc_ZdcModuleMask");
     
     InitHistos();
@@ -136,7 +141,10 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         //retrive trigger information
         std::vector<bool> m_trig;
         std::vector<float> m_trig_ps;
-        if(minbias){
+        if(Trig == 0){
+            m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_A_AND_C);
+        }
+        else if(Trig == 1){
             m_trig.push_back(*HLT_noalg_L1MBTS_1);                                  m_trig_ps.push_back(*ps_HLT_noalg_L1MBTS_1);
             //m_trig.push_back(*HLT_noalg_mb_L1MBTS_1);                               m_trig_ps.push_back(*ps_HLT_noalg_mb_L1MBTS_1);
             //m_trig.push_back(*HLT_noalg_L1MBTS_1_1);                                m_trig_ps.push_back(*ps_HLT_noalg_L1MBTS_1_1);
@@ -156,10 +164,10 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
             //m_trig.push_back(*HLT_mb_mbts_all_L1MBTS_A);                            m_trig_ps.push_back(*ps_HLT_mb_mbts_all_L1MBTS_A);
             //m_trig.push_back(*HLT_mb_mbts_all_L1MBTS_C);                            m_trig_ps.push_back(*ps_HLT_mb_mbts_all_L1MBTS_C);
         }
-        else{
+        else if(Trig ==2){
             //m_trig.push_back(*HLT_L1_ZDC_XOR_E1_E3);                                m_trig_ps.push_back(*ps_HLT_L1_ZDC_XOR_E1_E3);
-            //m_trig.push_back(*HLT_L1_ZDC_XOR_E2);                                   m_trig_ps.push_back(*ps_HLT_L1_ZDC_XOR_E2);
-            m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_A_AND_C);
+            m_trig.push_back(*HLT_L1_ZDC_XOR_E2);                                   m_trig_ps.push_back(*ps_HLT_L1_ZDC_XOR_E2);
+            //m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_A_AND_C);
             //m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_XOR_E2);
             //m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E1_E3);                        m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3);
             //m_trig.push_back(*HLT_mb_sptrk_L1ZDC_A_AND_C);                          m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_A_AND_C);
@@ -169,8 +177,9 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         }
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         trig_index = triggerIndex(m_trig); // retrive the index of the relevant trigger
-        prescale = m_trig_ps.at(trig_index);
-        N_evt_sampled += prescale;
+        //prescale = m_trig_ps.at(trig_index);
+        prescale = 1;
+        //N_evt_sampled += prescale;
         lumiBlock = *lumiblock;
         ntrk = trk_pt->size();
         if(*nvtx ==1) continue;
@@ -180,13 +189,35 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         if(i>iend) {cout<<"Event loop finished! Analyzed "<< iend<<" events"<<endl;break;}
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
-        if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
-        if((*nvtx) != 2) continue; //pile up rejection
-
+        //if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
+        if(!((lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
+        
+        if(lumiBlock>1804 && lumiBlock < 1816) continue; //Timing adjust to Had1C for trigger
+        if((lumiBlock >= 1045 && lumiBlock <= 1050) ||
+            lumiBlock == 1696 ||
+            (lumiBlock >= 1806 && lumiBlock <= 1811) ||
+            lumiBlock == 1858 ||
+            lumiBlock == 1898 ||
+            lumiBlock == 1932 ||
+            lumiBlock == 1944 ||
+            (lumiBlock >= 2245 && lumiBlock <= 2250) ||
+            (lumiBlock >= 3112 && lumiBlock <= 3121) ||
+            lumiBlock == 3214 ||
+            (lumiBlock >= 3858 && lumiBlock <= 3863) ||
+            (lumiBlock >= 4565 && lumiBlock <= 4568)) { continue;} // remove bad LB based on file list
+                
         #ifdef check
         cout<<"pt="<<trk_pt->size()<<"  eta="<<trk_eta->size()<<"  phi="<<trk_phi->size()<<"  qop="<<trk_charge->size()
             <<"  quality="<<trk_quality->size()<<endl;
         #endif
+        /*-----------------------------------------------------------------------------
+        *  Fill ZDC techinicals
+        *-----------------------------------------------------------------------------*/
+        hLucrodCorr->Fill(LucrodTriggerSideAmp[0],LucrodTriggerSideAmp[1]);
+        hLucrodZdcCorr[0]->Fill(LucrodTriggerSideAmp[0], Amp[0]);
+        hLucrodZdcCorr[1]->Fill(LucrodTriggerSideAmp[1], Amp[1]);
+        hAmpCorr->Fill(Amp[0], Amp[1]);
+        //------------------------------------------------------------------------------
         float sum =0;
         float sumA =0;
         float sumC =0;
@@ -197,22 +228,50 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         for(int i = 4; i<8; i++){
             if(isBitSet(*BitMask,i)) sumA+= zdcWei.at(i)*ModAmp[i];
         }
-        sum = sumA + sumC;
-        hzdc_A->Fill(sumA,prescale);
-        hzdc_C->Fill(sumC,prescale);
+        //take into account only hadronic process for zdc triggers
+        if(Trig == 0 || Trig == 2){
+            if(!isElectroMagnetic(0,(*BitMask))){
+                sum+=sumC;
+            }
+            if(!isElectroMagnetic(1,(*BitMask))){
+                sum+=sumA;
+            }
+        }
+        else{
+            sum = sumA + sumC;
+        }
+        //reject events when both sides were purely EM for zdc triggers
+        if(sum == 0 && !(Trig==1)) continue;
         hzdc->Fill(sum,prescale);
-        hZdcCorr->Fill(sumA,sumC,prescale);
-        if(!(sumA >1700 && sumC>1700)) continue;
-
-        if(sumA > 6800 || sumC > 6800) continue;
+        hZdcCorr->Fill(sumC,sumA); //the contribution includes also one side EM and other side is hadronic
+        /*-----------------------------------------------------------------------------
+        *  Offline cuts
+        *-----------------------------------------------------------------------------*/
+        bool pass_offline = true;
+        if(Trig ==0){
+            if(!(sumA >=1600 && sumC >=1600)) pass_offline = false;
+        }
+        if(Trig ==2){
+            if(!((sumA >2200 && sumC <1800) || (sumA <1800 && sumC >2200))) pass_offline = false;
+        }
+        if(!pass_offline) continue;
+        //-----------------------------------------------------------------------------------------
+         
+        hzdc_A_with_pileup->Fill(sumA,prescale);
+        hzdc_C_with_pileup->Fill(sumC,prescale);
+        if((*nvtx) != 2) continue; //pile up rejection
+        hzdc_A_without_pileup->Fill(sumA,prescale);
+        hzdc_C_without_pileup->Fill(sumC,prescale);
+        
         //determine effective energy bin
         float m_eff_energy = sqrt_s - sum;
         m_eff_energy = m_eff_energy/1000; //convert to TeV
+        heff->Fill(m_eff_energy);
         if(m_eff_energy < 0.0 || m_eff_energy > 13.6001) continue;
         m_cent_i          =Bins::GetCentBin(m_eff_energy);
         if(m_cent_i <0 || m_cent_i >=Bins::NCENT) continue;
         hzdc_after_cut->Fill(sum,prescale);
-        heff->Fill(m_eff_energy);
+        heff_after_cut->Fill(m_eff_energy);
         //get multiplicity bin
         nbin = Bins::GetTrkBin(ntrk);
         if(nbin <0 || nbin >=Bins::NTRK) continue;
@@ -220,15 +279,17 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         m_zvtx=vtx_z->at(0);
         int zbin   = get_zPool(m_zvtx);
         if(zbin<0) continue;
+        good_events[m_cent_i] +=1;
         /*-----------------------------------------------------------------------------
          *  Fill some Monitor histograms
          *-----------------------------------------------------------------------------*/
         h_Zvtx->Fill(m_zvtx);
-        hNtrk[m_cent_i]->Fill(ntrk, prescale);
+        hNtrk[m_cent_i]->Fill(ntrk);
         hNtrk_no_cut->Fill((*ntrk_ptr));
         h_eff_no_ps->Fill(m_cent_i);
         h_Trig->Fill(trig_index);
         hNtrkEff->Fill(m_eff_energy,ntrk);
+        hZdcCorr_after_cut->Fill(sumC,sumA);
         
 
 
@@ -253,10 +314,10 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
 
             int ptbin1 = Bins::GetPtBin1(pt);
             int ptbin2 = Bins::GetPtBin2(pt);
+            h_pt[m_cent_i]->Fill(pt);
+            h_eta[m_cent_i]->Fill(eta);
             if(ptbin1==-1 && ptbin2==-1) continue;
             N_trigger[m_cent_i][nbin]->Fill(pt,trk_eff);
-            h_pt[m_cent_i]->Fill(pt,prescale);
-            h_eta[m_cent_i]->Fill(eta,prescale);
             //N_ntrk[m_cent_i]->Fill(ntrk,trk_eff);
             if(ptbin1>=0) h_EtaPhi[ptbin1]->Fill(eta,phi);
 
@@ -266,8 +327,7 @@ void CorrFunc(const int a ,const char* fileList, bool minbias1 = 0){
         Fill(ev,ev,0);
         FillMixed(ev);
      }
-    tree->Fill();
-    
+
     SaveHistos();
     
 }
@@ -276,45 +336,58 @@ void InitHistos(){
     //create output file
     
     std::string directory;
-    directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
-    if(minbias) directory = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+    directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma",sigma);
+    if (same_side) directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma/sameSide",sigma);
+    if(Trig == 1) directory = Form("%s/minbias",directory.c_str());
+    if(Trig == 2) directory = Form("%s/xorE2",directory.c_str());
     gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
     tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
-    tree = new TTree("tree", "A simple tree");
-    tree->Branch("N_evt_sampled", &N_evt_sampled, "N_evt_sampled/I"); // Create a branch with the variable
+    //tree = new TTree("tree", "A simple tree");
+    //tree->Branch("N_evt_sampled", &N_evt_sampled, "N_evt_sampled/I"); // Create a branch with the variable
     
+    //ZDC technical histograms (ADC)
+    hLucrodCorr = new TH2D("hLucrodCorr",";zdc_ZdcLucrodTriggerSideAmp(0) [a.u];zdc_ZdcLucrodTriggerSideAmp(1) [a.u]", 100,0,5000, 100,0,5000);
+    hAmpCorr = new TH2D("hAmpCorr",";zdc_ZdcAmp(0) [ADC];zdc_ZdcAmp(1) [ADC]", 80,0,8000, 80,0,8000);
+    hLucrodZdcCorr[0] = new TH2D("hLucrodZdcCorr0",";zdc_ZdcLucrodTriggerSideAmp(0) [a.u];zdc_ZdcAmp(0) [ADC]", 100,0,5000, 80,0,8000);
+    hLucrodZdcCorr[1] = new TH2D("hLucrodZdcCorr1",";zdc_ZdcLucrodTriggerSideAmp(1) [a.u];zdc_ZdcAmp(1) [ADC]", 100,0,5000, 80,0,8000);
+    
+
     /*-----------------------------------------------------------------------------
      *  Global monitor histograms
      *-----------------------------------------------------------------------------*/
     h_Zvtx = new TH1D("hzvtx", "hzvtx" , 300 , -300 , 300); h_Zvtx ->Sumw2();
     hzdc = new TH1D("hzdc", ";ZDC energy [GeV]; Counts" , 200 , 0 , 50000);
-    hzdc_A = new TH1D("hzdc_A", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
-    hzdc_C = new TH1D("hzdc_C", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+    hzdc_A_with_pileup = new TH1D("hzdc_A_with_pileup", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+    hzdc_C_with_pileup = new TH1D("hzdc_C_with_pileup", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+    hzdc_A_without_pileup = new TH1D("hzdc_A_without_pileup", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
+    hzdc_C_without_pileup = new TH1D("hzdc_C_without_pileup", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     hzdc_after_cut = new TH1D("hzdc_cut", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     hNtrk_no_cut = new TH1D("hNtrkNoCut", ";N_{ch}; Events" , 200 , 0 , 200);hNtrk_no_cut->Sumw2();
-    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}^{rec}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,140);
-    hZdcCorr  = new TH2D("hZdcCorr", ";side A;side C" , 200, 0 , 25000, 200,0,25000);
-    heff  = new TH1D("heff", ";Eff energy [TeV];" , 200, 0 , 14);
+    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}^{rec}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,Bins::TRK_HI[Bins::NTRK -1]); hNtrkEff->Sumw2();
+    hZdcCorr  = new TH2D("hZdcCorr", ";side C;side A" , 200, 0 , 25000, 200,0,25000);
+    hZdcCorr_after_cut  = new TH2D("hZdcCorr_after_cut", ";side C;side A" , 200, 0 , 25000, 200,0,25000);
+    heff_after_cut  = new TH1D("heff_after_cut", ";Eff energy [TeV];" , 50, 0 , 14);
+    heff  = new TH1D("heff", ";Eff energy [TeV];" , 50, -20 , 14);
     
     
     //eta map of tracks
     for(int icent=0; icent<Bins::NCENT; icent++){
         sprintf(histname,"h_eta_icent%.2d",icent);
-        h_eta[icent]=new TH1D(histname,";#eta;counts per event",50,-3.0,3.0);
+        h_eta[icent]=new TH1D(histname,";#eta;counts per event",20,-2.5,2.5);
         h_eta[icent]->Sumw2();
     }
 
     //pt map of tracks
     for(int icent=0; icent<Bins::NCENT; icent++){
         sprintf(histname,"h_pt_icent%.2d",icent);
-        h_pt[icent]=new TH1D(histname,";p_{T} [GeV];counts per event",18,0.5,5);
+        h_pt[icent]=new TH1D(histname,";p_{T} [GeV];counts per event",39,0.5,20);
         h_pt[icent]->Sumw2();
     }
     
     //ntrks
     for(int icent=0; icent<Bins::NCENT; icent++){
         sprintf(histname,"h_ntrk_icent%.2d",icent);
-        hNtrk[icent] = new TH1D(histname, ";N_{ch}^{rec}; Events" , 140 , -0.5 , 139.5);
+        hNtrk[icent] = new TH1D(histname, ";N_{ch}^{rec}; Events" ,Bins::NTRK,0,Bins::TRK_HI[Bins::NTRK -1]);
         hNtrk[icent]->Sumw2();
     }
 
@@ -322,7 +395,8 @@ void InitHistos(){
     for(int ipt=0;ipt<Bins::NPT1;ipt++){
         sprintf(histname ,"h_EtaPhi_pt%d",ipt);
         sprintf(histtitle,"h_EtaPhi;#eta;#phi;N_{Tracks};Events");
-        h_EtaPhi[ipt]=new TH2D(histname,histtitle,50,-2.5,2.5,64,-acos(-1.0),acos(-1.0));
+        h_EtaPhi[ipt]=new TH2D(histname,histtitle,50,-2.5,2.5,36,-acos(-1.0),acos(-1.0));
+        h_EtaPhi[ipt]->Sumw2();
     }
 
     //main fg and bg distributions
@@ -334,11 +408,11 @@ void InitHistos(){
                 for(int ipt2=0; ipt2<Bins::NPT2; ipt2++){
                     for(int it=0; it<Bins::NCH; it++){
                     sprintf(histname,"fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
-                    fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+                    fg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,nBinsPhi,-PI/2,1.5*PI,nBinsEta,0,5.0);
                     fg[icent][itrk][ipt1][ipt2][it]->Sumw2();
 
                     sprintf(histname,"bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d",icent,itrk,ipt1,ipt2,it);
-                    bg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,36,-PI/2,1.5*PI,50,0,5.0);
+                    bg[icent][itrk][ipt1][ipt2][it] = new TH2D(histname,histname,nBinsPhi,-PI/2,1.5*PI,nBinsEta,0,5.0);
                     bg[icent][itrk][ipt1][ipt2][it]->Sumw2();
                     }
                 }
@@ -454,10 +528,44 @@ int triggerIndex(std::vector<bool> trigger){
     return index;
 }
 
-void load_weights(){
+void load_weights(float sigma, bool same_side){
     std::cout << "Initialize ZDC Weights!" << std::endl;
-    for(int i=0; i<zdcWei_a.size(); i++){
-        zdcWei.push_back(zdcWei_a.at(i)/no_booster.at(i));
+    std::string zdc_C; 
+    std::string zdc_A; 
+    zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma/zdcWeights_side0_corrected.root", sigma);
+    zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma/zdcWeights_side1.root", sigma); //TODO change it to fine tune
+    if(same_side){
+        zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/%.1fsigma/zdcWeights_side0_corrected.root", sigma);
+        zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/%.1fsigma/zdcWeights_side1.root", sigma); //TODO change it to fine tune 
+    }
+    std::cout << zdc_C << std::endl;
+    std::cout << zdc_A << std::endl;
+    //converting TvectorD to std::vector object
+    TFile *fileC = new TFile(Form("%s",zdc_C.c_str()));
+    TFile *fileA = new TFile(Form("%s",zdc_A.c_str()));
+    TVectorD *tvec_C = nullptr;
+    TVectorD *tvec_A = nullptr;
+    fileC->GetObject("gains_avg", tvec_C);
+    fileA->GetObject("gains_avg", tvec_A);
+    if (!tvec_C || !tvec_A) {
+        std::cerr << "Error: TVectorD object not found in file!" << std::endl;
+        exit(-1);
+    }
+    std::vector<float> weights_tmp;
+    for (int i = 0; i < 8; ++i) {
+        if(i<4) weights_tmp.push_back((*tvec_C)[i]);
+        else{
+                weights_tmp.push_back((*tvec_A)[i-4]);
+        }   
+    }
+    
+    //divide by no booster weights
+    for(int i=0; i<weights_tmp.size(); i++){
+        cout << weights_tmp.at(i) << endl;
+        if(i==0 || i==4) zdcWei.push_back(0); // 0 for EM module
+        else{
+            zdcWei.push_back(weights_tmp.at(i)/no_booster.at(i));
+        }
     }
 }
 
@@ -563,4 +671,22 @@ bool FillMixed(EVENT_PTR event) {
     pool[indx].push_back( event );
 
     return true;
+}
+
+bool isElectroMagnetic(int side, int mask){
+   if (side != 0 && side != 1) {
+        std::cerr << "Error: isElectroMagnetic() - Invalid side value provided. Must be 0 or 1." << std::endl;
+        throw std::invalid_argument("Invalid side value provided");
+    }
+
+    // Adjust the bit positions based on the side
+    int offset = (side == 1) ? 4 : 0;
+
+    // Check the hadronic bits
+    bool had1 = isBitSet(mask, 1 + offset);
+    bool had2 = isBitSet(mask, 2 + offset);
+    bool had3 = isBitSet(mask, 3 + offset);
+
+    // Return true if had1 is set, but had2 and had3 are not
+    return had1 && !had2 && !had3;
 }
