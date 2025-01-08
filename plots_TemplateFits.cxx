@@ -33,19 +33,25 @@ void plots_TemplateFits(bool minbias =0) {
     // }
 
     TFile *InFile  = new TFile(name , "read");
-    TFile *OutFile = new TFile(Form("%s/Plots.root", base.c_str()), "recreate");
+    //TFile *OutFile = new TFile(Form("%s/Plots.root", base.c_str()), "recreate");
 
-
+    TFile * fileinput = new TFile("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/histograms.root");
+    TH2D *h2 = (TH2D*)fileinput->Get("hNtrkEff")->Clone();
+    TH1D *h1 = h2->ProfileX("h1");
 
     //------------------------------------------------------------------------------
     TCanvas *c1 = NULL;
     TH1D *h_central, *h_rescaledperipheral, *h_fit_func;
     TF1  *f_pedestal, *f_vnn_combined;
 
-    std::vector<int> centbins_peripheral = Bins::CentBinsPeriph();
-    std::vector<int> trkbins_peripheral = Bins::TrkBinsPeriph();
+    // std::vector<int> centbins_peripheral = Bins::CentBinsPeriph();
+    // std::vector<int> trkbins_peripheral = Bins::TrkBinsPeriph();
+    std::vector<int> centbins_peripheral = {0};
+    std::vector<int> trkbins_peripheral ={0};
     std::vector<int> pt2_bins = Bins::PtbBins ();
-    std::vector<int> trk_bins = Bins::TrkBins ();
+    //std::vector<int> trk_bins = Bins::TrkBins ();
+    std::vector<int> trk_bins = {13};
+    std::vector<int> cent_bins = Bins::CentBins ();
     std::vector<int> deta_bins = Bins::DetaBins();
 
     for (int itrk1 : trk_bins){
@@ -56,7 +62,7 @@ void plots_TemplateFits(bool minbias =0) {
                         std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << std::endl;
                         for (auto icent2 : centbins_peripheral) {
                             for (auto itrk2 : trkbins_peripheral) {
-                                  for (int icent1 = 20; icent1 < 21; icent1++) {
+                                  for (auto icent1 : cent_bins) {
                                 //for (int icent1 = NCENT; icent1 < NCENT+ NCENT_ADD; icent1++) {
                                     std::cout << ipt1 << "  " << ipt2 << "  " << ich << "  " << ideta << "  " << icent2 << "  " << icent1 << std::endl;
 
@@ -120,11 +126,12 @@ void plots_TemplateFits(bool minbias =0) {
                                     else {
                                         Common::myText2(X, Y, 1, label_ptab(ipt1, ipt2), SIZE, 43); Y = Y - 0.06;
                                     }
-
-                                    X = 0.455 + 0.02;
-                                    Y = 0.91;
-                                    //Common::myText2(X       , Y     , 1, label_cent     (icent1), SIZE, 43); Y = Y - 0.06;
-                                    Common::myText2(X       , Y     , 1, label_trk     (itrk1), SIZE, 43); Y = Y - 0.06;
+                                    double nrec = h1->GetBinContent(icent1 +1);
+                                    X = 0.55 + 0.02;
+                                    Y = 0.6;
+                                    Common::myText2(X       , Y     , 1, label_cent     (icent1), SIZE, 43); Y = Y - 0.06;
+                                    Common::myText2(X       , Y     , 1, Form("<N_{ch}^{rec}> = %.2f",nrec),SIZE, 43); Y = Y - 0.06;
+                                    //Common::myText2(X       , Y     , 1, label_trk     (itrk1), SIZE, 43); Y = Y - 0.06;
                                     //Common::myText2(X       ,Y     ,1,label_cent_peri(icent2),SIZE,43);
 
                                     c1->cd();
@@ -138,7 +145,7 @@ void plots_TemplateFits(bool minbias =0) {
                                         //sprintf(name,"       #pm %0.2e"                 ,vnn_err*pedestal); Common::myText2(X ,Y-0.05,1,name,SIZE,43);
                                         Y = Y - 0.1;
                                     }
-
+                                    gStyle->SetOptStat(0);
                                     m_can_vec.push_back(c1);
                                 }
                             }

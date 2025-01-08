@@ -5,7 +5,7 @@
 
 float m_range_up = -1000;
 float m_range_lo = -1000;
-void Draw2D(int icent, int pt1, int pt2, int ich);
+void Draw2D(int icent,int itrk, int pt1, int pt2, int ich);
 
 void plots_2D_2PC(){
 
@@ -18,13 +18,14 @@ void plots_2D_2PC(){
     //     }
     // }
 
-    m_range_up = 1.4; m_range_lo = 0.9; Draw2D(1,5,39,2);
+    //m_range_up = 1.4; m_range_lo = 0.9; Draw2D(1,5,39,2);
     // m_range_up = 1.35; m_range_lo = 0.9; Draw2D(0,0,1);
     //m_range_up = 1.2; m_range_lo = 0.9; Draw2D(0,1,0);
     // // m_range_up = 1.05; m_range_lo = 0.9; Draw2D(0,1,1);
     // // m_range_up = 1.05; m_range_lo = 0.9; Draw2D(0,2,0);
     // m_range_up = 1.1; m_range_lo = 0.94; Draw2D(0,4,0);
     // m_range_up = 1.1; m_range_lo = 0.93; Draw2D(0,9,0);
+    Draw2D(05,13,5,05,2);
 }
 //TODO modify it to make rebin charge plots
 void Draw2D(int icent, int pt1, int pt2, int ich){
@@ -62,8 +63,8 @@ void Draw2D(int icent, int pt1, int pt2, int ich){
     fg = Common::Symmetrize_2D(fg);
     bg = Common::Symmetrize_2D(bg);
 #endif
-    fg->Rebin2D(m_rebin_X, m_rebin_Y);
-    bg->Rebin2D(m_rebin_X, m_rebin_Y);
+    // fg->Rebin2D(m_rebin_X, m_rebin_Y);
+    // bg->Rebin2D(m_rebin_X, m_rebin_Y);
 
 
     #ifdef RENORMALIZE
@@ -120,7 +121,7 @@ void Draw2D(int icent, int pt1, int pt2, int ich){
 #endif
 
     char name[600];
-    sprintf(name, "Can_2Dcent%.2d_pta%d_ptb%.2d_ch%d", icent, pt1, pt2, ich);
+    sprintf(name, "Can_2Dcent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d", icent,itrk, pt1, pt2, ich);
 
     TCanvas *Can = new TCanvas(name, name, 600, 600);
     Can->SetTheta(60);
@@ -132,6 +133,6 @@ void Draw2D(int icent, int pt1, int pt2, int ich){
     Can->SetTopMargin  (0.05);
     Can->SetRightMargin(0.03);
 
-    Can->SaveAs(Form("%s/%s.pdf",directory,name));
+    Can->SaveAs(Form("%s/%s.pdf",base,name));
 
 }

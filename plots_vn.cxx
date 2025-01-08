@@ -29,23 +29,33 @@ bool m_do_shifts;
 
 
 
-void plots_vn(bool minbias     = 0,
+void plots_vn(int Trig     = 0,
               int  ihar        = 2,//ihar=2,3,4 = v2,v3,v4
               int  l_vn_type   = Bins::VN_TEMPLATE,
               bool l_do_shifts = false){
      SetAtlasStyle();             
     std::string base1;
     std::string base3;
-    if(minbias){
-      std::cout << "Working on Minbias triggers!" << std::endl;
-      base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
-      base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots/minbias";
+    if(Trig== 0){
+        std::cout << "Working on AND trigger!" << std::endl;
+        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+        base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots";
+    }
+    else if(Trig == 1){
+        std::cout << "Working on Minbias trigger!" << std::endl;
+        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+        base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots/minbias";
+    }
+    else if(Trig ==2){
+        std::cout << "Working on XOR_E2 trigger!" << std::endl;
+        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/xorE2";
+        base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots/xorE2";
     }
     else{
-      std::cout << "Working on ZDC triggers!" << std::endl;
-      base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
-      base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots";
+         std::cerr << "Error: no valid trigger index provided" << std::endl;
+         exit(-1);
     }
+
     //m_correlation_type=l_correlation_type;
 
     std::string base2 =base1;
@@ -54,7 +64,7 @@ void plots_vn(bool minbias     = 0,
     //   int l_correlation_type=DataSetEnums::HADRON_HADRON_CORRELATIONS;//overrides outer scope variable
     //   base2=BASENAME;
     // }
-
+    
     m_har             =ihar;
     m_vn_type         =l_vn_type;
     m_do_shifts       =l_do_shifts;
@@ -87,28 +97,30 @@ void plots_vn(bool minbias     = 0,
     }
 
 
-                     InFile1=new TFile(name1,"read");Common::CheckFile(InFile1,name1);
+    InFile1=new TFile(name1,"read");Common::CheckFile(InFile1,name1);
     if(base2!=base1){InFile2=new TFile(name2,"read");Common::CheckFile(InFile2,name2);}
     else             InFile2=InFile1;
     //OutFile = new TFile("Rootfiles/Plots.root","update");
     //std::vector<int>cent_periph=Bins::CentBinsPeriph();
     //std::vector<int>trk_periph=Bins::TrkBinsPeriph();
-    std::vector<int>cent_periph = {0};
+    std::vector<int>cent_periph = {7};
     std::vector<int>trk_periph  = {0};
-    Peripheraldep_Centdep(Bins::GetTrkIndex(0,1000),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
-    // Peripheraldep_Centdep(Bins::GetTrkIndex(30,40),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
-    // Peripheraldep_Centdep(Bins::GetTrkIndex(100,110),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+    Peripheraldep_Centdep(Bins::GetTrkIndex(0,130),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+    //Peripheraldep_Centdep(Bins::GetTrkIndex(0,10),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+     //Peripheraldep_Centdep(Bins::GetTrkIndex(30,40),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+     //Peripheraldep_Centdep(Bins::GetTrkIndex(100,110),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
     Common::SaveCanvas(m_can_vec,base3);
 }
 
-//Peripheraldep vs Ntrk
+//Peripheraldep vs Centrality
 void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::vector<int>centbins_peripheral, std::vector<int>trkbins_peripheral){
   if(m_vn_type==Bins::VN_DIRECT) {
     std::cout<<" Function doesnot make sense for this m_vn_type="<<m_vn_type<<std::endl;
     return ;
   }
  
- std::vector<int> centbins_central=Bins::GetCentIndex({ 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.6001 });
+ //std::vector<int> centbins_central=Bins::GetCentIndex({ 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88});
+ std::vector<int> centbins_central={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 
   char name [600];
@@ -122,9 +134,9 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
 
   TCanvas *Can1=new TCanvas(name,name,1200,900);
   //TCanvas *Can1=new TCanvas(name,name,1300,600);
-  if(centbins_peripheral.size() >1){
-    Can1->Divide(2,1);
-  }
+  // if(centbins_peripheral.size() >1){
+  //   Can1->Divide(2,1);
+  // }
   m_can_vec.push_back(Can1);
 
 
@@ -138,17 +150,17 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
      for(auto icent2:centbins_peripheral){
         static int icent0=icent2;//the first centrality which is used for all ratios
       for(auto itrk2:trkbins_peripheral){
-        TH1D* h_vnn_vn=Bins::CentdepHist(centbins_central,Common::UniqueName().c_str()); 
+        if(icent2 == 0 && itrk2 == 13) continue;
+        TH1D* h_vnn_vn=Bins::CentdepHist(centbins_central,Common::UniqueName().c_str());
+        h_vnn_vn->Sumw2(); 
         //if(vnn_vn==0) sprintf(name,"v_{%d,%d}(p_{T}^{a},p_{T}^{b})",m_har,m_har);
         sprintf(name,"v_{%d}(p_{T}^{b})"             ,m_har      );
         h_vnn_vn->GetYaxis()->SetTitle(name);
         for(unsigned int icent_bin=0;icent_bin<centbins_central.size();icent_bin++){
           //skip centralities smaller than cent_periph
-          if((h_vnn_vn->GetBinLowEdge(icent_bin+2)-0.001) < Bins::GetCentVals(icent2).second) continue;
-          if((h_vnn_vn->GetBinLowEdge(icent_bin+2)-0.001) < Bins::GetCentVals(icent0).second) continue;
+          // if((h_vnn_vn->GetBinLowEdge(icent_bin+2)-0.001) < Bins::GetCentVals(icent2).second) continue;
+          // if((h_vnn_vn->GetBinLowEdge(icent_bin+2)-0.001) < Bins::GetCentVals(icent0).second) continue;
 
-          //std::pair<float, float> vnn=Bins::GetVnn  (centbins_central[icent_bin],itrk,ipt1,ipt2,ich,ideta,m_har,icent2,itrk2, InFile1);
-          //if(vnn.first<0) continue; //remove negative vnn values
           std::pair<float, float> vnn=Bins::GetVnPtb(centbins_central[icent_bin],itrk,ipt1,ipt2,ich,ideta,m_har,icent2,itrk2,InFile1,InFile2);
           if(vnn.first<0) continue; //remove negative vnn values
           h_vnn_vn->SetBinContent(icent_bin+1,vnn.first );
@@ -159,8 +171,9 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
 
 
 
-        int sty[]={20,24,21,25,29     ,30};
-        int col[]={ 1, 2, 4, 6,kOrange,40};
+       // int sty[]={20,24,21,25,29     ,30};
+        int sty[]={20,20,20,20,29     ,30};
+        int col[]={ 1, 4, 6, 8,kOrange,40};
         Common::FormatHist(h_vnn_vn,m_format);
         Common::format    (h_vnn_vn,col[idraw],sty[idraw]);
 
@@ -170,6 +183,13 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
 
         Can1->cd(1);
         // if(idraw==0){
+          //Set Ranges for Y-axis
+          float diff1=(max-min)*0.05;
+          float diff2=(max_ratios-min_ratios)*0.05;
+          //htemp->GetYaxis()->SetRangeUser(min       -diff1,max       +10*diff1);
+          htemp->GetYaxis()->SetRangeUser(min       -diff1,0.15);
+          //h_ratio_main ->GetYaxis()->SetRangeUser(min_ratios-diff2,max_ratios+diff2);
+          std::cout<<min<<"   "<<max<<"   "<<min_ratios<<"   "<<max_ratios<<endl;
           htemp->Draw("same");
           h_vnn_vn_main=(TH1D*)htemp;
           h_denominator=(TH1D*)h_vnn_vn;// For ratios
@@ -207,19 +227,13 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
          //if(vnn_vn==0){
            Can1->cd(1);
            std::string legend=Bins::label_cent_peri(icent2) + " , " + Bins::label_trk_peri(itrk2);
-           if(idraw<3) Common::myMarkerText(0.51,0.90-idraw*0.06    ,col[idraw],sty[idraw],legend,1,0.040);
-           else        Common::myMarkerText(0.73,0.49-(idraw-3)*0.06,col[idraw],sty[idraw],legend,1,0.040);
+            Common::myMarkerText(0.51,0.90-idraw*0.06    ,col[idraw],sty[idraw],legend,1,0.040);
+          //  else        Common::myMarkerText(0.73,0.49-(idraw-3)*0.06,col[idraw],sty[idraw],legend,1,0.040);
          //}
-       //idraw++;
+       idraw++;
       }
      }
 
-     //Set Ranges for Y-axis
-     float diff1=(max-min)*0.05;
-     float diff2=(max_ratios-min_ratios)*0.05;
-     h_vnn_vn_main->GetYaxis()->SetRangeUser(min       -diff1,max       +10*diff1);
-     //h_ratio_main ->GetYaxis()->SetRangeUser(min_ratios-diff2,max_ratios+diff2);
-     std::cout<<min<<"   "<<max<<"   "<<min_ratios<<"   "<<max_ratios<<endl;
 
   //}
 
@@ -227,7 +241,7 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
   Can1->cd(1);
   float X=0.20,Y=0.88;
   Common::myText2(X     ,Y,1,"ATLAS"         ,18,73);
-  Common::myText2(X+0.12,Y,1,Common::Internal,18,43);Y=Y-0.05;
+  Common::myText2(X+0.06,Y,1,Common::Internal,18,43);Y=Y-0.05;
   Common::myText2(X       , Y, 1, "#it{pp} #sqrt{#it{s}} = 13.6 TeV", 18, 43);Y=Y-0.05;
   if(Bins::GetPtbIndexForPtaIndex(ipt1)==ipt2){
     Common::myText2(X     ,Y,1,Bins::label_ptab(ipt1,ipt2) ,18,43);Y=Y-0.05;
