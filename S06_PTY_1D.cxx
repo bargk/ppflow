@@ -7,16 +7,31 @@ double NTrigs[Bins::NCENT+Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD][Bins::NP
 /*-----------------------------------------------------------------------------
  *  Makes PTY distributions from the 1D-pair distributions
  *-----------------------------------------------------------------------------*/
-void S06_PTY_1D(bool minbias =0){
-   std::string base;
-    if(minbias){
-        std::cout << "Working on Minbias triggers!" << std::endl;
-         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+void S06_PTY_1D(int Trig =0){
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma",Bins::sigma1);
+    if(Trig== 0){
+        std::cout << "Working on AND trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide",base.c_str());
+    }
+    else if(Trig == 1){
+        std::cout << "Working on Minbias trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide/minbias",base.c_str());
+        else{
+            base = Form("%s/minbias",base.c_str());
+        }
+    }
+    else if(Trig ==2){
+        std::cout << "Working on XOR_E2 trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide/xorE2",base.c_str());
+        else{
+            base = Form("%s/xorE2",base.c_str());
+        }
     }
     else{
-        std::cout << "Working on ZDC triggers!" << std::endl;
-        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+         std::cerr << "Error: no valid trigger index provided" << std::endl;
+         exit(-1);
     }
+  std::cout << base << endl;
    char name [600];
    char name1[600];
    sprintf(name,"%s/RebinTrk.root",base.c_str());
@@ -45,6 +60,7 @@ void S06_PTY_1D(bool minbias =0){
           throw std::exception();
         }
         NTrigs[icent][itrk][ipt1]=h_NTrigs->Integral(bin_lo,bin_high);
+        //cout<< "Ntriggers: " << NTrigs[icent][itrk][ipt1] <<endl;
       }
     }
    }
@@ -55,7 +71,7 @@ void S06_PTY_1D(bool minbias =0){
    TFile *input =new TFile(name );
    TFile *output=new TFile(name1,"recreate");
 
-   char PjXfgname[100],PjXbgname[100],PjXconame[100];
+  char PjXfgname[100],PjXbgname[100],PjXconame[100];
 
   const std::vector<int> cent_bins=Bins::CentBins();
   const std::vector<int> trk_bins=Bins::TrkBins();
@@ -72,34 +88,33 @@ void S06_PTY_1D(bool minbias =0){
     for(int itrk:trk_bins){
       for(int ipt1:pt1_bins){
         for(int ipt2:pt2_bins){
-          std::cout<<icent<<"  "<<ipt1<<"  "<<ipt2<<"  ::"<<std::endl;
+          //std::cout<<icent<<"  "<<ipt1<<"  "<<ipt2<<"  ::"<<std::endl;
           for(int ich:ch_bins){
             for(int ieta:deta_bins){
               sprintf(PjXfgname,"PjX_fg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d",icent,itrk,ipt1,ipt2,ich,ieta);
               sprintf(PjXbgname,"PjX_bg_cent%.2d_trk%.2d_pta%d_ptb%.2d_ch%d_deta%.2d",icent,itrk,ipt1,ipt2,ich,ieta);
               
               obj=next();
-              fg[icent][itrk][ipt1][ipt2][ich][ieta] = (TH1D*)obj;
+              fg[icent][itrk][ipt1][ipt2][ich][ieta] = (TH1D*)input->Get(PjXfgname);
               if(!Common::CheckObject(obj,PjXfgname)) throw std::exception();
-
+              //if(icent ==11 &&ipt1 == 5 && ipt2 == 5&& itrk==14) cout<< fg[icent][itrk][ipt1][ipt2][ich][ieta]->GetBinError(1)  <<" " <<PjXfgname<<endl;
               obj=next();
               bg[icent][itrk][ipt1][ipt2][ich][ieta] = (TH1D*)obj;
               if(!Common::CheckObject(obj,PjXbgname)) throw std::exception();
 
 
-              double integral1=fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral();
+              double integral1=fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral("width");
               fg[icent][itrk][ipt1][ipt2][ich][ieta]->Divide(bg[icent][itrk][ipt1][ipt2][ich][ieta]);
-              double integral2=fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral();
+              double integral2=fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral("width");
               double width    =fg[icent][itrk][ipt1][ipt2][ich][ieta]->GetBinWidth(1);
+    
 
               double scale_correct=integral1/integral2/width/NTrigs[icent][itrk][ipt1];
               double scale_approx =bg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral()/
                                   bg[icent][itrk][ipt1][ipt2][ich][ieta]->GetNbinsX()/width/NTrigs[icent][itrk][ipt1];
               //fg[icent][ipt1][ipt2][ich][ieta]->Scale(integral1/integral2/width/NTrigs[icent][ipt1]);
-              fg[icent][itrk][ipt1][ipt2][ich][ieta]->Scale(scale_approx);
-              if(icent>=2 && (icent<=13 || icent >=18) && ieta==1 && ich==2){
-                std::cout<<"A "<<icent<<"  "<<ipt1<<"  "<<ipt2<<" "<<scale_correct/scale_approx<<std::endl;
-              }
+              fg[icent][itrk][ipt1][ipt2][ich][ieta]->Scale(scale_correct);
+              
 
               //check for nan
               if(fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral() != fg[icent][itrk][ipt1][ipt2][ich][ieta]->Integral()){

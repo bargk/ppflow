@@ -10,7 +10,8 @@
 namespace Bins{
 
     std::string HH_LABEL  = "#it{h}-#it{h} Correlations";
-
+    float sigma1 = 1.5;
+    bool same_side1 = true;
     int  Initialize();
     void Initialize_CentAdd();
     void Initialize_Pt1Add();
@@ -139,8 +140,8 @@ namespace Bins{
     SAME_CHARGE = 0,
     OPPOSITE_CHARGE = 1,
 
-    NCENT_ADD = 1,
-    NTRK_ADD = 2,
+    NCENT_ADD = 11,
+    NTRK_ADD = 1,
 
     NPT1_ADD = 1,
     NPT2_ADD = 2,
@@ -162,8 +163,9 @@ float cent_add_lo[NCENT_ADD]     = {0.0};
 float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
-    //20,           21,          22,          23,           24,          25,          26,             27,            28,             29,             30,        35,       36,
-    { 0.0, 13.6}//, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.80}, {6.80, 8.16}, {8.16, 9.52}, {9.52, 10.88}, {10.88, 12.24}, {12.24, 13.60}//, {0, 60}, { 0, 10},
+    //20,           21,          22,            23,           24,          25,          26,             27,            28,             29,             30,        35,       36,
+    { 0.0, 13.6}, {0.0, 1.36}, {10.88, 12.92}, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.8}, {6.8, 8.16}, {8.16, 9.52}, {9.52, 10.88}//, {10.88, 12.24}, {12.24, 13.6}
+    //, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -194,7 +196,7 @@ void Initialize_CentAdd() {
 }
 
 std::string label_cent(int icent) {
-  sprintf(label, "%.2f-%.2f TeV", CENT_LO[icent], CENT_HI[icent]);
+  sprintf(label, "%.2f < E_{Eff} (TeV) < %.2f", CENT_LO[icent], CENT_HI[icent]);
   std::string ret = label;
   return ret;
 }
@@ -231,8 +233,8 @@ std::pair<double, double> GetCentVals(int icent) {
 // Multiplicity BINS
 //---------------------------------------------------------------------------------------------------------------------
 //LABELS                        0,  1,  2,  3,  4,  5,  6,  7,  8,  9,   10,  11,  12
-int TRK_LO[NTRK + NTRK_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110, 120 }; 
-int TRK_HI[NTRK + NTRK_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 1000};
+int TRK_LO[NTRK + NTRK_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110, 120  }; 
+int TRK_HI[NTRK + NTRK_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130  };
 int trk_add_lo[NTRK_ADD]     = {0};
 int trk_add_up[NTRK_ADD]     = {0};
 
@@ -240,7 +242,7 @@ int trk_add_up[NTRK_ADD]     = {0};
 void Initialize_TrkAdd() {
   std::vector<std::pair<double, double>> new_trk_bins = {
     //13,      14,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 0, 20}, {0, 1000}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    { 0, 130}//, {0, 130}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -606,13 +608,35 @@ TH1D* CentdepHist(std::vector<int>centbins, std::string name) {
   Xbins[NXbins] = CENT_HI[centbins[NXbins - 1]];
 
   TH1D* hist = new TH1D(name.c_str(), "", NXbins, Xbins);
-  hist->GetXaxis()->SetTitle("#sqrt{#it{s}_{eff}} [TeV]");
+  hist->GetXaxis()->SetTitle("E_{Eff} [TeV]");
   //hist->GetXaxis()->SetTitle("N_{ch}");
 
   return hist;
 }
 
+//Create a centrality dependence histogram from vector of bin-numbers
+TH1D* TrkdepHist(std::vector<int>trkbins, std::string name) {
+  double Xbins[1000] = {0.0};
+  int NXbins = trkbins.size();
 
+  for (int ibin = 0; ibin < NXbins; ibin++) {
+    Xbins[ibin] = TRK_LO[trkbins[ibin]];
+
+    if (ibin > 0) {
+      if (Xbins[ibin] != TRK_HI[trkbins[ibin - 1]]) {
+        std::cout << " " << " Error higher edge of lower bin doesnot match lower edge of next bin "
+                  << ibin << "  " << trkbins[ibin] << "  " << trkbins[ibin - 1] << std::endl;
+        throw std::exception();
+      }
+    }
+  }
+  Xbins[NXbins] = TRK_HI[trkbins[NXbins - 1]];
+
+  TH1D* hist = new TH1D(name.c_str(), "", NXbins, Xbins);
+  hist->GetXaxis()->SetTitle("N_{ch}^{rec}");
+
+  return hist;
+}
 
 
 // //Create a pta dependence histogram from vector of bin-numbers
@@ -797,14 +821,15 @@ std::pair<float, float> GetVnPtb(TFile *TemplateFile, int icent, int ipt1, int i
 std::string label_cent_peri(int icent) {
   //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
   //else                            
-  sprintf(label, "%.2f#leq#sqrt{#it{s}_{eff}} < %.2f TeV"   , CENT_LO[icent],CENT_HI[icent]);
+  sprintf(label, "%.2f#leq E_{Eff} < %.2f TeV"   , CENT_LO[icent],CENT_HI[icent]);
   std::string ret = label;
   return ret;
 }
 std::string label_trk_peri(int icent) {
   //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
   //else                            
-  sprintf(label, "%d#leq N_{ch}^{rec} < %d "   , TRK_LO[icent],TRK_HI[icent]);
+  sprintf(label, "%d < N_{ch}^{rec} < %d "   , TRK_LO[icent],TRK_HI[icent]);
+  if(icent == NTRK) sprintf(label, "%d < N_{ch}^{rec}"   , TRK_LO[icent]); //highest peripheral nch bin
   std::string ret = label;
   return ret;
 }

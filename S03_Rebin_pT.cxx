@@ -8,16 +8,31 @@ TH2D *bg[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD][Bins::NPT1 
 /*-----------------------------------------------------------------------------
  *  Adds more pTa and pTb bins
  *-----------------------------------------------------------------------------*/
-void S03_Rebin_pT(bool minbias =0) {
-    std::string base;
-    if(minbias){
-        std::cout << "Working on Minbias triggers!" << std::endl;
-         base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+void S03_Rebin_pT(int Trig =0) {
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma",Bins::sigma1);
+    if(Trig== 0){
+        std::cout << "Working on AND trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide",base.c_str());
+    }
+    else if(Trig == 1){
+        std::cout << "Working on Minbias trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide/minbias",base.c_str());
+        else{
+            base = Form("%s/minbias",base.c_str());
+        }
+    }
+    else if(Trig ==2){
+        std::cout << "Working on XOR_E2 trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide/xorE2",base.c_str());
+        else{
+            base = Form("%s/xorE2",base.c_str());
+        }
     }
     else{
-        std::cout << "Working on ZDC triggers!" << std::endl;
-        base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+         std::cerr << "Error: no valid trigger index provided" << std::endl;
+         exit(-1);
     }
+    std::cout << base << endl;
     char name [600];
     char name1[600];
     sprintf(name , "%s/RebinTrk.root", base.c_str());
