@@ -81,6 +81,7 @@ void MyChi2(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t flag){
             (g_h_central->GetBinError(i)*g_h_central->GetBinError(i)
              +par[0]*par[0]*g_h_peripheral->GetBinError(i)*g_h_peripheral->GetBinError(i));
   }
+  int dof = g_h_central->GetNbinsX() - NHAR; 
   f=chisq;
 }
 
@@ -220,7 +221,7 @@ struct Fitting{
       c1->SetRightMargin(0.02);
       c1->cd();
 
-      h_pars=new TH1D("h_pars",";Parameters;",NHAR+2,0,NHAR+2);
+      h_pars=new TH1D("h_pars",";Parameters;",NHAR+3,0,NHAR+3); //added extra bin for chi2
   }
 
 
@@ -239,7 +240,9 @@ struct Fitting{
       h_pars->SetBinContent(i+1,parms    [i]);
       h_pars->SetBinError  (i+1,parms_err[i]);
     }
-
+    //write chi2
+    h_pars->SetBinContent(h_pars->GetNbinsX(),chi2);
+    h_pars->SetBinError(h_pars->GetNbinsX(),0);
     //Set parameters for objects to be drawn
     h_central->Reset();
     h_central->Add(l_h_central);
@@ -270,7 +273,7 @@ struct Fitting{
     //Draw all the objects
     c1->cd();
     //h_central ->SetMaximum(1 + 3 * (1 - parms[NHAR + 1] * (1.0 - 2.5 * parms[1])));
-    //h_central ->SetMinimum(parms[NHAR+1]*(1.0-2.5*parms[1]));
+    h_central ->SetMinimum(0.95*parms[NHAR+1]*(1.0-2.5*parms[1]));
     h_central           ->Draw();
     h_rescaledperipheral->Draw("same");
     h_fit_func          ->Draw("same");
