@@ -1,7 +1,7 @@
 TFile *fopen2;
 TVectorD* gains_old;
 void Lagrange_method(float number, bool fine_tune = false){
-    int m_samples = 5; // how many sub "measurements"
+    int m_samples = 5; // how many sub "subsets"
     std::cout << "Dividing data into " << m_samples << " different samples!" << std::endl;
     std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma",number); 
     TTree *tree = new TTree("gains","gains");

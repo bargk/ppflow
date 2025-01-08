@@ -20,6 +20,7 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
     void SaveHistos();
 
     void data_gen(float number){
+
     std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma",number);
     gSystem->Exec(Form("mkdir -p %s",base.c_str()));
     char name[100];
@@ -65,8 +66,8 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
         std::vector<float> m_trig_ps;
         m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_C);            m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_C);  
         m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A);            m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A);
-        m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A_C);          m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A_C);
-        m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_OR);           m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_OR);
+        //m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A_C);          m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A_C);
+        //m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_OR);           m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_OR);
 
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         int trig_index = triggerIndex(m_trig); // retrive the index of the relevant trigger
@@ -74,11 +75,16 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
         float module_amp[8];
         for(int i=0; i<8; i++){
             module_amp[i] = ModAmp[i]/no_booster.at(i);
-            h_module[i]->Fill(module_amp[i], prescale);
-            if(i<4) h_module_corr[i]->Fill(module_amp[i],module_amp[i+4], prescale); //x: side C, y: side A
+            h_module[i]->Fill(module_amp[i]);
+            if(i<4) h_module_corr[i]->Fill(module_amp[i],module_amp[i+4]); //x: side C, y: side A
         }
-        h1[0]->Fill(sumZdc(0, (*BitMask), module_amp), prescale);
-        h1[1]->Fill(sumZdc(1, (*BitMask), module_amp), prescale);
+        //same side trigger selection
+        if((*HLT_noalg_ZDCPEB_L1ZDC_C)){
+            h1[0]->Fill(sumZdc(0, (*BitMask), module_amp));
+        }
+        if((*HLT_noalg_ZDCPEB_L1ZDC_A)){
+           h1[1]->Fill(sumZdc(1, (*BitMask), module_amp));;
+        }
 
         for(int side =0; side<2; side++){
             float total_sum =0;
@@ -86,13 +92,11 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
             // opposite selection
             if(side ==0 && (*HLT_noalg_ZDCPEB_L1ZDC_A)){
                 total_sum = sumZdc(side, (*BitMask), module_amp);
-                prescale = *ps_HLT_noalg_ZDCPEB_L1ZDC_A;
-                h0[side]->Fill(total_sum,prescale);
+                h0[side]->Fill(total_sum);
             }
             else if(side ==1 && (*HLT_noalg_ZDCPEB_L1ZDC_C)){
                 total_sum = sumZdc(side, (*BitMask), module_amp);
-                prescale = *ps_HLT_noalg_ZDCPEB_L1ZDC_C;
-                h0[side]->Fill(total_sum,prescale);
+                h0[side]->Fill(total_sum);
             }
             else {continue;}
         }
@@ -111,10 +115,13 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
 
     
     for (int side =0; side<2; side++){
-        int maximum = h0[side]->GetMaximumBin();
-        double low_lim = 0.5*h0[side]->GetXaxis()->GetBinCenter(maximum);
-        double high_lim = 1.5*h0[side]->GetXaxis()->GetBinCenter(maximum);
-
+        TH1D *htmp = (TH1D*)h0[side]->Clone(Form("%i",side));
+        int bin = htmp->FindBin(300);
+        htmp->GetXaxis()->SetRange(bin,htmp->GetNbinsX());
+        int maximum = htmp->GetMaximumBin();
+        double low_lim = 0.8*h0[side]->GetXaxis()->GetBinCenter(maximum);
+        double high_lim = 1.2*h0[side]->GetXaxis()->GetBinCenter(maximum);
+        cout << "Maximum bin : " << maximum<<endl;
         // Perform iterative fit
         TF1 *fit = new TF1("fit","gaus");
         fit->SetLineColor(kRed);
@@ -154,11 +161,6 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
         meanErr_arr[side] = fit->GetParError(1);
         sigmaErr_arr[side]= fit->GetParError(2);
     }
-    output->cd();
-    output->Write();
-    output->Close();
-    cout << "Saving Finished" << endl;
-
     //Now create histograms with sigma cut
     std::cout << "Generating matrix elements" << std::endl;
     float M0; float M1; float M2; float M3;
@@ -177,6 +179,17 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
 
     myreader.SetEntry(0);
     while (myreader.Next()){
+        int ievt = myreader.GetCurrentEntry();
+        if(ievt%100000==0) cout<<"proccesed "<<ievt<<" / "<<iend<<" events "<<" "<<tc->GetFile()->GetName()<<endl;
+        if(ievt > iend) break;
+        std::vector<bool> m_trig;
+        std::vector<float> m_trig_ps;
+        m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_C);            m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_C);  
+        m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A);            m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A);
+        //m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A_C);          m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A_C);
+        //m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_OR);           m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_OR);
+
+        if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         float module_amp[8];
         float total_sum=0;
         for(int i=0; i<8; i++){
@@ -192,6 +205,7 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
                     M2 = module_amp[2];
                     M3 = module_amp[3];
                     tree_c->Fill();
+                    h_cut[0]->Fill(total_sum);
                 }
                 else if(side ==1 && (*HLT_noalg_ZDCPEB_L1ZDC_C)){
                     total_sum = sumZdc(side, (*BitMask), module_amp);
@@ -201,6 +215,7 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
                     M2 = module_amp[2+4];
                     M3 = module_amp[3+4];
                     tree_a->Fill();
+                    h_cut[1]->Fill(total_sum);
                 }
             }
             
@@ -208,6 +223,10 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
     file->cd();
     file->Write();
     file->Close();
+    output->cd();
+    output->Write();
+    output->Close();
+    cout << "Saving Finished" << endl;
 
     char letter[100];
     std::cout << "finished" << std::endl;
@@ -228,14 +247,16 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
 
 void initHistos(){
     std::cout << "initHistos()" << endl;
-    h0[0] = new TH1D("h_c_opposite",";#sum ADC;Counts",500,300,5000); 
-    h0[1] = new TH1D("h_a_opposite",";#sum ADC;Counts",500,300,5000);
-    h_cut[0] = new TH1D("h_c_opposite_cut",";#sum ADC;Counts",500,300,5000); 
-    h_cut[1] = new TH1D("h_a_opposite_cut",";#sum ADC;Counts",500,300,5000);
-    h1[0] = new TH1D("h_c",";#sum ADC;Counts",500,100,5000);
-    h1[1] = new TH1D("h_a",";#sum ADC;Counts",500,100,5000);
-    h0_corr = new TH2D("h_corr_opposite",";#sum ADC (side C);#sum ADC (side A)",500,100,5000,500,100,5000);
-    h1_corr = new TH2D("h_corr",";#sum ADC (side C);#sum ADC (side A)",500,100,5000,500,100,5000);
+    double LimLow =0;
+    double LimHigh =50000;
+    h0[0] = new TH1D("h_c_opposite",";#sum ADC;Counts",1000,LimLow,LimHigh); 
+    h0[1] = new TH1D("h_a_opposite",";#sum ADC;Counts",1000,LimLow,LimHigh);
+    h_cut[0] = new TH1D("h_c_opposite_cut",";#sum ADC;Counts",1000,LimLow,LimHigh); 
+    h_cut[1] = new TH1D("h_a_opposite_cut",";#sum ADC;Counts",1000,LimLow,LimHigh);
+    h1[0] = new TH1D("h_c",";#sum ADC;Counts",1000,LimLow,LimHigh);
+    h1[1] = new TH1D("h_a",";#sum ADC;Counts",1000,LimLow,LimHigh);
+    h0_corr = new TH2D("h_corr_opposite",";#sum ADC (side C);#sum ADC (side A)",500,LimLow,LimHigh,500,LimLow,LimHigh);
+    h1_corr = new TH2D("h_corr",";#sum ADC (side C);#sum ADC (side A)",500,LimLow,LimHigh,500,LimLow,LimHigh);
 
     //histogram for each module
     for(int i=0; i<8; i++){

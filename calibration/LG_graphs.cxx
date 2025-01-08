@@ -22,7 +22,7 @@ void LG_graphs(float number, bool fine_tune = false){
     TVectorD *gains81;
     TVectorD *gains12;
     TVectorD *weights;
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma",number);
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/%.1fsigma",number);
     std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.calibration_ZDCCalib.merge.AOD.c1535_m2248.ANALYSIS_EXT0/";
 
     //load zdc weights
@@ -88,8 +88,8 @@ void LG_graphs(float number, bool fine_tune = false){
         std::vector<float> m_trig_ps;
         m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_C);            m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_C);  
         m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A);            m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A);
-        m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A_C);          m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A_C);
-        m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_OR);           m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_OR);
+        // m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_A_C);          m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_A_C);
+        // m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_OR);           m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_OR);
 
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         int trig_index = triggerIndex(m_trig); // retrive the index of the relevant trigger
@@ -97,11 +97,16 @@ void LG_graphs(float number, bool fine_tune = false){
         float module_amp[8]; 
         for(int i=0; i<8; i++){
             module_amp[i] = (*weights)[i]*ModAmp[i]/no_booster.at(i); //now with energy
-            h_module[i]->Fill(module_amp[i], prescale);
-            if(i<4) h_module_corr[i]->Fill(module_amp[i],module_amp[i+4], prescale); //x: side C, y: side A
+            h_module[i]->Fill(module_amp[i]);
+            if(i<4) h_module_corr[i]->Fill(module_amp[i],module_amp[i+4]); //x: side C, y: side A
         }
-        h1[0]->Fill(sumZdc(0, (*BitMask), module_amp), prescale);
-        h1[1]->Fill(sumZdc(1, (*BitMask), module_amp), prescale);
+        //same side trigger selection
+        if((*HLT_noalg_ZDCPEB_L1ZDC_C)){
+            h1[0]->Fill(sumZdc(0, (*BitMask), module_amp));
+        }
+        if((*HLT_noalg_ZDCPEB_L1ZDC_A)){
+           h1[1]->Fill(sumZdc(1, (*BitMask), module_amp));;
+        }
 
         for(int side =0; side<2; side++){
             float total_sum =0;
@@ -109,13 +114,11 @@ void LG_graphs(float number, bool fine_tune = false){
             // opposite selection
             if(side ==0 && (*HLT_noalg_ZDCPEB_L1ZDC_A)){
                 total_sum = sumZdc(side, (*BitMask), module_amp);
-                prescale = *ps_HLT_noalg_ZDCPEB_L1ZDC_A;
-                h0[side]->Fill(total_sum,prescale);
+                h0[side]->Fill(total_sum);
             }
             else if(side ==1 && (*HLT_noalg_ZDCPEB_L1ZDC_C)){
                 total_sum = sumZdc(side, (*BitMask), module_amp);
-                prescale = *ps_HLT_noalg_ZDCPEB_L1ZDC_C;
-                h0[side]->Fill(total_sum,prescale);
+                h0[side]->Fill(total_sum);
             }
             else {continue;}
         }
@@ -139,11 +142,14 @@ void LG_graphs(float number, bool fine_tune = false){
         float sigmaErr_arr[2];
 
         std::cout << "Performing sigma cut!" <<std::endl;
-        cout <<h0[0]->GetMaximumBin()<<endl;
         for (int side =0; side<2; side++){
-            int maximum = h0[side]->GetMaximumBin();
-            double low_lim = 0.5*h0[side]->GetXaxis()->GetBinCenter(maximum);
-            double high_lim = 1.5*h0[side]->GetXaxis()->GetBinCenter(maximum);
+            TH1D *htmp = (TH1D*)h0[side]->Clone(Form("%i",side));
+            int bin = htmp->FindBin(300);
+            htmp->GetXaxis()->SetRange(bin,htmp->GetNbinsX());
+            int maximum = htmp->GetMaximumBin();
+            double low_lim = 0.8*h0[side]->GetXaxis()->GetBinCenter(maximum);
+            double high_lim = 1.2*h0[side]->GetXaxis()->GetBinCenter(maximum);
+            cout << "Maximum bin : " << maximum<<endl;
 
             // Perform iterative fit
             TF1 *fit = new TF1("fit","gaus");
@@ -251,14 +257,16 @@ void LG_graphs(float number, bool fine_tune = false){
 
 void initHistos(){
     std::cout << "initHistos()" << endl;
-    h0[0] = new TH1D("h_c_opposite",";#sum [GeV];Counts",500,500,15000); 
-    h0[1] = new TH1D("h_a_opposite",";#sum [GeV];Counts",500,500,15000);
-    h_cut[0] = new TH1D("h_c_opposite_cut",";#sum [GeV];Counts",500,500,10000); 
-    h_cut[1] = new TH1D("h_a_opposite_cut",";#sum [GeV];Counts",500,500,10000);
-    h1[0] = new TH1D("h_c",";#sum [GeV];Counts",500,500,15000);
-    h1[1] = new TH1D("h_a",";#sum [GeV];Counts",500,500,15000);
-    h0_corr = new TH2D("h_corr_opposite",";#sum [GeV] (side C);#sum [GeV] (side A)",500,100,10000,500,100,10000);
-    h1_corr = new TH2D("h_corr",";#sum [GeV] (side C);#sum [GeV] (side A)",500,100,10000,500,100,10000);
+    double LimLow =0;
+    double LimHigh =50000;
+    h0[0] = new TH1D("h_c_opposite",";#sum [GeV];Counts",1000,LimLow,LimHigh); 
+    h0[1] = new TH1D("h_a_opposite",";#sum [GeV];Counts",1000,LimLow,LimHigh);
+    h_cut[0] = new TH1D("h_c_opposite_cut",";#sum [GeV];Counts",1000,LimLow,LimHigh); 
+    h_cut[1] = new TH1D("h_a_opposite_cut",";#sum [GeV];Counts",1000,LimLow,LimHigh);
+    h1[0] = new TH1D("h_c",";#sum [GeV];Counts",1000,LimLow,LimHigh);
+    h1[1] = new TH1D("h_a",";#sum [GeV];Counts",1000,LimLow,LimHigh);
+    h0_corr = new TH2D("h_corr_opposite",";#sum GeV (side C);#sum GeV (side A)",500,LimLow,LimHigh,500,LimLow,LimHigh);
+    h1_corr = new TH2D("h_corr",";#sum GeV (side C);#sum GeV (side A)",500,LimLow,LimHigh,500,LimLow,LimHigh);
 
     //histogram for each module
     for(int i=0; i<8; i++){
