@@ -10,7 +10,7 @@
  *  Makes ZYAM subtraction on the PTYs
  *-----------------------------------------------------------------------------*/
 void S07_ZYAM1D(int Trig =0){
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma",Bins::sigma1);
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles");
     if(Trig== 0){
         std::cout << "Working on AND trigger!" << std::endl;
         if(Bins::same_side1) base = Form("%s/sameSide",base.c_str());

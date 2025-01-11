@@ -1,5 +1,4 @@
-void gains_extrapolated(float sigma = 1.5){
-    cout << "working on : " << sigma <<" sigma data" <<endl;
+void gains_extrapolated(){
     //Side 81
     //...............................81HAD1.......................................
     TF1 *had1_81 = new TF1("f81HAD1", "TMath::Exp([0]+[1]*x+[2]*x**2)",1200,1800);
@@ -70,20 +69,20 @@ void gains_extrapolated(float sigma = 1.5){
     TVectorD *gains12_err;
     TVectorD *gains12_corrected;
     TVectorD *gains12_err_corrected;
-    TFile *input = new TFile(Form("%s/%.1fsigma/zdcWeights_side0.root",base.c_str(),sigma));
-    gains12 = (TVectorD*)input->Get("gains_avg");
-    gains12_err = (TVectorD*)input->Get("gains_std");
-    gains12_corrected = (TVectorD*)input->Get("gains_avg");
-    gains12_err_corrected = (TVectorD*)input->Get("gains_std");
+    TFile *input = new TFile(Form("%s/zdcWeights_side0.root",base.c_str()));
+    gains12 = (TVectorD*)input->Get("gains");
+    //gains12_err = (TVectorD*)input->Get("gains_std");
+    gains12_corrected = (TVectorD*)input->Get("gains");
+    //gains12_err_corrected = (TVectorD*)input->Get("gains_std");
 
     //extapolate HAD2 side C
     (*gains12_corrected)[2]= ((had2_12->Eval(1500))/had2_12->Eval(1450))*((*gains12)[2]); //12HAD2
     // TODO add error propagation
 
-    TFile *output = new TFile(Form("%s/%.1fsigma/zdcWeights_side0_corrected.root",base.c_str(),sigma),"RECREATE");
+    TFile *output = new TFile(Form("%s/zdcWeights_side0_corrected.root",base.c_str()),"RECREATE");
     output->cd();
-    gains12_corrected->Write("gains_avg");
-    gains12_err_corrected->Write("gains_std");
+    gains12_corrected->Write("gains");
+    //gains12_err_corrected->Write("gains_std");
     output->Close();
 
     // //load gain factors from TB2023 and create new root file with the new weights

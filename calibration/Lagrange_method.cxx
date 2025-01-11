@@ -1,9 +1,9 @@
 TFile *fopen2;
 TVectorD* gains_old;
-void Lagrange_method(float number, bool fine_tune = false){
-    int m_samples = 5; // how many sub "subsets"
+void Lagrange_method(int itr){
+    int m_samples = 1; // how many sub "subsets"
     std::cout << "Dividing data into " << m_samples << " different samples!" << std::endl;
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma",number); 
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide"); 
     TTree *tree = new TTree("gains","gains");
     std::vector<float> gains;
     int be_energy = 2680; // 1n peak energy [GeV]
@@ -11,21 +11,14 @@ void Lagrange_method(float number, bool fine_tune = false){
     char name[100];
     char name1[100];
     char name2[100];
-    sprintf(name,"%s/matrix_elements.root",base.c_str());
-    if(fine_tune){
-    sprintf(name,"%s/matrix_elements_fineTune.root",base.c_str());
-    }
+    sprintf(name,"%s/matrix_elements_itr%d.root",base.c_str(),itr);
     TChain *mychain_c = new TChain("mytree_c");
     TChain *mychain_a = new TChain("mytree_a");
     mychain_c->Add(name,0);
     mychain_a->Add(name,0);
     if(!mychain_a || !mychain_c) {std::cerr << "Error with loading data" << endl; exit(-1);}
     for (int side =0; side<2; side++){
-        sprintf(name1,"%s/zdcWeights_side%i.root",base.c_str(),side);
-        if(fine_tune){
-            sprintf(name1,"%s/zdcWeights_side%i_fineTune.root",base.c_str(),side);
-            sprintf(name2,"%s/zdcWeights_side%i.root",base.c_str(),side);
-        }
+        sprintf(name1,"%s/zdcWeights_side%i_itr%d.root",base.c_str(),side, itr);
         TTreeReader myReader;
         if(side ==0) {myReader.SetTree(mychain_c);}
         else { myReader.SetTree(mychain_a);}
@@ -191,19 +184,11 @@ void Lagrange_method(float number, bool fine_tune = false){
         }
 
         TFile *fopen = new TFile(name1, "RECREATE");
-        if(fine_tune){
-            fopen2 = new TFile(name2, "READ");
-            gains_old = (TVectorD*)fopen2->Get("gains_avg");
-            }
         TVectorD gains =  TVectorD(4);
         TVectorD gains_err = TVectorD(4);
         for(int i=0; i<4; i++){
             gains[i] = histograms.at(i)->GetMean();
             gains_err[i] = histograms.at(i)->GetStdDev();
-            if(fine_tune){
-                cout << histograms.at(i)->GetMean() << " * " << (*gains_old)[i] <<endl;
-                gains[i] = (histograms.at(i)->GetMean()) * (*gains_old)[i];
-            }
         }
         fopen->cd();
         gains.Write("gains_avg");

@@ -9,7 +9,7 @@ TH1D *N_trigger[Bins::NCENT + Bins::NCENT_ADD][Bins::NTRK + Bins::NTRK_ADD];
  *  add more multiplicity bins
  *------------------------------------------------------- ---------------------*/
 void S02_RebinTrk(int Trig =0) {
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma",Bins::sigma1);
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles");
     if(Trig== 0){
         std::cout << "Working on AND trigger!" << std::endl;
         if(Bins::same_side1) base = Form("%s/sameSide",base.c_str());

@@ -95,7 +95,7 @@ vector<float> zdcWei_a ={0,3.03828,3.47985,2.85721,0,3.8468,3.01163,3.14491}; //
 std::vector<float> no_booster = {0.54, 1.00, 0.94, 0.79,1.47,1.02,0.87,0.54};
 vector<float> zdcWei;
 
-void load_weights(float sigma , bool same_side);
+void load_weights(bool same_side);
 void InitHistos();
 bool passTrigger(std::vector<bool> trigger);
 int triggerIndex(std::vector<bool> trigger);

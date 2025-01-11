@@ -5,7 +5,6 @@
 
 
 int Trig;
-float sigma = 1.5; // 2.0,1.5,1.0 sigma cut for calibration factors
 bool same_side = true; // use same or opposite side calibration method
 
 void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
@@ -54,7 +53,7 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
       exit(-1);
     }
 
-    load_weights(sigma , same_side);
+    load_weights(same_side);
     // getting branches
     TTreeReader myreader(fChain);
     TTreeReaderValue<std::vector<float>> trk_pt(myreader, "trk_pt"); // units of MeV
@@ -336,8 +335,8 @@ void InitHistos(){
     //create output file
     
     std::string directory;
-    directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma",sigma);
-    if (same_side) directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/%.1fsigma/sameSide",sigma);
+    directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles");
+    if (same_side) directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide");
     if(Trig == 1) directory = Form("%s/minbias",directory.c_str());
     if(Trig == 2) directory = Form("%s/xorE2",directory.c_str());
     gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
@@ -528,15 +527,15 @@ int triggerIndex(std::vector<bool> trigger){
     return index;
 }
 
-void load_weights(float sigma, bool same_side){
+void load_weights(bool same_side){
     std::cout << "Initialize ZDC Weights!" << std::endl;
     std::string zdc_C; 
     std::string zdc_A; 
-    zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma/zdcWeights_side0_corrected.root", sigma);
-    zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/%.1fsigma/zdcWeights_side1.root", sigma); //TODO change it to fine tune
+    zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/zdcWeights_side0_corrected.root");
+    zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/zdcWeights_side1.root");  
     if(same_side){
-        zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/%.1fsigma/zdcWeights_side0_corrected.root", sigma);
-        zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/%.1fsigma/zdcWeights_side1.root", sigma); //TODO change it to fine tune 
+        zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/zdcWeights_side0_corrected.root");
+        zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/zdcWeights_side1.root");  
     }
     std::cout << zdc_C << std::endl;
     std::cout << zdc_A << std::endl;
@@ -545,8 +544,8 @@ void load_weights(float sigma, bool same_side){
     TFile *fileA = new TFile(Form("%s",zdc_A.c_str()));
     TVectorD *tvec_C = nullptr;
     TVectorD *tvec_A = nullptr;
-    fileC->GetObject("gains_avg", tvec_C);
-    fileA->GetObject("gains_avg", tvec_A);
+    fileC->GetObject("gains", tvec_C);
+    fileA->GetObject("gains", tvec_A);
     if (!tvec_C || !tvec_A) {
         std::cerr << "Error: TVectorD object not found in file!" << std::endl;
         exit(-1);
@@ -561,11 +560,11 @@ void load_weights(float sigma, bool same_side){
     
     //divide by no booster weights
     for(int i=0; i<weights_tmp.size(); i++){
-        cout << weights_tmp.at(i) << endl;
         if(i==0 || i==4) zdcWei.push_back(0); // 0 for EM module
         else{
             zdcWei.push_back(weights_tmp.at(i)/no_booster.at(i));
         }
+        cout << zdcWei.at(i) << endl;
     }
 }
 

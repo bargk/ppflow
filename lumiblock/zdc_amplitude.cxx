@@ -1,7 +1,6 @@
 //Ploting the amplitudes of the modules.
 //The code has same structrue as CorrFunc.cxx but without the 2pc anaysis.
 
-#include "bins.h"
 std::vector<bool> m_trig;
 
 bool isBitSet(int x, int s){
@@ -22,8 +21,6 @@ bool isBitSet(int x, int s){
 
 
 void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
-    //load the bad lumiblocks
-    TFile *finput = new TFile("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/badLB.root",read);
     int Trig = Trig1;
     char output_name[100];
     sprintf(output_name,"histograms_%d.root",a);
@@ -93,6 +90,20 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
     while(myreader.Next()){
         int lumiBlock = *lumiblock;
         if(!((lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
+        if(lumiBlock>1804 && lumiBlock < 1816) continue; //Timing adjust to Had1C for trigger
+        if((lumiBlock >= 1045 && lumiBlock <= 1050) ||
+            lumiBlock == 1696 ||
+            (lumiBlock >= 1806 && lumiBlock <= 1811) ||
+            lumiBlock == 1858 ||
+            lumiBlock == 1898 ||
+            lumiBlock == 1932 ||
+            lumiBlock == 1944 ||
+            (lumiBlock >= 2245 && lumiBlock <= 2250) ||
+            (lumiBlock >= 3112 && lumiBlock <= 3121) ||
+            lumiBlock == 3214 ||
+            (lumiBlock >= 3858 && lumiBlock <= 3863) ||
+            (lumiBlock >= 4565 && lumiBlock <= 4568)) { continue;} // remove bad LB based on file list
+
         if(Trig == 0){
             m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);                            
         }

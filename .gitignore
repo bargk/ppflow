@@ -5,3 +5,5 @@ vn_plots/
 nohup.out
 files.txt
 jobs/run.py.*
+plots_analysis/
+calibration/RootFiles/
