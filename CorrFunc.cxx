@@ -240,9 +240,11 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
             sum = sumA + sumC;
         }
         //reject events when both sides were purely EM for zdc triggers
-        if(sum == 0 && !(Trig==1)) continue;
+        if(!(Trig==1) && sum == 0) continue;
+        //if on "AND" trigger reject events when both sides didnt catch the leading baryon
+        if(Trig == 0 && (isElectroMagnetic(0,(*BitMask)) || isElectroMagnetic(1,(*BitMask)))) continue;
         hzdc->Fill(sum,prescale);
-        hZdcCorr->Fill(sumC,sumA); //the contribution includes also one side EM and other side is hadronic
+        hZdcCorr->Fill(sumC,sumA); 
         /*-----------------------------------------------------------------------------
         *  Offline cuts
         *-----------------------------------------------------------------------------*/
