@@ -1,4 +1,4 @@
-std::vector<float> no_booster = {0.54, 1.00, 0.94, 0.79,1.47,1.02,0.87,0.54}; //first 4 lower bits is side C
+#include "calibration.h"
 
 void initHistos();
 int triggerIndex(std::vector<bool> trigger);
@@ -9,62 +9,43 @@ void SaveHistos();
 TVectorD* ConcatenateTVectorD(const TVectorD* vec1, const TVectorD* vec2);
 TVectorD* MultiplyMultipleTVectorD(const std::vector<TVectorD*>& vectors);
 
-//histograms
-TH1D* h0[2]; 
-TH1D* h1[2]; 
-TH1D* h_cut[2]; 
-TH1D* h_module[8]; 
-TH2D* h_module_corr[4];
-TH2D* h0_corr; 
-TH2D* h1_corr;
-TFile *output; 
+
 
 void LG_graphs(int itr){
-    std::vector<TVectorD*> weights;
-    TVectorD* multiplied_weights = new TVectorD(8);
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide");
-    std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.calibration_ZDCCalib.merge.AOD.c1535_m2248.ANALYSIS_EXT0/";
+    //load weights from previous iterations
+    TVectorD *weights = new TVectorD(8);
+    //TVectorD* multiplied_weights = new TVectorD(8);
+    TVectorD *initial_weight_12 = new TVectorD(4);
+    TVectorD *initial_weight_81 = new TVectorD(4);
+    // Open files for the current iteration
+    TFile* file12 = new TFile(Form("%s/zdcWeights_side0_itr%i.root", base.c_str(), itr), "READ");
+    TFile* file81 = new TFile(Form("%s/zdcWeights_side1_itr%i.root", base.c_str(), itr), "READ");
 
-    // Loop over all iterations
-    for (int idx = 1; idx <= itr; idx++) {
-        // Open files for the current iteration
-        TFile* file12 = new TFile(Form("%s/zdcWeights_side0_itr%i.root", base.c_str(), idx), "READ");
-        TFile* file81 = new TFile(Form("%s/zdcWeights_side1_itr%i.root", base.c_str(), idx), "READ");
+    // Retrieve gain vectors for both sides
+    TVectorD* gains12 = (TVectorD*)file12->Get("gains_avg");
+    TVectorD* gains81 = (TVectorD*)file81->Get("gains_avg");
+    TVectorD* gains12_err = (TVectorD*)file12->Get("gains_std");
+    TVectorD* gains81_err = (TVectorD*)file81->Get("gains_std");
 
-        // Retrieve gain vectors for both sides
-        TVectorD* gains12 = (TVectorD*)file12->Get("gains_avg");
-        TVectorD* gains81 = (TVectorD*)file81->Get("gains_avg");
+    // Concatenate vectors for the current iteration
+    weights = ConcatenateTVectorD(gains12, gains81);
 
-        // Concatenate vectors for the current iteration
-        TVectorD* weights_itr = ConcatenateTVectorD(gains12, gains81);
-        weights.push_back(weights_itr);
+    // Clean up
+    file12->Close();
+    file81->Close();
+        
 
-        // Clean up
-        file12->Close();
-        file81->Close();
-    }
-
-    // Perform element-wise multiplication across all iterations
-    multiplied_weights = MultiplyMultipleTVectorD(weights);
-    if (multiplied_weights) {
-        std::cout << "Result of element-wise multiplication across " << itr << " iterations:" << std::endl;
-        multiplied_weights->Print();
-    }
-
-    //save the weights for each side
-    TVectorD* gains12 = new TVectorD(4);
-    TVectorD* gains81 = new TVectorD(4);
-    for(int i =0; i<4; i++){
-        (*gains12)[i] = (*multiplied_weights)[i];
-        (*gains81)[i] = (*multiplied_weights)[i+4];
-    }
+    std::cout << "Result of element-wise multiplication across" << itr << " iterations:" << std::endl;
+    weights->Print();
     TFile* fweights12 = new TFile(Form("%s/zdcWeights_side0.root", base.c_str()), "recreate");
     TFile* fweights81 = new TFile(Form("%s/zdcWeights_side1.root", base.c_str()), "recreate");
     fweights12->cd();
-    gains12->Write("gains");
+    gains12->Write("gains_avg");
+    gains12_err->Write("gains_std");
     fweights12->Close();
     fweights81->cd();
-    gains81->Write("gains");
+    gains81->Write("gains_avg");
+    gains81_err->Write("gains_std");
     fweights81->Close();
 
     char name[100];
@@ -98,7 +79,7 @@ void LG_graphs(int itr){
     TTreeReaderArray<float> ModAmp(myreader, "zdc_ZdcModuleFitAmp");
 
     int nentries= myreader.GetEntries();
-    int istart=0,iend= 0.01*nentries; //by default loop over whole dataset
+    int istart=0,iend= nentries; //by default loop over whole dataset
     cout << "Total events : "<< nentries << endl;
 
     while (myreader.Next()){
@@ -117,8 +98,7 @@ void LG_graphs(int itr){
         float prescale = m_trig_ps.at(trig_index);
         float module_amp[8]; 
         for(int i=0; i<8; i++){
-            module_amp[i] = (*multiplied_weights)[i]*ModAmp[i]/no_booster.at(i); //now with energy
-            h_module[i]->Fill(module_amp[i]);
+            module_amp[i] = (*weights)[i]*ModAmp[i]; //now with energy
         }
         if((*HLT_noalg_ZDCPEB_L1ZDC_C)){
             h1[0]->Fill(sumZdc(0, (*BitMask), module_amp)); // oposite side

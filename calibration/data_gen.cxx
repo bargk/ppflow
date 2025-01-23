@@ -1,16 +1,4 @@
-
-std::vector<float> no_booster = {0.54, 1.00, 0.94, 0.79,1.47,1.02,0.87,0.54}; //first 4 lower bits is side C
-std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.calibration_ZDCCalib.merge.AOD.c1535_m2248.ANALYSIS_EXT0/";
-
-  //histograms
-    TH1D* h0[2]; //opposite side
-    TH1D* h1[2]; //same side
-    TH1D* h_cut[2]; 
-    TH1D* h_module[8]; 
-    TH2D* h_module_corr[4];
-    TH2D* h0_corr; 
-    TH2D* h1_corr;
-    TFile *output; 
+    #include "calibration.h"
 
     void initHistos();
     int triggerIndex(std::vector<bool> trigger);
@@ -23,7 +11,6 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
 
     void data_gen(float number, int itr){
 
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide",number);
     gSystem->Exec(Form("mkdir -p %s",base.c_str()));
     char name[100];
     char name1[100];
@@ -40,42 +27,34 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
     exit(-1);
     }
 
-    //load weights from previous iterations
-    std::vector<TVectorD*> weights;
-    TVectorD* multiplied_weights = new TVectorD(8);
-    // Loop over all iterations
-    if(itr >1){
-        for (int idx = 1; idx < itr; idx++) {
-            // Open files for the current iteration
-            TFile* file12 = new TFile(Form("%s/zdcWeights_side0_itr%i.root", base.c_str(), idx), "READ");
-            TFile* file81 = new TFile(Form("%s/zdcWeights_side1_itr%i.root", base.c_str(), idx), "READ");
+    //load weights from previous iteration
+    TVectorD *weights = new TVectorD(8);
+    TVectorD *initial_weight_12 = new TVectorD(4);
+    TVectorD *initial_weight_81 = new TVectorD(4);
+    int itr_prev = itr -1;
+   if(itr_prev > 0){
+    TFile* file12 = new TFile(Form("%s/zdcWeights_side0_itr%i.root", base.c_str(), itr_prev), "READ");
+    TFile* file81 = new TFile(Form("%s/zdcWeights_side1_itr%i.root", base.c_str(), itr_prev), "READ");
 
-            // Retrieve gain vectors for both sides
-            TVectorD* gains12 = (TVectorD*)file12->Get("gains_avg");
-            TVectorD* gains81 = (TVectorD*)file81->Get("gains_avg");
+    // Retrieve gain vectors for both sides
+    TVectorD* gains12 = (TVectorD*)file12->Get("gains_avg");
+    TVectorD* gains81 = (TVectorD*)file81->Get("gains_avg");
 
-            // Concatenate vectors for the current iteration
-            TVectorD* weights_itr = ConcatenateTVectorD(gains12, gains81);
-            weights.push_back(weights_itr);
+    // Concatenate vectors for the current iteration
+    weights = ConcatenateTVectorD(gains12, gains81);
 
-            // Clean up
-            file12->Close();
-            file81->Close();
-        }
-        // Perform element-wise multiplication across all iterations
-        multiplied_weights = MultiplyMultipleTVectorD(weights);
-        if (multiplied_weights) {
-            std::cout << "Result of element-wise multiplication across " << itr << " iterations:" << std::endl;
-            multiplied_weights->Print();
+    // Clean up
+    file12->Close();
+    file81->Close();
+   }
+    else{ //initial guess is with hv gains
+        for (int i = 0; i < 8; ++i) {
+            //(*multiplied_weights)[i] = hv_gain.at(i)/no_booster.at(i);
+            (*weights)[i] = hv_gain.at(i)/no_booster.at(i);
         }
     }
-    else{
-        for (int i = 0; i < multiplied_weights->GetNrows(); ++i) {
-            (*multiplied_weights)[i] = 1.0;
-        }
         std::cout << "Result of element-wise multiplication across" << itr << " iterations:" << std::endl;
-        multiplied_weights->Print();
-    }
+        weights->Print();
 
 
 
@@ -116,7 +95,7 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
         float prescale = m_trig_ps.at(trig_index);
         float module_amp[8];
         for(int i=0; i<8; i++){
-            module_amp[i] = (*multiplied_weights)[i]*ModAmp[i]/no_booster.at(i);
+            module_amp[i] = (*weights)[i]*ModAmp[i];
             h_module[i]->Fill(module_amp[i]);
         }
 
@@ -132,16 +111,7 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
 
     //doing sigma cut
     std::cout << "Performing sigma cut!" <<std::endl;
-    float chi2_arr[2];
-    float ndf_arr[2];
-    float constant_arr[2];
-    float mean_arr[2]; 
-    float sigma_arr[2];
-    float constErr_arr[2];
-    float meanErr_arr[2];
-    float sigmaErr_arr[2];
 
-    
     for (int side =0; side<2; side++){
         TH1D *htmp = (TH1D*)h1[side]->Clone(Form("%i",side));
         int bin = htmp->FindBin(300);
@@ -221,7 +191,7 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
         float module_amp[8];
         float total_sum=0;
         for(int i=0; i<8; i++){
-                module_amp[i] = (*multiplied_weights)[i]*ModAmp[i]/no_booster.at(i);
+                module_amp[i] = (*weights)[i]*ModAmp[i];
             }
         if((*HLT_noalg_ZDCPEB_L1ZDC_C)){
             total_sum = sumZdc(0, (*BitMask), module_amp);
@@ -265,10 +235,6 @@ std::string path = "/gpfs0/citron/users/bargl/ZDC/user.bglik.data23_hi.00463315.
         output->Write();
         cout << "Saving Finished" << endl;
     }
-
-
-
-
 
 void initHistos(){
     std::cout << "initHistos()" << endl;

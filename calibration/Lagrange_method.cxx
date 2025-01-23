@@ -1,9 +1,14 @@
+#include "calibration.h"
+
 TFile *fopen2;
 TVectorD* gains_old;
+
+
+
+
 void Lagrange_method(int itr){
-    int m_samples = 1; // how many sub "subsets"
+    int m_samples = 3; // how many sub "subsets"
     std::cout << "Dividing data into " << m_samples << " different samples!" << std::endl;
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide"); 
     TTree *tree = new TTree("gains","gains");
     std::vector<float> gains;
     int be_energy = 2680; // 1n peak energy [GeV]
@@ -134,6 +139,7 @@ void Lagrange_method(int itr){
             g.push_back(temp_g);
 
 
+
             // Getting gain factors into root
             TFile *file_0 = new TFile(Form("%s/gains_side%i_%i.root",base.c_str(),side,i),"RECREATE");
             X.Write("gains"); //g0,g1,g2,g3, lambda
@@ -150,13 +156,13 @@ void Lagrange_method(int itr){
         std::vector<double> g_avg; // average g from m_samples
         for(int element=0; element<5; element++){
             double sum0 =0; double sum1 =0; double sum2 =0; double sum3 =0; double sum4 =0; double sum5 =0;
-            for(int itr =0; itr<m_samples; itr++){
-                sum0 += amp[itr].at(element);
-                sum1 += amp2[itr].at(element);
-                sum2 += m0mj[itr].at(element);
-                sum3 += m1mj[itr].at(element);
-                sum4 += m2mj[itr].at(element);
-                sum5+= g[itr].at(element);
+            for(int itr_idx =0; itr_idx<m_samples; itr_idx++){
+                sum0 += amp[itr_idx].at(element);
+                sum1 += amp2[itr_idx].at(element);
+                sum2 += m0mj[itr_idx].at(element);
+                sum3 += m1mj[itr_idx].at(element);
+                sum4 += m2mj[itr_idx].at(element);
+                sum5+= g[itr_idx].at(element);
             }
 
             amp_avg.push_back(sum0/m_samples);
@@ -190,6 +196,32 @@ void Lagrange_method(int itr){
             gains[i] = histograms.at(i)->GetMean();
             gains_err[i] = histograms.at(i)->GetStdDev();
         }
+
+        //before wrting the weights from current iteration, multiply it with weights from previous iteration
+        int prev_itr = itr -1;
+        //if don't have previous lagrange weights
+        if(prev_itr == 0 && side == 0){
+            for(int i=0; i<4; i++){
+                gains[i] = gains[i] * hv_gain.at(i)/ no_booster.at(i);
+            }
+        }
+        else if(prev_itr == 0 && side == 1){
+            for(int i=0; i<4; i++){
+                gains[i] = gains[i] * hv_gain.at(i+4)/ no_booster.at(i+4);
+            }
+        }
+
+        else{
+            TFile* file_weight = new TFile(Form("%s/zdcWeights_side%i_itr%i.root", base.c_str(), side,prev_itr), "READ");
+            TVectorD* weights_prev_itr = (TVectorD*)file_weight->Get("gains_avg");
+            for(int i=0; i<4; i++){
+               gains[i] = gains[i] * (*weights_prev_itr)[i];
+            }
+        }
+
+        std::cout << "Final weights after multiplication : " << std::endl;
+        gains.Print();
+
         fopen->cd();
         gains.Write("gains_avg");
         gains_err.Write("gains_std");
@@ -206,4 +238,3 @@ void Lagrange_method(int itr){
     gSystem->Exec(letter);
 
 }
-
