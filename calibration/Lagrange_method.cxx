@@ -7,15 +7,15 @@ TVectorD* gains_old;
 
 
 void Lagrange_method(int itr){
-    int m_samples = 3; // how many sub "subsets"
+    int m_samples = 10; // how many sub "subsets"
     std::cout << "Dividing data into " << m_samples << " different samples!" << std::endl;
     TTree *tree = new TTree("gains","gains");
     std::vector<float> gains;
     int be_energy = 2680; // 1n peak energy [GeV]
 
-    char name[100];
-    char name1[100];
-    char name2[100];
+    char name[500];
+    char name1[500];
+    char name2[500];
     sprintf(name,"%s/matrix_elements_itr%d.root",base.c_str(),itr);
     TChain *mychain_c = new TChain("mytree_c");
     TChain *mychain_a = new TChain("mytree_a");
