@@ -6,8 +6,9 @@ import sys
 #.......................................
 #             for edit                        
 #.......................................
-total_files = 6051 #number of files in directory (cd to directory and type "ls -1 | wc -l")
-jobs = 159 #number of jobs to submit (include 0 index)
+total_files = 6524 #number of files in directory (cd to directory and type "ls -1 | wc -l")
+#total_files = 5381 #number of files in directory (cd to directory and type "ls -1 | wc -l")
+jobs = 231 #number of jobs to submit (include 0 index)
 
 bin=int(total_files/jobs)
 res = total_files%bin
@@ -54,8 +55,10 @@ if len(sys.argv) !=3:
   sys.exit(-1)
     
 
-macro = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/CorrFunc.cxx"
+#macro = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/CorrFunc.cxx"
+macro = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/zdc_amplitude.cxx"
 file_list_path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/files.txt"
+#file_list_path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/files_reprocFalse.txt"
 
 
 # Specify the range of lines to read (0-indexed)

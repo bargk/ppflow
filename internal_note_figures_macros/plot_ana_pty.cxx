@@ -3,7 +3,7 @@
 #include "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/common.C"
 #include "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/bins.h"
 
-std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/1.5sigma";
+std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
 std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/pty";
 TH1D *h[31];
 std::vector<int> bins_cent = {23,24,25,26,27,28,29,30,22,19}; 

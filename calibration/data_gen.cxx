@@ -93,19 +93,26 @@
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         int trig_index = triggerIndex(m_trig); // retrive the index of the relevant trigger
         float prescale = m_trig_ps.at(trig_index);
+        int lumiBlock = *lumiblock;
+        if(!((lumiBlock > 268 && lumiBlock < 675))) continue; //stable beams
         float module_amp[8];
         for(int i=0; i<8; i++){
             module_amp[i] = (*weights)[i]*ModAmp[i];
-            h_module[i]->Fill(module_amp[i]);
         }
 
         if((*HLT_noalg_ZDCPEB_L1ZDC_C)){
             h1[0]->Fill(sumZdc(0, (*BitMask), module_amp)); // oposite side
             h0[1]->Fill(sumZdc(1, (*BitMask), module_amp)); // same side
+            for(int i=0; i<4; i++){
+                if(isBitSet((*BitMask),i)) h_module[i]->Fill(lumiBlock,module_amp[i]);
+            }
         }
         if((*HLT_noalg_ZDCPEB_L1ZDC_A)){
            h1[1]->Fill(sumZdc(1, (*BitMask), module_amp));
            h0[0]->Fill(sumZdc(0, (*BitMask), module_amp));
+           for(int i=4; i<8; i++){
+                if(isBitSet((*BitMask),i)) h_module[i]->Fill(lumiBlock,module_amp[i]);
+            }
         }
     }
 
@@ -188,6 +195,8 @@
         //m_trig.push_back(*HLT_noalg_ZDCPEB_L1ZDC_OR);           m_trig_ps.push_back(*ps_HLT_noalg_ZDCPEB_L1ZDC_OR);
 
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
+        int lumiBlock = *lumiblock;
+        if(!((lumiBlock > 268 && lumiBlock < 675))) continue; //stable beams
         float module_amp[8];
         float total_sum=0;
         for(int i=0; i<8; i++){
@@ -251,7 +260,7 @@ void initHistos(){
 
     //histogram for each module
     for(int i=0; i<8; i++){
-        h_module[i] = new TH1D(Form("module_%i",i),";#sum ADC;Counts",400,0,4000);
+        h_module[i] = new TH2D(Form("module_%i",i),";LB;ADC",500,200,700,500,0,15000);
     }
     //histograms for correlation
     for(int i=0; i<4; i++){

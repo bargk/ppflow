@@ -10,8 +10,8 @@ using namespace Bins;
 std::vector<TCanvas*> m_can_vec;
 std::vector<TCanvas*> m_can_vec_cuts; // for same multiplicity and pT cuts
 float sigma = 1.5;
-std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/1.5sigma/xorE2";
-std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/template/xorE2";
+std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
+std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/template";
 
 void plot_ana_templateFit() {
     //SetAtlasStyle();

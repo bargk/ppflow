@@ -15,6 +15,7 @@ using namespace std;
 
 std::string path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/user.steinber.data22_13p6TeV.00435229.physics_MinBias.merge.AOD.r14470_p5587.4zdc_EXT0"; //nutples
 
+
 TChain *fChain        =nullptr;
 TTree *tree;
 int nmix;
@@ -57,6 +58,8 @@ TH1* hzdc_A_with_pileup;
 TH1* hzdc_C_with_pileup;
 TH1* hzdc_A_without_pileup;
 TH1* hzdc_C_without_pileup;
+TH1* hzdc_A_without_pileup_noOfflineCut;
+TH1* hzdc_C_without_pileup_noOfflineCut;
 TH1* hzdc_after_cut;
 TH1* N_trigger[Bins::NCENT][Bins::NTRK];
 TH1* h_pt[Bins::NCENT];
@@ -91,8 +94,10 @@ std::vector<std::string> m_EffEnergyNames;
 
 //ZDC weights
 //vector<float> zdcWei ={0,2.78128,2.37211,3.31743,0,3.80388,3.26592,5.26164}; //EM on both sides set to 0 //OLD- BEFORE REPORECESSED!
-vector<float> zdcWei_a ={0,3.03828,3.47985,2.85721,0,3.8468,3.01163,3.14491}; //EM on both sides set to 0 
-std::vector<float> no_booster = {0.54, 1.00, 0.94, 0.79,1.47,1.02,0.87,0.54};
+//vector<float> zdcWei_a ={0,3.03828,3.47985,2.85721,0,3.8468,3.01163,3.14491}; //EM on both sides set to 0 
+//std::vector<float> no_booster = {0.54, 1.00, 0.94, 0.79,1.47,1.02,0.87,0.54};
+//std::vector<float> no_booster = {1.0/2.67, 1.0/1.64, 1.0/0.91,1.0/1.33,1.0/1.11,1.0/1.85,1.0/1.29,1.0/2.27}; // this is the HV gains from pb23
+std::vector<float> no_booster = {1.0, 1.00, 1.0, 1.0,1.0, 1.00, 1.0, 1.0};
 vector<float> zdcWei;
 
 void load_weights(bool same_side);

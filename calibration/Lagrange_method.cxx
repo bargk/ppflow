@@ -7,7 +7,7 @@ TVectorD* gains_old;
 
 
 void Lagrange_method(int itr){
-    int m_samples = 10; // how many sub "subsets"
+    int m_samples = 5; // how many sub "subsets"
     std::cout << "Dividing data into " << m_samples << " different samples!" << std::endl;
     TTree *tree = new TTree("gains","gains");
     std::vector<float> gains;

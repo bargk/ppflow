@@ -96,6 +96,8 @@ void LG_graphs(int itr){
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         int trig_index = triggerIndex(m_trig); // retrive the index of the relevant trigger
         float prescale = m_trig_ps.at(trig_index);
+        int lumiBlock = *lumiblock;
+        if(!((lumiBlock > 268 && lumiBlock < 675))) continue; //stable beams
         float module_amp[8]; 
         for(int i=0; i<8; i++){
             module_amp[i] = (*weights)[i]*ModAmp[i]; //now with energy
@@ -133,10 +135,6 @@ void initHistos(){
     // h0_corr = new TH2D("h_corr_opposite",";#sum GeV (side C);#sum GeV (side A)",500,LimLow,LimHigh,500,LimLow,LimHigh);
     // h1_corr = new TH2D("h_corr",";#sum GeV (side C);#sum GeV (side A)",500,LimLow,LimHigh,500,LimLow,LimHigh);
 
-    //histogram for each module
-    for(int i=0; i<8; i++){
-        h_module[i] = new TH1D(Form("module_%i",i),";#sum [GeV];Counts",400,0,4000);
-    }
     //histograms for correlation
     for(int i=0; i<4; i++){
         h_module_corr[i] = new TH2D(Form("module_%i_corr",i),";#sum [GeV] (side C);#sum [GeV] (side A)",400,0,4000,400,0,4000);

@@ -1,5 +1,5 @@
 void gains_extrapolated(){
-    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide");
+    std::string base = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/noGains");
     //pmts curves for HV response
 
     // Side 81

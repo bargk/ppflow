@@ -132,8 +132,9 @@ namespace Bins{
 
 
     enum {
-    NCENT = 20,
+    NCENT = 21,
     NTRK = 13,
+    NLB  = 9,
     NPT1 = 5,
     NPT2 = 5,
     NCH  = 2,
@@ -142,7 +143,7 @@ namespace Bins{
 
     NCENT_ADD = 11,
     NTRK_ADD = 1,
-
+    NLB_ADD = 1,
     NPT1_ADD = 1,
     NPT2_ADD = 2,
     NCH_ADD = 1,
@@ -155,16 +156,17 @@ namespace Bins{
     // CENTRALITY BINS
 //---------------------------------------------------------------------------------------------------------------------
 
-//LABELS                              0,    1,    2,    3,    4,    5,    6,    7,    8,     9,   10,   11,   12,   13,   14    ,15,   16,     17,    18,    19    
-float CENT_LO[NCENT + NCENT_ADD] = { 0.0,  0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88,  11.56, 12.24, 12.92 };  // bins for effective energy 
-float CENT_HI[NCENT + NCENT_ADD] = { 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.6001 }; //in TeV
+//LABELS                              0,       1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   16,    17,    18,    19,    20
+float CENT_LO[NCENT + NCENT_ADD] = { -500.0, 0.0,  0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92 };  // bins for effective energy 
+float CENT_HI[NCENT + NCENT_ADD] = { 0.0,    0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.6001 }; //in TeV
+
 
 float cent_add_lo[NCENT_ADD]     = {0.0};
 float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
-    //20,           21,          22,            23,           24,          25,          26,             27,            28,             29,             30,        35,       36,
-    { 0.0, 13.6}, {0.0, 1.36}, {10.88, 12.92}, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.8}, {6.8, 8.16}, {8.16, 9.52}, {9.52, 10.88}//, {10.88, 12.24}, {12.24, 13.6}
+    //21,                   22,          23,            24,           25,          26,          27,             28,            29,             30,             31,        35,       36,
+    { -500.0, 13.6001}, {0.0, 1.36}, {10.88, 12.92}, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.8}, {6.8, 8.16}, {8.16, 9.52}, {9.52, 10.88}//, {10.88, 12.24}, {12.24, 13.6}
     //, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
@@ -304,6 +306,83 @@ std::pair<double, double> GetTrkVals(int itrk) {
     throw std::exception();
   }
   return std::make_pair(TRK_LO[itrk], TRK_HI[itrk]);
+}
+//---------------------------------------------------------------------------------------------------------------------
+
+// Lumiblock BINS
+//---------------------------------------------------------------------------------------------------------------------
+//LABELS                          0,    1,    2,    3,    4,   5,     6,    7,    8,  
+int LB_LO[NLB + NLB_ADD] = { 1816, 1902, 1936, 2254, 2812, 3218, 3687, 3867, 4655}; 
+int LB_HI[NLB + NLB_ADD] = { 1888, 1929, 2146, 2806, 3111, 3679, 3765, 4562, 4754};
+int lb_add_lo[NLB_ADD]     = {0};
+int lb_add_up[NLB_ADD]     = {0};
+
+
+void Initialize_LbAdd() {
+  std::vector<std::pair<double, double>> new_lb_bins = {
+    //13,      14,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
+    { 1816, 1929}//, {0, 130}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    //37,       38,       39,       40,       41,       42,       43,       44,       
+    //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
+  };
+    if (new_lb_bins.size() != NLB_ADD) {
+    std::cout << "Initialize_LbAdd()::new_lb_bins.size()!=NLB_ADD " << new_lb_bins.size() << "  " << NLB_ADD << std::endl;
+    throw std::exception();
+  }
+
+  int ibin = 0;
+  for (auto new_bin : new_lb_bins) {
+    int low = -1, high = -1;
+    for (int ilb = 0; ilb < NLB; ilb++) {
+      if (fabs(LB_LO[ilb] - new_bin.first ) < 0.001 ) low = ilb;
+      if (fabs(LB_HI[ilb] - new_bin.second) < 0.001 ) high = ilb + 1;
+    }
+    
+    if (low == -1 || high == -1 || low >= high) {
+      std::cout << "Initialize_LbAdd():: Problem adding new bin" << std::endl;
+      throw std::exception();
+    }
+
+    lb_add_lo[ibin] = low;
+    lb_add_up[ibin] = high;
+    LB_LO[NLB + ibin] = new_bin.first;
+    LB_HI[NLB + ibin] = new_bin.second;
+    ibin++;
+  }
+}
+
+std::string label_lb(int ilb) {
+  sprintf(label, "%d_%d", LB_LO[ilb], LB_HI[ilb]);
+  std::string ret = label;
+  return ret;
+}
+int GetLbIndex(double lb_low, double lb_high) {
+  for (int index = 0; index < NLB + NLB_ADD; index++) {
+    if ( fabs(LB_LO[index] - lb_low) < 0.001 && fabs(LB_HI[index] - lb_high) < 0.001 ) return index;
+  }
+  std::cout << "This multiplicity does not exist " << lb_low << "," << lb_high << std::endl;
+  throw std::exception();
+}
+std::vector<int> GetLbIndex(std::vector<std::pair<int, int>> input) {
+  std::vector<int> ret;
+  for (auto& mult_bin : input) {
+    ret.push_back(GetLbIndex(mult_bin.first, mult_bin.second));
+  }
+  return ret;
+}
+std::vector<int> GetLbIndex(std::vector<int> input) {
+  std::vector<int> ret;
+  for (int i = 0; i < (int)(input.size()) - 1; i++) {
+    ret.push_back(GetLbIndex(input[i], input[i + 1]));
+  }
+  return ret;
+}
+std::pair<double, double> GetLbVals(int ilb) {
+  if (ilb >= (NLB + NLB_ADD) || ilb < 0) {
+    std::cout << "This multiplicity index doesnot exist :" << ilb << std::endl;
+    throw std::exception();
+  }
+  return std::make_pair(LB_LO[ilb], LB_HI[ilb]);
 }
 //---------------------------------------------------------------------------------------------------------------------
 
@@ -581,6 +660,12 @@ int GetCentBin(float cent_onepercent) {
 int GetTrkBin(int ntrk) {
   for (int i = 0; i < NTRK; i++) {
     if (ntrk >= TRK_LO[i] && ntrk < TRK_HI[i]) return i;
+  }
+  return -1;
+}
+int GetLbBin(int lb) {
+  for (int i = 0; i < NLB; i++) {
+    if (lb >= LB_LO[i] && lb < LB_HI[i]) return i;
   }
   return -1;
 }
@@ -1078,6 +1163,7 @@ int Initialize() {
   Initialize_Pt2Add();
   Initialize_CentAdd();
   Initialize_TrkAdd();
+  Initialize_LbAdd();
   return 1;
 }
 int m_is_initialized = Initialize();
