@@ -9,9 +9,9 @@ using namespace Bins;
 
 std::vector<TCanvas*> m_can_vec;
 std::vector<TCanvas*> m_can_vec_cuts; // for same multiplicity and pT cuts
-float sigma = 1.5;
-std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
-std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/template";
+std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide/xor";
+//std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/template";
+std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/thesis/fig_pool/ana/template/xor";
 
 void plot_ana_templateFit() {
     //SetAtlasStyle();
@@ -32,12 +32,12 @@ void plot_ana_templateFit() {
 
     // std::vector<int> centbins_peripheral = Bins::CentBinsPeriph();
     // std::vector<int> trkbins_peripheral = Bins::TrkBinsPeriph();
-    std::vector<int> centbins_peripheral = {0};
-    std::vector<int> trkbins_peripheral ={0};
+    std::vector<int> centbins_peripheral = {22};
+    std::vector<int> trkbins_peripheral ={5};
     std::vector<int> pt2_bins = Bins::PtbBins ();
     //std::vector<int> trk_bins = Bins::TrkBins ();
-    std::vector<int> trk_bins = {13};
-    std::vector<int> cent_bins = Bins::CentBins ();
+    std::vector<int> trk_bins = {4};
+    std::vector<int> cent_bins = Bins::CentBins();
     std::vector<int> deta_bins = Bins::DetaBins();
 
     for (int itrk1 : trk_bins){
@@ -90,12 +90,15 @@ void plot_ana_templateFit() {
                                     leg->SetFillStyle(0);
                                     std::string label_central   = "Y(#Delta#phi)  "; //+label_cent(icent1);
                                   
-                                        std::string label_peripheral = "FY^{periph}(#Delta#phi) + G"; //+label_cent(icent2);
+                                        //std::string label_peripheral = "FY^{periph}(#Delta#phi) + G"; //+label_cent(icent2);
+                                        std::string label_peripheral = "FY^{periph}(#Delta#phi)"; //+label_cent(icent2);
                                         leg->AddEntry(h_central           , label_central.c_str()    , "p");
                                         leg->AddEntry(h_rescaledperipheral, label_peripheral.c_str() , "p");
                                         leg->AddEntry(h_fit_func          , "Y^{templ}(#Delta#phi)"  , "l");
-                                        leg->AddEntry(f_vnn_combined      , "Y^{ridge}(#Delta#phi) +FY^{periph}(0)", "l");
-                                        leg->AddEntry(f_pedestal          , "G + FY^{periph}(0)"       , "l");
+                                        //leg->AddEntry(f_vnn_combined      , "Y^{ridge}(#Delta#phi) +FY^{periph}(0)", "l");
+                                        leg->AddEntry(f_vnn_combined      , "Y^{ridge}(#Delta#phi)", "l");
+                                        //leg->AddEntry(f_pedestal          , "G + FY^{periph}(0)"       , "l");
+                                        leg->AddEntry(f_pedestal          , "G "       , "l");
                                    
                                     leg->Draw();
 

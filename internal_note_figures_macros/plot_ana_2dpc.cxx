@@ -4,8 +4,10 @@
 #include "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/bins.h"
 
 #define SYMMETRIZE  
-std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
-std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/2dpc";
+// #define RENORMALIZE  
+std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide/xor";
+//std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/2dpc";
+std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/thesis/fig_pool/ana/2dpc/xor";
 float m_range_lo = -1000;
 float m_range_up = -1000;
 void Draw2D(int icent,int itrk, int pt1, int pt2, int ich);
@@ -17,17 +19,20 @@ void plot_ana_2dpc(){
     gSystem->Exec(Form("mkdir -p %s",figures.c_str()));
     int m_rebin_X =2; int m_rebin_Y =2;
 
-    m_range_up = 1.1;  m_range_lo = 0.95; Draw2D(22,13, 5, 05, 2);
-    m_range_up = 1.1;  m_range_lo = 0.95; Draw2D(19,13, 5, 05, 2); //those 2 is for the minbias range
+    m_range_up = 1.1;  m_range_lo = 0.95; Draw2D(29,4, 5, 05, 2);
+    m_range_up = 1.1;  m_range_lo = 0.95; Draw2D(19,4, 5, 05, 2); //those 2 is for the minbias range
 
-    m_range_up = 1.2;  m_range_lo = 0.93; Draw2D(23,13, 5, 05, 2);
-    m_range_up = 1.2;  m_range_lo = 0.93; Draw2D(24,13, 5, 05, 2);
-    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(25,13, 5, 05, 2);
-    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(26,13, 5, 05, 2);
-    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(27,13, 5, 05, 2);
-    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(28,13, 5, 05, 2);
-    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(29,13, 5, 05, 2);
-    m_range_up = 1.13; m_range_lo = 0.93; Draw2D(30,13, 5, 05, 2);
+    m_range_up = 1.2;  m_range_lo = 0.93; Draw2D(3,4, 5, 05, 2);
+    m_range_up = 1.2;  m_range_lo = 0.93; Draw2D(4,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(15,4, 5, 05, 2);
+    m_range_up = 1.2;  m_range_lo = 0.93; Draw2D(21,4, 5, 05, 2);
+    m_range_up = 1.2;  m_range_lo = 0.93; Draw2D(24,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(25,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(26,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(27,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(28,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(16,4, 5, 05, 2);
+    m_range_up = 1.15; m_range_lo = 0.93; Draw2D(17,4, 5, 05, 2);
 }
 
 void Draw2D(int icent,int itrk, int pt1, int pt2, int ich){
@@ -138,7 +143,8 @@ void Draw2D(int icent,int itrk, int pt1, int pt2, int ich){
     int SIZE = 20;
     Common::myText2(X, Y, 1, "ATLAS ", SIZE, 73);
     Common::myText2(X + 0.15, Y, 1, Common::Internal, SIZE, 43); Y -= 0.05;
-    Common::myText2(X, Y, 1, "#it{pp}, #sqrt{#it{s}} = 13.6 TeV", SIZE, 43); Y -= 0.05;
+    Common::myText2(X, Y, 1, "#it{pp} 22, #sqrt{#it{s}} = 13.6 TeV", SIZE, 43); Y -= 0.05;
+    Common::myText2(X, Y, 1, "XOR trigger", SIZE, 43); Y -= 0.05;
 
     X = 0.63; Y = 0.95;
     Common::myText2(X , Y , 1, Bins::label_cent(icent)     , SIZE, 43);

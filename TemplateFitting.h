@@ -7,8 +7,8 @@ const TH1D*  g_h_peripheral;
 TH1D*  g_h_template_fit;
 double g_ped;
 
-//#define FITS_ALLHARS
-#define FITS_HAR2_ONLY
+#define FITS_ALLHARS
+//#define FITS_HAR2_ONLY
 #ifdef FITS_HAR2_ONLY
 const int NHAR =1     ;//v2 only
 const int NPARS=NHAR+2;

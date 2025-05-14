@@ -4,75 +4,88 @@
 #include "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/bins.h"
 
 std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
-std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/vn";
+//std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ana/vn";
+std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/thesis/fig_pool/ana/vn";
 
 void plot_ana_vn(){
     SetAtlasStyle();
     gSystem->Exec(Form("mkdir -p %s",figures.c_str()));
-    TH1D *h_v2_zdc = new TH1D("h_v2_zdc", ";E_{Eff} [TeV];v_{2}(p_{T}^{b})", 8, Bins::CENT_LO[23], Bins::CENT_HI[30]); 
-    TH1D *h_v2_xor = new TH1D("h_v2_xor", ";E_{Eff} [TeV];", 4, Bins::CENT_LO[27], Bins::CENT_HI[30]); 
-    TH1D *h_v2_minbias_1 = new TH1D("h_v2_minbias_1", ";E_{Eff} [TeV];", 1, Bins::CENT_LO[22], Bins::CENT_HI[22]); 
-    TH1D *h_v2_minbias_2 = new TH1D("h_v2_minbias_2", ";E_{Eff} [TeV];", 1, Bins::CENT_LO[19], Bins::CENT_HI[19]);
-    h_v2_zdc->SetMarkerColor(kBlue); h_v2_zdc->SetLineColor(kBlue);
-    h_v2_minbias_1->SetMarkerColor(kRed); h_v2_minbias_1->SetLineColor(kRed);
-    h_v2_minbias_2->SetMarkerColor(kRed); h_v2_minbias_2->SetLineColor(kRed);
-    h_v2_xor->SetMarkerColor(kOrange+3); h_v2_xor->SetLineColor(kOrange+3);
+    //empty histogram just for limit of canvas
+    TH1D *h_limits = new TH1D("h_limits","",1,6.1,13.61);
+    h_limits->SetBinContent(1,-10);
 
-    TCanvas *c0 = new TCanvas("c0","",3000,2500);
+    // const int nbins_and = 7;
+    // Double_t edges_and[nbins_and + 1] = {3.6,6.1,7.1,8.1,9.1,10.1,11.1,11.6};
+    const int nbins_and = 10;
+    Double_t edges_and[nbins_and + 1] = {6.1,7.1,7.6,8.1,8.6,9.1,9.6,10.1,10.6,11.1,11.6};
+    TH1D *hv2_and = new TH1D("hv2_and","",nbins_and,edges_and);
+    const int nbins_xor = 9;
+    Double_t edges_xor[nbins_xor + 1] = {7.1,8.6,9.1,9.6,10.1,10.6,11.1,11.6,12.1,12.6};
+    TH1D *hv2_xor = new TH1D("hv2_xor","",nbins_xor,edges_xor);
+    const int nbins_minbias = 2;
+    Double_t edges_minbias[nbins_minbias + 1] = {11.6,13.1,13.61};
+    TH1D *hv2_minbias = new TH1D("hv2_minbias","",nbins_minbias,edges_minbias);
+
+    hv2_and->SetMarkerColor(kBlue); hv2_and->SetMarkerStyle(20);
+    hv2_xor->SetMarkerColor(kOrange+3); hv2_xor->SetMarkerStyle(20);
+    hv2_minbias->SetMarkerColor(kRed); hv2_minbias->SetMarkerStyle(20);
+
+    TCanvas *c0 = new TCanvas("c0");
     TFile *input =  new TFile(Form("%s/TemplateFits_vnn.root",base.c_str()));
     TFile *input1 = new TFile(Form("%s/minbias/TemplateFits_vnn.root",base.c_str()));
-    TFile *input2 = new TFile(Form("%s/xorE2/TemplateFits_vnn.root",base.c_str()));
+    TFile *input2 = new TFile(Form("%s/xor/TemplateFits_vnn.root",base.c_str()));
 
-    int pericent =1;
-    std::pair<float, float> vnn_zdc;
+    int pericent = 22;
+    int peritrk = 5;
+    int itrk =4;
+    int ipt1 = 5;
+    int ipt2 = 5;
+    //std::pair<float, float> vnn_zdc;
+    std::pair<float, float> vnn_zdc_bigbin;
     std::pair<float, float> vnn_minbias1;
     std::pair<float, float> vnn_minbias2;
-    // for(int icent =0; icent< 8; icent++){
-    //             vnn_zdc=      Bins::GetVnPtb(icent +23,13,5,5,2,1,2,pericent,0,input,input); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
-    //             h_v2_zdc->SetBinContent(icent+1, vnn_zdc.first);
-    //             h_v2_zdc->SetBinError(icent+1, vnn_zdc.second);
-    //     }
-    // for(int icent =0; icent< 4; icent++){
-    //     vnn_zdc=      Bins::GetVnPtb(icent +27,13,5,5,2,1,2,pericent,0,input2,input2); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
-    //     h_v2_xor->SetBinContent(icent+1, vnn_zdc.first);
-    //     h_v2_xor->SetBinError(icent+1, vnn_zdc.second);
-    // }
-    // vnn_minbias1=      Bins::GetVnPtb(22,13,5,5,2,1,2,pericent,0,input1,input1); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
-    // h_v2_minbias_1->SetBinContent(1, vnn_minbias1.first);
-    // h_v2_minbias_1->SetBinError(1, vnn_minbias1.second);
-    // vnn_minbias2=      Bins::GetVnPtb(19,13,5,5,2,1,2,pericent,0,input1,input1); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
-    // h_v2_minbias_2->SetBinContent(1, vnn_minbias2.first);
-    // h_v2_minbias_2->SetBinError(1, vnn_minbias2.second);
+    for(int icent =0; icent< nbins_and; icent++){
+                int bin_idx = Bins::GetCentIndex(edges_and[icent],edges_and[icent +1]);
+                std::pair<float, float> vnn_zdc=      Bins::GetVnPtb(bin_idx,itrk,ipt1,ipt2,2,1,2,pericent,peritrk,input,input); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
+                hv2_and->SetBinContent(icent + 1, vnn_zdc.first);
+                hv2_and->SetBinError(icent + 1, vnn_zdc.second);
+    }
 
-    
-    // THStack *hs_average = new THStack("hs",";E_{Eff} [TeV]; v_{2}(p_{T}^{b})");
-    // hs_average->Add(h_v2_zdc);
-    // hs_average->Add(h_v2_xor);
-    // hs_average->Add(h_v2_minbias_1);
-    // hs_average->Add(h_v2_minbias_2);
-    // hs_average->SetMaximum(0.15);
-    // hs_average->SetMinimum(0);
-    // hs_average->Draw("nostack;E1");
-    // float X=0.20,Y=0.88;
-    // Common::myText2(X     ,Y,1,"ATLAS "         ,70,73);
-    // Common::myText2(X+0.1,Y,1,Common::Internal,70,43);Y=Y-0.05;
-    // Common::myText2(X       , Y, 1, "#it{pp} #sqrt{#it{s}} = 13.6 TeV", 70, 43);
-    // TLegend *legend0 = new TLegend(0.5,0.8,0.8,0.9);
-    // legend0->AddEntry(h_v2_zdc,"ZDC AND ","lep");
-    // legend0->AddEntry(h_v2_minbias_1,"Minimum bias","lep");
-    // legend0->AddEntry(h_v2_xor,"ZDC XOR","lep");
-    // legend0->Draw();
-    // c0->SaveAs(Form("%s/v2.pdf",figures.c_str())); 
+    for(int icent =0; icent< nbins_xor; icent++){
+            int bin_idx = Bins::GetCentIndex(edges_xor[icent],edges_xor[icent +1]);
+            std::pair<float, float> vnn_zdc=      Bins::GetVnPtb(bin_idx,itrk,ipt1,ipt2,2,1,2,pericent,peritrk,input2,input2); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
+            hv2_xor->SetBinContent(icent + 1, vnn_zdc.first);
+            hv2_xor->SetBinError(icent + 1, vnn_zdc.second);
+    }
 
-    //plot vn vs ntrk
-    c0->Clear();
-    TH1D *h_v2_ntrk = new TH1D("h_v2_ntrk", ";N_{ch}^{rec};v_{2}(p_{T}^{b})", Bins::NTRK -3, Bins::TRK_LO[0], Bins::TRK_HI[Bins::NTRK -3]);
-    input =  new TFile(Form("%s/TemplateFits_vnn_ntrk.root",base.c_str()));
-    for(int icent =0; icent< Bins::NTRK -3; icent++){
-                vnn_zdc=      Bins::GetVnPtb(icent,21,5,5,2,1,2,pericent,0,input,input); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
-                h_v2_ntrk->SetBinContent(icent+1, vnn_zdc.first);
-                h_v2_ntrk->SetBinError(icent+1, vnn_zdc.second);
-        }
-    h_v2_ntrk->Draw();
-    c0->SaveAs(Form("%s/v2_ntrk.pdf",figures.c_str())); 
+    for(int icent =0; icent< nbins_minbias; icent++){
+        int bin_idx = Bins::GetCentIndex(edges_minbias[icent],edges_minbias[icent +1]);
+        std::pair<float, float> vnn_zdc=      Bins::GetVnPtb(bin_idx,itrk,ipt1,ipt2,2,1,2,pericent,peritrk,input1,input1); //icent_bin,itrk,ipt1,ipt2,ich,ideta,m_har,pericent,peritrk
+        hv2_minbias->SetBinContent(icent + 1, vnn_zdc.first);
+        hv2_minbias->SetBinError(icent + 1, vnn_zdc.second);
+    }
+
+    THStack *hs_average = new THStack("hs",";E_{Eff} [TeV]; v_{2}");
+    hs_average->Add(h_limits);
+    hs_average->Add(hv2_and);
+    hs_average->Add(hv2_xor);
+    hs_average->Add(hv2_minbias);
+    hs_average->SetMaximum(0.09);
+    hs_average->SetMinimum(0.045);
+    hs_average->Draw("nostack;E1");
+    //hs_average->GetXaxis()->SetLimits(3.6,13.6);
+    float X=0.2,Y=0.88;
+    int size =17;
+    Common::myText2(X     ,Y,1,"ATLAS "         ,size,73);
+    Common::myText2(X+0.1,Y,1,Common::Internal,size,43);Y=Y-0.05;
+    Common::myText2(X       , Y, 1, "#it{pp} #sqrt{#it{s}} = 13.6 TeV", size, 43);Y=Y-0.05;
+    Common::myText2(X       , Y, 1, Form("%s",Bins::label_ptab(ipt1,ipt2).c_str()), size, 43); Y=Y-0.05;
+    Common::myText2(X       , Y, 1, Form("%s",Bins::label_eta (Bins::GetDetaIndex(2.0,5.0)).c_str()), size, 43);
+    TLegend *legend0 = new TLegend(0.45,0.7,0.88,0.88);
+    legend0->SetBorderSize(0);
+    legend0->AddEntry(hv2_and,"ZDC AND ","lep");
+    legend0->AddEntry(hv2_minbias,"Minimum bias","lep");
+    legend0->AddEntry(hv2_xor,"ZDC XOR","lep");
+    legend0->Draw();
+    c0->SaveAs(Form("%s/v2.pdf",figures.c_str()));
 }

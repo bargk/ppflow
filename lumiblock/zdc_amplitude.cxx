@@ -25,11 +25,11 @@ bool isBitSet(int x, int s){
         return pass;
  }
 
- std::vector<float> GetMoments(int ilb_bin, int side, int Trig);
+std::vector<float> GetMoments(int ilb_bin, int side, int Trig);
 
- std::string weights_path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide";
+std::string weights_path = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide";
 void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
-    // Open the ROOT file containing the saved function
+    
 
     int Trig = Trig1;
     load_weights();
@@ -69,9 +69,16 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
             //continue;
         }
         std::cout << "Opened file: " << file << std::endl;
-    }
 
-    //reading moments for late shower cut
+    }
+    std::string directory;
+    directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp");
+    if(Trig == 1) directory = Form("%s/minbias",directory.c_str());
+    if(Trig == 2) directory = Form("%s/xor",directory.c_str());
+    gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
+
+    //----------------------------------coorections for LHCf -------------------------------------------
+    //reading moments for late shower cut. DONT FORGET TO UNCOMMENT THE RELEVANT PART IN THE EVENT LOOP!
     std::vector<std::vector<float>> moments_C;
     std::vector<std::vector<float>> moments_A;
     for(int ilb =0; ilb<Bins::NLB; ilb++){
@@ -81,13 +88,28 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
         // cout<<moments_A[ilb].at(0) <<" " <<moments_A[ilb].at(1) <<endl;
     }
 
-    std::string directory;
-    directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp");
-    if(Trig == 1) directory = Form("%s/minbias",directory.c_str());
-    if(Trig == 2) directory = Form("%s/xor",directory.c_str());
-    gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
+    //getting scale factors for stability correction
+    float scale_stability[2][4][Bins::NLB];
+    for(int side =0; side<2; side++){
+        std::string path_par;
+        path_par = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp";
+        std::vector<int> lb_center = {Bins::GetLbIndex(1816,1887), Bins::GetLbIndex(1902,1928), Bins::GetLbIndex(2812,2996), Bins::GetLbIndex(2996,3109),Bins::GetLbIndex(3218,3678)};
+        TFile *flb_mean_and = new TFile(Form("%s/mean_block1.root",path_par.c_str()),"read");
+        for(int mod=0; mod<4; mod++){
+            TH1D* h_mean_and = (TH1D*)flb_mean_and->Get(Form("h_mean_side%i_mod%i",side,mod));
+            double mean_center_and =0;
+            for(const auto& lumi : lb_center){
+                mean_center_and += h_mean_and->GetBinContent(lumi + 1)/lb_center.size();
+            }
+            for(int ilb=0; ilb<Bins::NLB; ilb++){
+                scale_stability[side][mod][ilb] = mean_center_and/h_mean_and->GetBinContent(ilb+1);
+                //scale_stability[side][mod][ilb] = 1.0;
+            }
+        }
+    }
+    //--------------------------------------------------------------------------------------------------
     TFile *tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
-
+    
 
     TH2D *hAmpLB[2]; 
     hAmpLB[0]= new TH2D("hLbAmp0",";LB;zdc_ZdcAmp(0) [ADC]", 3800,1000,4800,80,0,8000);
@@ -127,7 +149,7 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
 
     for(int side =0; side<2; side++){
         for(int ilb =0; ilb<Bins::NLB; ilb++){
-            h_h2AmpRat_corr_Amp_lb[side][ilb]= new TH2D(Form("h%i_h2AmpRat_Amp_LB_%s",side,Bins::label_lb(ilb).c_str()),Form(";zdc_ZdcAmp[%i];HAD2/zdc_ZdcAmp[%i]",side,side),80,0,8000,150,0,1.5);
+            h_h2AmpRat_corr_Amp_lb[side][ilb]= new TH2D(Form("h%i_h2AmpRat_Amp_ilb_%i",side,ilb),Form(";zdc_ZdcAmp[%i];HAD2/zdc_ZdcAmp[%i]",side,side),80,0,8000,150,0,1.5);
         }
     }
 
@@ -144,8 +166,10 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
     }
     TH1D *hsumA_energy = new TH1D("hsumA_energy", ";[GeV];Events",200,0,25000);
     TH1D *hsumC_energy = new TH1D("hsumC_energy", ";[GeV];Events",200,0,25000);
+    TH2D *hAmpCorr_energy = new TH2D("hAmpCorr_energy",";[GeV];Events",200,0,25000,200,0,25000);
+    TH1D *hsumA_uncalib = new TH1D("hsumA_uncalib", ";[ADC];Events",80,0,8000);
+    TH1D *hsumC_uncalib = new TH1D("hsumC_uncalib", ";[ADC];Events",80,0,8000);
     
-
     
     //zdc
     TTreeReader myreader(fChain);
@@ -186,7 +210,7 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
         if(lumiBlock >=1930 && lumiBlock <= 1935) continue;
         if(lumiBlock >=2147 && lumiBlock <= 2253) continue;
         if(lumiBlock >=2807 && lumiBlock <= 2811) continue;
-        if(lumiBlock >=3112 && lumiBlock <= 3217) continue;
+        if(lumiBlock >=3111 && lumiBlock <= 3217) continue;
         if(lumiBlock >=3680 && lumiBlock <= 3686) continue;
         if(lumiBlock >=3766 && lumiBlock <= 3866) continue;
         if(lumiBlock >=4563 && lumiBlock <= 4654) continue;
@@ -235,8 +259,6 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
         float stdev_A = moments_A[ilb_bin].at(1);
         if(isBitSet((*BitMask),2) && (ModAmp[2]/Amp[0] > (mean_C + 2*stdev_C))) continue;
         if(isBitSet((*BitMask),2+4) && (ModAmp[2+4]/Amp[1] > (mean_A + 2*stdev_A))) continue;
-        // if(isBitSet((*BitMask),3) && (ModAmp[3]/Amp[0]>0.57)) continue;
-        // if(isBitSet((*BitMask),3+4) && (ModAmp[3+4]/Amp[1]>0.46)) continue;
         //----------------------------------------------------------------------------------
 
         hAmpLB[0]->Fill(lumiBlock, Amp[0]);
@@ -256,8 +278,8 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
         if(isBitSet((*BitMask),7) && isBitSet((*BitMask),6)) hRatio[1]->Fill(ModAmp[7]/ModAmp[6]);
         hAmpCorr->Fill(Amp[0], Amp[1]);
         for(int mod =0; mod<4; mod++){
-            if(isBitSet((*BitMask),mod)) h_module[0][mod]->Fill(lumiBlock,ModAmp[mod]);
-            if(isBitSet((*BitMask),mod+4)) h_module[1][mod]->Fill(lumiBlock,ModAmp[mod +4]);
+            if(isBitSet((*BitMask),mod)) h_module[0][mod]->Fill(lumiBlock,ModAmp[mod]*scale_stability[0][mod][ilb_bin]);
+            if(isBitSet((*BitMask),mod+4)) h_module[1][mod]->Fill(lumiBlock,ModAmp[mod +4]*scale_stability[1][mod][ilb_bin]);
         }
         if(Amp[0] > 4000 && Amp[0] < 5000){
             if(isBitSet((*BitMask),1) && isBitSet((*BitMask),2)){
@@ -306,22 +328,34 @@ void zdc_amplitude(const int a ,const char* fileList, int Trig1 = 0){
         }     
         float sumA =0;
         float sumC =0;
+        float sumA_uncalib =0;
+        float sumC_uncalib =0;
         bool fillC = false;
         bool fillA = false;
         for(int i=0; i<4; i++){
             if(isBitSet(*BitMask,i)){
-                sumC += ModAmp[i]*zdcWei.at(i);
-                h_energy[i]->Fill(ModAmp[i]*zdcWei.at(i));
+                sumC += ModAmp[i]*zdcWei.at(i)*scale_stability[1][i][ilb_bin];
+                sumC_uncalib += ModAmp[i]*scale_stability[1][i][ilb_bin];
+                h_energy[i]->Fill(ModAmp[i]*zdcWei.at(i)*scale_stability[0][i][ilb_bin]);
                 fillC = true;
             }  
             if(isBitSet(*BitMask,i+4)){
-                sumA += ModAmp[i+4]*zdcWei.at(i+4);
-                h_energy[i+4]->Fill(ModAmp[i+4]*zdcWei.at(i+4));
+                sumA += ModAmp[i+4]*zdcWei.at(i+4)*scale_stability[1][i][ilb_bin];
+                sumA_uncalib += ModAmp[i+4]*scale_stability[1][i][ilb_bin];
+                h_energy[i+4]->Fill(ModAmp[i+4]*zdcWei.at(i+4)*scale_stability[1][i][ilb_bin]);
                 fillA = true;
             }  
         }
-        if(fillA) hsumA_energy->Fill(sumA);
-        if(fillC) hsumC_energy->Fill(sumC);
+        if(fillA) {
+            hsumA_energy->Fill(sumA);
+            hsumA_uncalib->Fill(sumA_uncalib);
+        }
+        if(fillC) {
+            hsumC_energy->Fill(sumC);
+            hsumC_uncalib->Fill(sumC_uncalib);
+        }
+        hAmpCorr_energy->Fill(sumC,sumA);
+        
     }
     tmpf->Write();
 
@@ -368,12 +402,14 @@ std::vector<float> GetMoments(int ilb_bin, int side, int Trig){
     if(Trig == 0 ) input_histo = new TFile(Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp/histograms.root"),"read");
     if(Trig == 1 ) input_histo = new TFile(Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp/minbias/histograms.root"),"read");
     if(Trig == 2 ) input_histo = new TFile(Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp/xor/histograms.root"),"read");
-    TH2D *h2 = (TH2D*)input_histo->Get(Form("h%i_h2AmpRat_Amp_LB_%s",side,lb_range.at(ilb_bin).c_str()));
+    TH2D *h2 = (TH2D*)input_histo->Get(Form("h%i_h2AmpRat_Amp_ilb_%i",side,ilb_bin));
+    //h2->Print();
     std::vector<float> mom;
     mom.push_back(h2->GetMean(2));
     mom.push_back(h2->GetStdDev(2));
     return mom;
 }
+
 
 
 

@@ -13,17 +13,18 @@ TH1D * hclone;
 TFile *file_calibrated;
 TFile *file_uncalibrated;
 double X, Y;
-int Size = 100;
+int Size = 20;
 void plot_ana_zdc_calibration(){
     file_calibrated = new TFile(Form("%s/zdc_calibrated.root",base.c_str()),"read");
     file_uncalibrated = new TFile(Form("%s/zdc_uncalib_itr1.root",base.c_str()),"read");
-    TCanvas* c0 = new TCanvas("c0","",4000,2600);
+    TCanvas* c0 = new TCanvas("c0");
     TLegend *legend0;
     SetAtlasStyle(); 
 
     //plot uncalibrated ZDC without fit
     //std::vector<std::string> histNames = {"h_c_opposite", "h_a_opposite"};
     std::vector<std::string> histNames = {"h_c", "h_a"};
+    std::vector<std::string> side_name = {"C", "A"};
     std::vector<int> lineColors = {kBlack, kMagenta};
     std::vector<std::string> fileNames = {"side_c_uncalib_nofit.pdf", "side_a_uncalib_nofit.pdf"};
     gSystem->Exec(Form("mkdir -p %s/energy_calib",figures.c_str()));
@@ -41,7 +42,7 @@ void plot_ana_zdc_calibration(){
         // Draw the histogram
         h_sum[i]->Draw();
         //h_sum[i]->GetXaxis()->SetRange(3,90);
-        h_sum[i]->GetXaxis()->SetTitle("ZDC Sum [a.u]");
+        h_sum[i]->GetXaxis()->SetTitle("ZDC Sum [ADC]");
         h_sum[i]->GetYaxis()->SetTitle("Events");
         h_sum[i]->GetYaxis()->SetTitleOffset(1.1);
         //h_sum[i]->GetFunction("fit")->SetLineWidth(10);
@@ -50,8 +51,9 @@ void plot_ana_zdc_calibration(){
         // Add text annotations
         X = 0.5, Y = 0.85;
         Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-        Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+        Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
         Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.05;
+        Common::myText2(X, Y, 1, Form("Side %s",side_name.at(i).c_str()), Size, 43); Y -= 0.05;
 
         // Save the canvas
         c0->SaveAs(Form("%s/energy_calib/%s", figures.c_str(), fileNames[i].c_str()));
@@ -59,18 +61,23 @@ void plot_ana_zdc_calibration(){
         }
     //------------------------------------------------------------------------------------------------------------------
     //plot zdc sides top on each other
-    h_sum[0] = (TH1D*)file_uncalibrated->Get(histNames[0].c_str());
-    h_sum[1] = (TH1D*)file_uncalibrated->Get(histNames[1].c_str());
+    h_sum[0] = (TH1D*)file_uncalibrated->Get(histNames[0].c_str())->Clone("clone_h0");
+    h_sum[1] = (TH1D*)file_uncalibrated->Get(histNames[1].c_str())->Clone("clone_h1");
     h_sum[0]->SetLineColor(lineColors[0]);
     h_sum[1]->SetLineColor(lineColors[1]);
-    Common::FormatHist(h_sum[1], Common::StandardFormat());
-    hs0 = new THStack("sides_uncalib", ";ZDC Sum [a.u];Events");
+    //Common::FormatHist(h_sum[1], Common::StandardFormat());
+    hs0 = new THStack("sides_uncalib", ";ZDC Sum [ADC];Events");
     hs0->Add(h_sum[0]);
     hs0->Add(h_sum[1]);
-    hs0->Draw("nostack");
+    c0->SetLeftMargin(0.15);  // Increase bottom margin (default is ~0.1)
+    hs0->Draw("nostack;hist");
+    hs0->GetXaxis()->SetNdivisions(505);
+    hs0->GetYaxis()->SetNdivisions(505);
+    hs0->GetXaxis()->SetTitleOffset(0.8);
+    //gPad->SetLeftMargin(0.2);
     X = 0.5, Y = 0.85;
     Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-    Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+    Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
     Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.05;
     legend0 = new TLegend(0.5,0.45,0.7,0.65);
     legend0->AddEntry(h_sum[0], "side C", "l");
@@ -80,7 +87,7 @@ void plot_ana_zdc_calibration(){
     c0->SaveAs(Form("%s/energy_calib/sides_uncalib.pdf", figures.c_str()));
     c0->Clear();
     legend0->Clear();
-    
+    //-----------------------------------------------------------------------------------------------------------
     //plot uncalibrated ZDC with fit
     file_uncalibrated->Clear();
     //histNames = {"h_c_opposite", "h_a_opposite"};
@@ -101,6 +108,8 @@ void plot_ana_zdc_calibration(){
 
         // Draw the histogram
         h_sum[i]->Draw();
+        h_sum[i]->GetXaxis()->SetTitle("ZDC Sum [ADC]");
+        h_sum[i]->GetYaxis()->SetTitle("Events");
         //h_sum[i]->GetXaxis()->SetRange(3,90);
         h_sum[i]->GetYaxis()->SetTitleOffset(1.1);
         //h_sum[i]->GetFunction("fit")->SetLineWidth(10);
@@ -109,8 +118,9 @@ void plot_ana_zdc_calibration(){
         // Add text annotations
         X = 0.5, Y = 0.85;
         Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-        Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+        Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
         Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.05;
+        Common::myText2(X, Y, 1, Form("Side %s",side_name.at(i).c_str()), Size, 43); Y -= 0.05;
 
         // Save the canvas
         c0->SaveAs(Form("%s/energy_calib/%s", figures.c_str(), fileNames[i].c_str()));
@@ -118,6 +128,7 @@ void plot_ana_zdc_calibration(){
         h_sum[i]->Clear();
         }
     //--------------------------------------------------------------------------------------------------------------
+
     //Draw 1n peak fit after calibration
     histNames = {"h_c", "h_a"};
     //lineColors = {kGreen + 1, kMagenta};
@@ -133,7 +144,8 @@ void plot_ana_zdc_calibration(){
         Common::FormatHist(h_sum[i], Common::StandardFormat());
         h_sum[i]->SetMarkerStyle(20);
         h_sum[i]->SetMarkerSize(2);
-        h_sum[i]->GetXaxis()->SetTitle("Energy [GeV]");
+        h_sum[i]->GetXaxis()->SetTitle("ZDC sum [GeV]");
+        h_sum[i]->GetYaxis()->SetTitle("Events");
 
         // Draw the histogram
         //h_sum[i]->GetXaxis()->SetRangeUser(1000,8000);
@@ -149,14 +161,15 @@ void plot_ana_zdc_calibration(){
         }
         h_sum[i]->Fit("fit_1n","Rq");
         h_sum[i]->Draw();
-        
+        h_sum[i]->GetYaxis()->SetTitleOffset(1.3);
 
         // Add text annotations
         X = 0.5, Y = 0.85;
         Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-        Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
-        Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.10;
-        Common::myText2(X, Y, 1, Form("#mu = : %i",(int)fit_1n->GetParameter(1)), Size, 43); Y -= 0.05;
+        Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+        Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.05;
+        Common::myText2(X, Y, 1, Form("Side %s",side_name.at(i).c_str()), Size, 43); Y -= 0.10;
+        Common::myText2(X, Y, 1, Form("#mu = : %i GeV",(int)fit_1n->GetParameter(1)), Size, 43); Y -= 0.05;
         Common::myText2(X, Y, 1, Form("#sigma /#mu = : %.2f",fit_1n->GetParameter(2)/fit_1n->GetParameter(1)), Size, 43); Y -= 0.05;
 
         // Save the canvas
@@ -203,13 +216,14 @@ void plot_ana_zdc_calibration(){
         // Add text annotations
         X = 0.5, Y = 0.85;
         Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-        Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+        Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
         Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.10;
         c0->SaveAs(Form("%s/energy_calib/%s", figures.c_str(), fileNames[i].c_str()));
         c0->Clear();
         h_sum[i]->Clear();
         legend0->Clear();
     }
+    //--------------------------------------------------------------------------------------------------------
 
     //zdc weights convergence plots
     TH1D *h_zdc_weights[2][4];
@@ -222,7 +236,7 @@ void plot_ana_zdc_calibration(){
                 h_zdc_weights[side][mod]->SetMarkerColor(lineColors[side]);
                 h_zdc_weights[side][mod]->SetLineColor(lineColors[side]);
                 h_zdc_weights[side][mod]->SetMarkerStyle(20);
-                h_zdc_weights[side][mod]->SetMarkerSize(5);
+                h_zdc_weights[side][mod]->SetMarkerSize(1.5);
             }
         }
         for(int side =0; side<2; side++){
@@ -240,25 +254,27 @@ void plot_ana_zdc_calibration(){
 
     //drawing
     for(int mod =0; mod<4; mod++){ 
-        THStack *hs = new THStack(Form("hs%i", mod), Form(";Iteration;w_{%i} [#frac{GeV}{a.u}]",mod));
+        THStack *hs = new THStack(Form("hs%i", mod), Form(";Iteration;w_{%i} [#frac{GeV}{ADC}]",mod));
         gStyle->SetErrorX(0.001);
         double maximum;
         maximum =(h_zdc_weights[0][mod]->GetMaximum() > h_zdc_weights[1][mod]->GetMaximum()) ? h_zdc_weights[0][mod]->GetMaximum() : h_zdc_weights[1][mod]->GetMaximum();
-        hs->SetMaximum(1.3*maximum);
+        double minimum = std::min(h_zdc_weights[0][mod]->GetMinimum(), h_zdc_weights[1][mod]->GetMinimum());
         hs->Add(h_zdc_weights[0][mod]);
         hs->Add(h_zdc_weights[1][mod]);
         hs->Draw("nostack;p;E1");
+        hs->SetMaximum(1.1*maximum);
+        hs->SetMinimum(0.9*minimum);
         hs->GetYaxis()->SetTitleOffset(0.95);
         hs->GetXaxis()->SetTitleOffset(1.0);
-        legend0 = new TLegend(0.7,0.75,0.9,0.9);
+        legend0 = new TLegend(0.7,0.75,0.88,0.88);
         legend0->AddEntry(h_zdc_weights[0][mod], "side C", "lep");
         legend0->AddEntry(h_zdc_weights[1][mod], "side A", "lep");
         legend0->SetBorderSize(0);
         legend0->Draw();
 
-        X = 0.15, Y = 0.85;
+        X = 0.2, Y = 0.85;
         Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-        Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+        Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
         Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.10;
         c0->SaveAs(Form("%s/energy_calib/weights_mod%i.pdf", figures.c_str(),mod));
         c0->Clear();
@@ -275,13 +291,14 @@ void plot_ana_zdc_calibration(){
     THStack *hs1 = new THStack("sides_calib", ";ZDC Sum [GeV];Events");
     hs1->Add(h_sum[0]);
     hs1->Add(h_sum[1]);
-    hs1->Draw("nostack");
-    //hs1->GetXaxis()->SetNdivisions(505);
-    c0->SetBottomMargin(0.15);  // Increase bottom margin (default is ~0.1)
     c0->SetLeftMargin(0.15);  // Increase bottom margin (default is ~0.1)
+    hs1->Draw("nostack;hist");
+    hs1->GetXaxis()->SetNdivisions(505);
+    hs1->GetYaxis()->SetNdivisions(505);
+    hs1->GetXaxis()->SetTitleOffset(0.8);
     X = 0.5, Y = 0.85;
     Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-    Common::myText2(X + 0.08, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+    Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
     Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.05;
     legend0 = new TLegend(0.5,0.45,0.7,0.65);
     legend0->AddEntry(h_sum[0], "side C", "l");
@@ -290,11 +307,62 @@ void plot_ana_zdc_calibration(){
     legend0->Draw();
     c0->SaveAs(Form("%s/energy_calib/sides_calib.pdf", figures.c_str()));
     c0->Clear();
+    //-------------------------------------------------------------------------------------------------
 
-
-
-
-  
+    //plot 1 neutron peak  for different sigma selection
     
+    histNames = {"h_c", "h_a"};
+    std::vector<string> sigmas = {"1.4sigma", "1.6sigma"};
+    //lineColors = {kGreen + 1, kMagenta};
+    fileNames = {"side_c_calib_fit", "side_a_calib_fit"};
+
+    //loop over sigma selections
+    for(int isigma =0; isigma<sigmas.size(); isigma++){
+        file_uncalibrated = new TFile(Form("%s/systematics/%s/zdc_uncalib_itr10.root",base.c_str(),sigmas.at(isigma).c_str()),"read");
+        // Loop over histograms
+        for (size_t i = 0; i < histNames.size(); i++) {
+            // Retrieve histogram from file
+            h_sum[i] = (TH1D*)file_uncalibrated->Get(histNames[i].c_str());
+            
+            // Set color and style
+            h_sum[i]->SetLineColor(lineColors[i]);
+            h_sum[i]->SetMarkerColor(lineColors[i]);
+            Common::FormatHist(h_sum[i], Common::StandardFormat());
+            h_sum[i]->SetMarkerStyle(20);
+            h_sum[i]->SetMarkerSize(2);
+            h_sum[i]->GetXaxis()->SetTitle("ZDC sum [GeV]");
+            h_sum[i]->GetYaxis()->SetTitle("Events");
+            h_sum[i]->GetFunction("fit")->Delete();
+            // Draw the histogram
+            //h_sum[i]->GetXaxis()->SetRangeUser(1000,8000);
+            //fit for 1n peak
+            TF1 *fit_1n = new TF1("fit_1n","gaus");
+            fit_1n->SetLineColor(kRed);
+            fit_1n->SetLineWidth(5);
+            if(i ==0 ){
+                fit_1n->SetRange(2250,3000);
+            }
+            else{
+                fit_1n->SetRange(2250,3000);    
+            }
+            h_sum[i]->Fit("fit_1n","Rq");
+            h_sum[i]->Draw();
+            h_sum[i]->GetYaxis()->SetTitleOffset(1.3);
+            // Add text annotations
+            X = 0.5, Y = 0.85;
+            Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
+            Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
+            Common::myText2(X, Y, 1, "#it{PbPb 23}, #sqrt{#it{s_{NN}}} = 5.36 TeV", Size, 43); Y -= 0.05;
+            Common::myText2(X, Y, 1, Form("Side %s",side_name.at(i).c_str()), Size, 43); Y -= 0.10;
+            Common::myText2(X, Y, 1, Form("#mu = : %i GeV",(int)fit_1n->GetParameter(1)), Size, 43); Y -= 0.05;
+            Common::myText2(X, Y, 1, Form("#sigma /#mu = : %.2f",fit_1n->GetParameter(2)/fit_1n->GetParameter(1)), Size, 43); Y -= 0.05;
+    
+            // Save the canvas
+            c0->SaveAs(Form("%s/energy_calib/%s_%s.pdf", figures.c_str(), fileNames[i].c_str(),sigmas.at(isigma).c_str()));
+            c0->Clear();
+            h_sum[i]->Clear();
+            }
+    }
+
 }
 

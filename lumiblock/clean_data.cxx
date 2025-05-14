@@ -53,7 +53,7 @@ void clean_data(){
             double sigma = sqrt(variance);
             cout << mean << " " << sigma <<endl;
 
-            // Loop through bins and save events beyond 3σ 
+            // Loop through bins and save events beyond 3sigma
             for (int bin = h1[sideAna][modAna]->FindBin(rangeLow); bin <= h1[sideAna][modAna]->FindBin(rangeHigh); bin++) {
                 double content = h1[sideAna][modAna]->GetBinContent(bin);
                 if(content == 0) continue;

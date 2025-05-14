@@ -46,6 +46,7 @@ int dep =20; //each pool have size of 20
 
 
 //histograms
+TH1* h_trk_test; // for test
 TH1* h_Trig;
 TH1* h_Zvtx;
 TH1* hNtrk[Bins::NCENT];
@@ -100,7 +101,7 @@ std::vector<std::string> m_EffEnergyNames;
 std::vector<float> no_booster = {1.0, 1.00, 1.0, 1.0,1.0, 1.00, 1.0, 1.0};
 vector<float> zdcWei;
 
-void load_weights(bool same_side);
+void load_weights();
 void InitHistos();
 bool passTrigger(std::vector<bool> trigger);
 int triggerIndex(std::vector<bool> trigger);
@@ -110,4 +111,5 @@ int get_zPool(float z);
 void Fill(Event* event1, Event* event2, int mixtype);
 bool FillMixed(EVENT_PTR event);
 bool isElectroMagnetic(int side, int mask);
+std::vector<float> GetMoments(int ilb_bin, int side, int Trig);
 #endif

@@ -21,7 +21,7 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         cout << "Working on minbias trigger!" << endl;
     }
     else if(Trig == 2){
-        cout << "Working on xorE2 trigger!" << endl;
+        cout << "Working on xor trigger!" << endl;
     }
     // Split the file paths into a vector
     std::vector<std::string> files;
@@ -35,9 +35,11 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         std::cerr << "No files provided!" << std::endl;
         return;
     }
+
     // loading data
     fChain = new TChain("zdcTree");
-    char base[200] ="/eos/project-p/ppflow2022/user.bglik.data22_13p6TeV.00435229.ANALYSIS.2.noLhcf_EXT0.585561170.585561170";
+    char base[200] ="/gpfs0/citron/users/bargl/ZDC/lhcf22/user.bglik.data22_13p6TeV.00435229.ANALYSIS.2.noLhcf_EXT0.585561170.585561170";
+    //char base[200] ="/gpfs0/citron/users/bargl/ZDC/lhcf22/user.bglik.data22_13p6TeV.00435229.ANALYSIS3.noLhcf_EXT0.596048724.596048724";
     // Open the files
     for (const auto file : files) {
         fChain->Add(Form("%s/%s",base,file.c_str()),0);
@@ -56,7 +58,7 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
       exit(-1);
     }
 
-    load_weights(same_side);
+    load_weights();
     // getting branches
     TTreeReader myreader(fChain);
     TTreeReaderValue<std::vector<float>> trk_pt(myreader, "trk_pt"); // units of MeV
@@ -69,24 +71,24 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
     TTreeReaderValue<int> nvtx(myreader, "t_nvtx");
     TTreeReaderValue<unsigned int> lumiblock(myreader, "lumiBlock");
     //zdc triggers
-    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E1_E3                         (myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
-    TTreeReaderValue<bool> HLT_L1_ZDC_XOR_E2                            (myreader, "HLT_noalg_L1ZDC_XOR_E2");
+    TTreeReaderValue<bool> HLT_noalg_L1ZDC_XOR_E1_E3                    (myreader, "HLT_noalg_L1ZDC_XOR_E1_E3");
+    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E1_E3                 (myreader, "HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+    TTreeReaderValue<bool> HLT_noalg_L1ZDC_XOR_E2                       (myreader, "HLT_noalg_L1ZDC_XOR_E2");
+    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E2                    (myreader, "HLT_mb_sptrk_L1ZDC_XOR_E2");
     TTreeReaderValue<bool> HLT_noalg_L1ZDC_A_AND_C                      (myreader, "HLT_noalg_L1ZDC_A_AND_C");
-    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E2                    (myreader,"HLT_mb_sptrk_L1ZDC_XOR_E2");
-	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_XOR_E1_E3                 (myreader,"HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
-	TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_A_AND_C                   (myreader, "HLT_mb_sptrk_L1ZDC_A_AND_C");
+    TTreeReaderValue<bool> HLT_mb_sptrk_L1ZDC_A_AND_C                   (myreader, "HLT_mb_sptrk_L1ZDC_A_AND_C");
 	// TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2          (myreader,"HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
 	// TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3       (myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-	// TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C         (myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
-    TTreeReaderValue<float> ps_HLT_L1_ZDC_XOR_E1_E3                     (myreader, "ps_HLT_noalg_L1ZDC_XOR_E1_E3");
-    TTreeReaderValue<float> ps_HLT_L1_ZDC_XOR_E2                        (myreader, "ps_HLT_noalg_L1ZDC_XOR_E2");
+	//TTreeReaderValue<bool> HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C         (myreader, "HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+    TTreeReaderValue<float> ps_HLT_noalg_L1ZDC_XOR_E1_E3                     (myreader, "ps_HLT_noalg_L1ZDC_XOR_E1_E3");
+    TTreeReaderValue<float> ps_HLT_noalg_L1ZDC_XOR_E2    (myreader, "ps_HLT_noalg_L1ZDC_XOR_E2");
     TTreeReaderValue<float> ps_HLT_noalg_L1ZDC_A_AND_C                  (myreader, "ps_HLT_noalg_L1ZDC_A_AND_C");
     TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_XOR_E2                (myreader,"ps_HLT_mb_sptrk_L1ZDC_XOR_E2");
 	TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3             (myreader,"ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
 	TTreeReaderValue<float> ps_HLT_mb_sptrk_L1ZDC_A_AND_C               (myreader, "ps_HLT_mb_sptrk_L1ZDC_A_AND_C");
 	// TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2      (myreader,"ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
 	// TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3   (myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-	// TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C     (myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+	//TTreeReaderValue<float> ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C     (myreader, "ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
 
 
     //minbias triggers
@@ -116,9 +118,40 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
     
     InitHistos();
 
+    //----------------------------------coorections for LHCf -------------------------------------------
+    //reading moments for late shower cut. DONT FORGET TO UNCOMMENT THE RELEVANT PART IN THE EVENT LOOP!
+    std::vector<std::vector<float>> moments_C;
+    std::vector<std::vector<float>> moments_A;
+    for(int ilb =0; ilb<Bins::NLB; ilb++){
+        moments_C.push_back(GetMoments(ilb,0, Trig));
+        moments_A.push_back(GetMoments(ilb,1, Trig));
+    }
+
+    //getting scale factors for stability correction
+    float scale_stability[2][4][Bins::NLB];
+    for(int side =0; side<2; side++){
+        std::string path_par;
+        path_par = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp";
+        std::vector<int> lb_center = {Bins::GetLbIndex(1816,1887), Bins::GetLbIndex(1902,1928), Bins::GetLbIndex(2812,2996), Bins::GetLbIndex(2996,3109),Bins::GetLbIndex(3218,3678)};
+        TFile *flb_mean_and = new TFile(Form("%s/mean_block1.root",path_par.c_str()),"read");
+        for(int mod=0; mod<4; mod++){
+            TH1D* h_mean_and = (TH1D*)flb_mean_and->Get(Form("h_mean_side%i_mod%i",side,mod));
+            double mean_center_and =0;
+            for(const auto& lumi : lb_center){
+                mean_center_and += h_mean_and->GetBinContent(lumi + 1)/lb_center.size();
+            }
+            for(int ilb=0; ilb<Bins::NLB; ilb++){
+                scale_stability[side][mod][ilb] = mean_center_and/h_mean_and->GetBinContent(ilb+1);
+                //scale_stability[side][mod][ilb] = 1.0;
+            }
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
+
     int nentries= myreader.GetEntries();
     int istart=0,iend= nentries; //by default loop over whole dataset
-    cout << "Total events : "<< nentries << endl;
+    cout << "Analyzing : "<< iend << " events" << endl;
     
       while (myreader.Next()){
         //retrive trigger information
@@ -126,6 +159,8 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         std::vector<float> m_trig_ps;
         if(Trig == 0){
             m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_A_AND_C);
+            m_trig.push_back(*HLT_mb_sptrk_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_A_AND_C);
+            //m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C);
         }
         else if(Trig == 1){
             m_trig.push_back(*HLT_noalg_L1MBTS_1);                                  m_trig_ps.push_back(*ps_HLT_noalg_L1MBTS_1);
@@ -148,15 +183,10 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
             //m_trig.push_back(*HLT_mb_mbts_all_L1MBTS_C);                            m_trig_ps.push_back(*ps_HLT_mb_mbts_all_L1MBTS_C);
         }
         else if(Trig ==2){
-            //m_trig.push_back(*HLT_L1_ZDC_XOR_E1_E3);                                m_trig_ps.push_back(*ps_HLT_L1_ZDC_XOR_E1_E3);
-            m_trig.push_back(*HLT_L1_ZDC_XOR_E2);                                   m_trig_ps.push_back(*ps_HLT_L1_ZDC_XOR_E2);
-            //m_trig.push_back(*HLT_noalg_L1ZDC_A_AND_C);                             m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_A_AND_C);
-            //m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E2);                           m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_XOR_E2);
-            //m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E1_E3);                        m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3);
-            //m_trig.push_back(*HLT_mb_sptrk_L1ZDC_A_AND_C);                          m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_A_AND_C);
-            //m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2);                 m_trig_ps.push_back(*ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2);
-            //m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3);              m_trig_ps.push_back(*ps_HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3);
-            //m_trig.push_back(*HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C);                m_trig_ps.push_back(*ps_HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C);
+            m_trig.push_back(*HLT_noalg_L1ZDC_XOR_E2);                                m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_XOR_E2);                            
+            m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E2);                             m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_XOR_E2);                                                           
+            m_trig.push_back(*HLT_noalg_L1ZDC_XOR_E1_E3);                             m_trig_ps.push_back(*ps_HLT_noalg_L1ZDC_XOR_E1_E3);                                
+            m_trig.push_back(*HLT_mb_sptrk_L1ZDC_XOR_E1_E3);                          m_trig_ps.push_back(*ps_HLT_mb_sptrk_L1ZDC_XOR_E1_E3);  
         }
         if(!passTrigger(m_trig)) continue; // check if event passed selected triggers
         trig_index = triggerIndex(m_trig); // retrive the index of the relevant trigger
@@ -172,33 +202,34 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         if(i>iend) {cout<<"Event loop finished! Analyzed "<< iend<<" events"<<endl;break;}
         if(i%100000==0) cout<<"proccesed "<<i<<" / "<<iend<<" events "<<" "<<fChain->GetFile()->GetName()<<endl;
         
-        //if(!((lumiBlock>537 && lumiBlock <859) || (lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
         if(!((lumiBlock>1014 && lumiBlock <4755))) continue; //stable beams
-        
-        if(lumiBlock < 1940) continue; // LHCf was out of physics position
-        
         if(lumiBlock < 1816) continue; //Timing adjust to Had1C for trigger
-        if((lumiBlock >= 1045 && lumiBlock <= 1050) ||
-            lumiBlock == 1696 ||
-            (lumiBlock >= 1806 && lumiBlock <= 1811) ||
-            lumiBlock == 1858 ||
-            lumiBlock == 1898 ||
-            lumiBlock == 1932 ||
-            lumiBlock == 1944 ||
-            (lumiBlock >= 2245 && lumiBlock <= 2250) ||
-            (lumiBlock >= 3112 && lumiBlock <= 3121) ||
-            lumiBlock == 3214 ||
-            (lumiBlock >= 3858 && lumiBlock <= 3863) ||
-            (lumiBlock >= 4565 && lumiBlock <= 4568)) { continue;} // remove bad LB based on file list
+        if(lumiBlock >=1889 && lumiBlock <= 1901) continue;
+        if(lumiBlock >=1930 && lumiBlock <= 1935) continue;
+        if(lumiBlock >=2147 && lumiBlock <= 2253) continue;
+        if(lumiBlock >=2807 && lumiBlock <= 2811) continue;
+        if(lumiBlock >=3111 && lumiBlock <= 3217) continue;
+        if(lumiBlock >=3680 && lumiBlock <= 3686) continue;
+        if(lumiBlock >=3766 && lumiBlock <= 3866) continue;
+        if(lumiBlock >=4563 && lumiBlock <= 4654) continue;
           
         #ifdef check
         cout<<"pt="<<trk_pt->size()<<"  eta="<<trk_eta->size()<<"  phi="<<trk_phi->size()<<"  qop="<<trk_charge->size()
             <<"  quality="<<trk_quality->size()<<endl;
         #endif
         if(isBitSet(Status[0],2) || isBitSet(Status[1],2)) continue; // reject failbits
-        //reject events which have late shower
-        if((ModAmp[3]/(ModAmp[2]+0.001) > 200) || (ModAmp[7]/(ModAmp[6]+0.001) > 200)) continue;
-        if((ModAmp[1] < 800 && ModAmp[2] > 2500) || (ModAmp[5] < 800 && ModAmp[6] > 2500)) continue;
+        
+        //--------------------------getting relevant moments for late shower cut-------------
+        int ilb_bin = Bins::GetLbBin(lumiBlock);
+        if(ilb_bin == -1) continue;
+        float mean_C = moments_C[ilb_bin].at(0);
+        float stdev_C = moments_C[ilb_bin].at(1);
+        float mean_A = moments_A[ilb_bin].at(0);
+        float stdev_A = moments_A[ilb_bin].at(1);
+        if(isBitSet((*BitMask),2) && (ModAmp[2]/Amp[0] > (mean_C + 2*stdev_C))) continue;
+        if(isBitSet((*BitMask),2+4) && (ModAmp[2+4]/Amp[1] > (mean_A + 2*stdev_A))) continue;
+        //----------------------------------------------------------------------------------
+
         /*-----------------------------------------------------------------------------
         *  Fill ZDC techinicals
         *-----------------------------------------------------------------------------*/
@@ -213,11 +244,11 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         //sum the energy in the zdc
         bool LGoverflow = false;
         for(int i = 1; i<4; i++){
-            if(isBitSet(*BitMask,i)) sumC+= zdcWei.at(i)*ModAmp[i];
+            if(isBitSet(*BitMask,i)) sumC+= zdcWei.at(i)*ModAmp[i]*scale_stability[0][i][ilb_bin];
             if(isBitSet(ModStatus[i],6)) LGoverflow = true;
         }
         for(int i = 5; i<8; i++){
-            if(isBitSet(*BitMask,i)) sumA+= zdcWei.at(i)*ModAmp[i];
+            if(isBitSet(*BitMask,i)) sumA+= zdcWei.at(i)*ModAmp[i]*scale_stability[1][i-4][ilb_bin];
             if(isBitSet(ModStatus[i],6)) LGoverflow = true;
         }
         if(LGoverflow) continue; //reject overflowed events
@@ -247,16 +278,16 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         /*-----------------------------------------------------------------------------
         *  Offline cuts
         *-----------------------------------------------------------------------------*/
+        if(sumA > 5000 || sumC > 5000) continue;
         bool pass_offline = true;
         if(Trig ==0){
-            if(!(sumA >=1600 && sumC >=1600)) pass_offline = false;
+            if(!(sumA >1000 && sumC >1000)) pass_offline = false;
         }
         if(Trig ==2){
-            if(!((sumA >2200 && sumC <1800) || (sumA <1800 && sumC >2200))) pass_offline = false;
+            if(!((sumA > 1000 && sumC <1000) || (sumA <1000 && sumC >1000))) pass_offline = false;
         }
         if(!pass_offline) continue;
         //-----------------------------------------------------------------------------------------
-         
         hzdc_A_with_pileup->Fill(sumA,prescale);
         hzdc_C_with_pileup->Fill(sumC,prescale);
         if((*nvtx) != 2) continue; //pile up rejection
@@ -270,8 +301,6 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         // if(m_eff_energy < 0.0 || m_eff_energy > 13.6001) continue;
         m_cent_i          =Bins::GetCentBin(m_eff_energy);
         if(m_cent_i <0 || m_cent_i >=Bins::NCENT) continue;
-        hzdc_after_cut->Fill(sum,prescale);
-        heff_after_cut->Fill(m_eff_energy);
         //get multiplicity bin
         nbin = Bins::GetTrkBin(ntrk);
         if(nbin <0 || nbin >=Bins::NTRK) continue;
@@ -281,13 +310,15 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         if(zbin<0) continue;
         good_events[m_cent_i] +=1;
         /*-----------------------------------------------------------------------------
-         *  Fill some Monitor histograms
-         *-----------------------------------------------------------------------------*/
+        *  Fill some Monitor histograms
+        *-----------------------------------------------------------------------------*/
+        hzdc_after_cut->Fill(sum);
+        heff_after_cut->Fill(m_eff_energy);
         h_Zvtx->Fill(m_zvtx);
         hNtrk[m_cent_i]->Fill(ntrk);
         hNtrk_no_cut->Fill((*ntrk_ptr));
-        h_eff_no_ps->Fill(m_cent_i);
-        h_Trig->Fill(trig_index);
+        //h_eff_no_ps->Fill(m_cent_i);
+        //h_Trig->Fill(trig_index);
         hNtrkEff->Fill(m_eff_energy,ntrk);
         hZdcCorr_after_cut->Fill(sumC,sumA);
         
@@ -296,6 +327,7 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
         /*-----------------------------------------------------------------------------
          *  Information about tracks in the event
          *-----------------------------------------------------------------------------*/
+         int trk_with_pt = 0; //for testing
         Event *ev=new Event(i, m_cent_i, m_zvtx);
         for(int j=0; j<ntrk; j++){
             float pt=0,eta=10,phi=10;
@@ -314,16 +346,18 @@ void CorrFunc(const int a ,const char* fileList, int Trig1 = 0){
 
             int ptbin1 = Bins::GetPtBin1(pt);
             int ptbin2 = Bins::GetPtBin2(pt);
+            if(ptbin1==-1 && ptbin2==-1) continue;
             h_pt[m_cent_i]->Fill(pt);
             h_eta[m_cent_i]->Fill(eta);
-            if(ptbin1==-1 && ptbin2==-1) continue;
             N_trigger[m_cent_i][nbin]->Fill(pt,trk_eff);
             //N_ntrk[m_cent_i]->Fill(ntrk,trk_eff);
             if(ptbin1>=0) h_EtaPhi[ptbin1]->Fill(eta,phi);
+            if (ptbin1 == 2 && m_cent_i == 9) trk_with_pt +=1; // for testing
 
             //push track into event
             ev->AddTrack(pt,eta,phi,charge,trk_eff,ptbin1,ptbin2);
         }
+        h_trk_test->Fill(trk_with_pt); // for testing
         Fill(ev,ev,0);
         FillMixed(ev);
      }
@@ -339,7 +373,7 @@ void InitHistos(){
     directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles");
     if (same_side) directory = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide");
     if(Trig == 1) directory = Form("%s/minbias",directory.c_str());
-    if(Trig == 2) directory = Form("%s/xorE2",directory.c_str());
+    if(Trig == 2) directory = Form("%s/xor",directory.c_str());
     gSystem->Exec(Form("mkdir -p %s",directory.c_str()));
     tmpf = new TFile(Form("%s/%s",directory.c_str(),output_name),"recreate");
     //tree = new TTree("tree", "A simple tree");
@@ -365,11 +399,11 @@ void InitHistos(){
     hzdc_C_without_pileup = new TH1D("hzdc_C_without_pileup", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     hzdc_after_cut = new TH1D("hzdc_cut", ";ZDC energy [GeV]; Counts" , 200 , 0 , 25000);
     hNtrk_no_cut = new TH1D("hNtrkNoCut", ";N_{ch}; Events" , 200 , 0 , 200);hNtrk_no_cut->Sumw2();
-    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}^{rec}" , Bins::NCENT, 0 , 13.6, Bins::NTRK,0,Bins::TRK_HI[Bins::NTRK -1]); hNtrkEff->Sumw2();
+    hNtrkEff  = new TH2D("hNtrkEff", ";Effective energy [TeV];N_{ch}^{rec}" , Bins::NCENT, Bins::CENT_LO[0] , Bins::CENT_HI[Bins::NCENT-1], 15,0,150); hNtrkEff->Sumw2();
     hZdcCorr  = new TH2D("hZdcCorr", ";side C;side A" , 200, 0 , 25000, 200,0,25000);
     hZdcCorr_after_cut  = new TH2D("hZdcCorr_after_cut", ";side C;side A" , 200, 0 , 25000, 200,0,25000);
-    heff_after_cut  = new TH1D("heff_after_cut", ";Eff energy [TeV];" , 50, 0 , 14);
-    heff  = new TH1D("heff", ";Eff energy [TeV];" , 50, -20 , 14);
+    heff_after_cut  = new TH1D("heff_after_cut", ";Eff energy [TeV];" , Bins::NCENT, Bins::CENT_LO[0] , Bins::CENT_HI[Bins::NCENT-1]);
+    heff  = new TH1D("heff", ";Eff energy [TeV];" ,Bins::NCENT, 0 , 13.61);
     
     
     //eta map of tracks
@@ -431,77 +465,8 @@ void InitHistos(){
         }
     }
 
-    //Trigger names histograms
-    if(minbias == 1){
-        m_TrigNames ={
-            "noalg_L1MBTS_1",
-            "noalg_mb_L1MBTS_1",
-            "noalg_L1MBTS_1_1",
-            "noalg_mb_L1MBTS_1_1",
-            "noalg_mb_L1MBTS_2",
-            "noalg_L1MBTS_A",
-            "noalg_L1MBTS_C",
-            "mb_mbts_L1MBTS_1",
-            "mb_mbts_L1MBTS_1_1",
-            "mb_mbts_L1MBTS_2",
-            "HLT_mb_mbts_L1RD0_FILLED",
-            "HLT_mb_sptrk_vetombts2in_L1RD0_FILLED",
-            "mb_mbts_all_L1MBTS_A",
-            "mb_mbts_all_L1MBTS_C"
-        
-        };
-    }
-   
-   else{
-        m_TrigNames ={
-                //"L1_ZDC_XOR_E1_E3",
-                //"L1_ZDC_XOR_E2",
-                "noalg_L1ZDC_A_AND_C",
-                //"mb_sptrk_L1ZDC_XOR_E2",
-                //"mb_sptrk_L1ZDC_XOR_E1_E3",
-                "mb_sptrk_L1ZDC_A_AND_C",
-                //"mb_sp100_trk30_hmt_L1ZDC_XOR_E2",
-                //"mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3",
-                "mb_sp100_trk30_hmt_L1ZDC_A_AND_C",
-            };
-   }
-   
-    h_Trig=new TH1D("h_Trig","h_Trig",m_TrigNames.size(),-0.5,m_TrigNames.size()-0.5);
-    int itrig=1;
-    for(auto trig:m_TrigNames){
-        h_Trig->GetXaxis()->SetBinLabel(itrig,trig.c_str());
-        itrig++;
-    }
-
-    m_EffEnergyNames = {
-        "[0,0.68)",
-        "[0.68,1.36)",
-        "[1.36,2.04)",
-        "[2.04,2.72)",
-        "[2.72,3.4)",
-        "[3.4,4.08)",
-        "[4.08,4.76)",
-        "[4.76,5.44)",
-        "[5.44,6.12)",
-        "[6.12,6.8)",
-        "[6.8,7.48)",
-        "[7.48,8.16)",
-        "[8.16,8.84)",
-        "[8.84,9.52)",
-        "[9.52,10.2)",
-        "[10.2,10.88)",
-        "[10.88,11.56)",
-        "[11.56,12.24)",
-        "[12.24,12.92)",
-        "[12.92,13.6)"
-    };
-    h_eff_no_ps=new TH1D("h_eff_no_ps","h_eff_no_ps",m_EffEnergyNames.size(),-0.5,m_EffEnergyNames.size()-0.5);
-    int ieffbin=1;
-    for(auto binnum:m_EffEnergyNames){
-        h_eff_no_ps->GetXaxis()->SetBinLabel(ieffbin,binnum.c_str());
-        ieffbin++;
-    }
-
+    //for testing
+    h_trk_test = new TH1D("h_trk_test", ";N_{ch}; Events" , 200 , 0 , 200);
 
 }
  bool passTrigger(std::vector<bool> trigger){
@@ -530,18 +495,12 @@ int triggerIndex(std::vector<bool> trigger){
     return index;
 }
 
-void load_weights(bool same_side){
+void load_weights(){
     std::cout << "Initialize ZDC Weights!" << std::endl;
     std::string zdc_C; 
     std::string zdc_A; 
-    //zdc_C = Form("%s/zdcWeights_side0_corrected.root",weights_path.c_str());
-    zdc_C = Form("%s/zdcWeights_side0_corrected.root",weights_path.c_str());
-    zdc_A = Form("%s/zdcWeights_side1_corrected.root",weights_path.c_str());
-    // if(same_side){
-    //     zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/zdcWeights_side0_corrected.root");
-    //     //zdc_C = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/zdcWeights_side0.root");
-    //     zdc_A = Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/calibration/RootFiles/sameSide/zdcWeights_side1.root");  
-    // }
+    zdc_C = Form("%s/zdcWeights_side0_itr10.root",weights_path.c_str());
+    zdc_A = Form("%s/zdcWeights_side1_itr10.root",weights_path.c_str());
     std::cout << zdc_C << std::endl;
     std::cout << zdc_A << std::endl;
     //converting TvectorD to std::vector object
@@ -549,16 +508,18 @@ void load_weights(bool same_side){
     TFile *fileA = new TFile(Form("%s",zdc_A.c_str()));
     TVectorD *tvec_C = nullptr;
     TVectorD *tvec_A = nullptr;
-    fileC->GetObject("gains", tvec_C);
-    fileA->GetObject("gains", tvec_A);
+    fileC->GetObject("gains_avg", tvec_C);
+    fileA->GetObject("gains_avg", tvec_A);
     if (!tvec_C || !tvec_A) {
         std::cerr << "Error: TVectorD object not found in file!" << std::endl;
         exit(-1);
     }
     for (int i = 0; i < 8; ++i) {
         if(i<4) zdcWei.push_back((*tvec_C)[i]);
+        //if(i<4) zdcWei.push_back(1.0);
         else{
                 zdcWei.push_back((*tvec_A)[i-4]);
+                //zdcWei.push_back(1.0);
         }
         if(i ==0 || i==4) zdcWei.at(i) = 0.0;
         cout << zdcWei.at(i) << endl;   
@@ -590,8 +551,9 @@ void Fill(Event* event1, Event* event2, int mixtype) {
     if (icent < 0 || icent >= Bins::NCENT) return;
 
     int itrk = (nbin);
-    if (itrk < 0 || itrk >= Bins::NTRK) return;
-
+    //int itrk = Bins::GetTrkBin(event1->get_npart());
+      if (itrk < 0 || itrk >= Bins::NTRK) return;
+    
     int ntrk1 = event1->get_npart();
     int ntrk2 = event2->get_npart();
 
@@ -638,6 +600,7 @@ void Fill(Event* event1, Event* event2, int mixtype) {
                 else                   bg[icent][itrk][ptbin1][ptbin2][1]->Fill(dphi0, deta, wei * eff1 * eff2);
             }
         }
+        //cout << j <<" " <<ev->Get << endl;
     }
 }
 
@@ -685,4 +648,21 @@ bool isElectroMagnetic(int side, int mask){
 
     // Return true if had1 is set, but had2 and had3 are not
     return had1 && !had2 && !had3;
+}
+
+std::vector<float> GetMoments(int ilb_bin, int side, int Trig){
+    TFile *input_histo; 
+    std::vector<string> lb_range;
+    for(int ilb=0; ilb<Bins::NLB; ilb++){
+        lb_range.push_back(Bins::label_lb(ilb));
+    }
+    if(Trig == 0 ) input_histo = new TFile(Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp/histograms.root"),"read");
+    if(Trig == 1 ) input_histo = new TFile(Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp/minbias/histograms.root"),"read");
+    if(Trig == 2 ) input_histo = new TFile(Form("/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp/xor/histograms.root"),"read");
+    TH2D *h2 = (TH2D*)input_histo->Get(Form("h%i_h2AmpRat_Amp_ilb_%i",side,ilb_bin));
+    //h2->Print();
+    std::vector<float> mom;
+    mom.push_back(h2->GetMean(2));
+    mom.push_back(h2->GetStdDev(2));
+    return mom;
 }

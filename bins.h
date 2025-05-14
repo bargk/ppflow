@@ -6,7 +6,7 @@
 #include <Riostream.h>
 
 #include "common.C"
-
+//#define DOUBLE_ERROR
 namespace Bins{
 
     std::string HH_LABEL  = "#it{h}-#it{h} Correlations";
@@ -132,9 +132,9 @@ namespace Bins{
 
 
     enum {
-    NCENT = 21,
-    NTRK = 13,
-    NLB  = 9,
+    NCENT = 20,
+    NTRK = 4,
+    NLB  = 10,
     NPT1 = 5,
     NPT2 = 5,
     NCH  = 2,
@@ -142,9 +142,9 @@ namespace Bins{
     OPPOSITE_CHARGE = 1,
 
     NCENT_ADD = 11,
-    NTRK_ADD = 1,
+    NTRK_ADD = 2,
     NLB_ADD = 1,
-    NPT1_ADD = 1,
+    NPT1_ADD = 2,
     NPT2_ADD = 2,
     NCH_ADD = 1,
     COMBINED_CHARGE = 2,
@@ -156,17 +156,16 @@ namespace Bins{
     // CENTRALITY BINS
 //---------------------------------------------------------------------------------------------------------------------
 
-//LABELS                              0,       1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,   14,   15,   16,    17,    18,    19,    20
-float CENT_LO[NCENT + NCENT_ADD] = { -500.0, 0.0,  0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92 };  // bins for effective energy 
-float CENT_HI[NCENT + NCENT_ADD] = { 0.0,    0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88, 11.56, 12.24, 12.92, 13.6001 }; //in TeV
-
+// Bin Index:                         0     1     2    3     4     5     6     7     8     9    10    11    12    13     14     15     16     17     18     19  
+float CENT_LO[NCENT + NCENT_ADD] = { 3.6, 4.1,  4.6,  5.1,  5.6,  6.1,  6.6,  7.1,  7.6,  8.1,  8.6,  9.1,  9.6,  10.1,  10.6,  11.1,  11.6,  12.1,  12.6,  13.1 };  //bins for eff energy in TeV
+float CENT_HI[NCENT + NCENT_ADD] = { 4.1, 4.6,  5.1,  5.6,  6.1,  6.6,  7.1,  7.6,  8.1,  8.6,  9.1,  9.6,  10.1,  10.6, 11.1,  11.6,  12.1,  12.6,  13.1,  13.61 };  
 
 float cent_add_lo[NCENT_ADD]     = {0.0};
 float cent_add_up[NCENT_ADD]     = {0.0};
 void Initialize_CentAdd() {
   std::vector<std::pair<double, double>> new_cent_bins = {
-    //21,                   22,          23,            24,           25,          26,          27,             28,            29,             30,             31,        35,       36,
-    { -500.0, 13.6001}, {0.0, 1.36}, {10.88, 12.92}, {0.0, 1.36}, {1.36, 2.72}, {2.72, 4.08}, {4.08, 5.44}, {5.44, 6.8}, {6.8, 8.16}, {8.16, 9.52}, {9.52, 10.88}//, {10.88, 12.24}, {12.24, 13.6}
+    //20,           21,          22,     23,           24,          25,       26,       27,            28,             29,             30,        31,       36,
+    { 3.6, 5.1}, {5.1, 6.1}, {3.6,6.1}, {6.1, 7.1}, {7.1, 8.1}, {8.1, 9.1}, {9.1, 10.1}, {10.1, 11.1}, {11.6, 13.1}, {7.1, 8.6}, {6.1, 13.61}
     //, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
@@ -234,17 +233,17 @@ std::pair<double, double> GetCentVals(int icent) {
 
 // Multiplicity BINS
 //---------------------------------------------------------------------------------------------------------------------
-//LABELS                        0,  1,  2,  3,  4,  5,  6,  7,  8,  9,   10,  11,  12
-int TRK_LO[NTRK + NTRK_ADD] = { 0,  10, 20, 30, 40, 50, 60, 70, 80, 90 , 100, 110, 120  }; 
-int TRK_HI[NTRK + NTRK_ADD] = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130  };
+//LABELS                        0,  1,  2,  3,  
+int TRK_LO[NTRK + NTRK_ADD] = { 0,  10, 20, 30}; 
+int TRK_HI[NTRK + NTRK_ADD] = { 10, 20, 30, 300};
 int trk_add_lo[NTRK_ADD]     = {0};
 int trk_add_up[NTRK_ADD]     = {0};
 
 
 void Initialize_TrkAdd() {
   std::vector<std::pair<double, double>> new_trk_bins = {
-    //13,      14,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 0, 130}//, {0, 130}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    //4,        5,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
+    { 0, 300}, {0, 20},//{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -276,6 +275,7 @@ void Initialize_TrkAdd() {
 
 std::string label_trk(int itrk) {
   sprintf(label, "%d #leq N_{ch}^{rec} <%d", TRK_LO[itrk], TRK_HI[itrk]);
+  if(itrk ==5) sprintf(label, "N_{ch}^{rec} <%d", TRK_HI[itrk]);
   std::string ret = label;
   return ret;
 }
@@ -311,9 +311,9 @@ std::pair<double, double> GetTrkVals(int itrk) {
 
 // Lumiblock BINS
 //---------------------------------------------------------------------------------------------------------------------
-//LABELS                          0,    1,    2,    3,    4,   5,     6,    7,    8,  
-int LB_LO[NLB + NLB_ADD] = { 1816, 1902, 1936, 2254, 2812, 3218, 3687, 3867, 4655}; 
-int LB_HI[NLB + NLB_ADD] = { 1888, 1929, 2146, 2806, 3111, 3679, 3765, 4562, 4754};
+//LABELS                       0,    1,    2,    3,    4,   5,     6,    7,    8,   9
+int LB_LO[NLB + NLB_ADD] = { 1816, 1902, 1936, 2254, 2812, 2996, 3218, 3687, 3867, 4655}; 
+int LB_HI[NLB + NLB_ADD] = { 1887, 1928, 2145, 2806, 2996, 3109, 3678, 3764, 4561, 4744};
 int lb_add_lo[NLB_ADD]     = {0};
 int lb_add_up[NLB_ADD]     = {0};
 
@@ -321,7 +321,7 @@ int lb_add_up[NLB_ADD]     = {0};
 void Initialize_LbAdd() {
   std::vector<std::pair<double, double>> new_lb_bins = {
     //13,      14,       14,        15,        28,       29,      30,       31,       32,       33,       34,        35,       36,
-    { 1816, 1929}//, {0, 130}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
+    { 1816, 1928}//, {0, 130}, //{ 0, 100},{0, 20}, {0, 20}, {20, 40}, {40, 60}, {60, 80}, {80, 100}, {20, 100}, {0, 60}, { 0, 10},
     //37,       38,       39,       40,       41,       42,       43,       44,       
     //{10, 20}, {30, 40}, {50, 60}, {60, 70}, {70, 80}, {80, 90}, {90, 100}, {85, 95}
   };
@@ -388,15 +388,15 @@ std::pair<double, double> GetLbVals(int ilb) {
 
 // PTa BINS
 //LABELS                           0,   1,   2,   3,   4,   
-float PT1_LO[NPT1 + NPT1_ADD] = {0.5, 1.0, 2.0, 3.0, 4.0,};
-float PT1_HI[NPT1 + NPT1_ADD] = {1.0, 2.0, 3.0, 4.0, 5.0,};
+float PT1_LO[NPT1 + NPT1_ADD] = {0.5, 1.0, 2.0, 3.0, 4.0};
+float PT1_HI[NPT1 + NPT1_ADD] = {1.0, 2.0, 3.0, 4.0, 5.0};
 //BINS
 int pt1_add_lo[NPT1_ADD] = {0};
 int pt1_add_up[NPT1_ADD] = {0};
 void Initialize_Pt1Add() {
   std::vector<std::pair<double, double>> new_pt1_bins = {
     //  5          6          7           8
-    {0.5, 5.0}//, {1.0, 5.0}, {2.0, 5.0}, {0.5, 3.0},
+    {0.5, 5.0}, {1.0, 5.0}//, {2.0, 3.0}//, {0.5, 3.0},
   };
 
   if (new_pt1_bins.size() != NPT1_ADD) {
@@ -468,7 +468,7 @@ int pt2_add_up[NPT2_ADD] = {0};
 void Initialize_Pt2Add() {
   std::vector<std::pair<double, double>> new_pt2_bins = {
     // 5         6           7           8          49          50          51          52          53
-    {0.5, 5.0}, {3.0, 5.0}//, {2.0, 3.0}, {3.0, 5.0}, //{0.5, 5.0}, {1.0, 5.0}, {2.0, 5.0}, {0.4, 3.0}, {1.0, 3.0},
+    {0.5, 5.0}, {1.0, 5.0}//, {2.0, 3.0}//, {3.0, 5.0}, //{0.5, 5.0}, {1.0, 5.0}, {2.0, 5.0}, {0.4, 3.0}, {1.0, 3.0},
     // 54         55          56          57          58          59          60          61            62
     //{1.4, 1.6}, {2.4, 2.6}, {1.0, 1.5}, {1.5, 2.0}, {3.0, 4.0}, {4.0, 6.0}, {6.0, 8.0}, {8.0, 10.0}, {10.0, 15},
     // 63         64          65          66          67          68          69          70          71        72
@@ -906,15 +906,15 @@ std::pair<float, float> GetVnPtb(TFile *TemplateFile, int icent, int ipt1, int i
 std::string label_cent_peri(int icent) {
   //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
   //else                            
-  sprintf(label, "%.2f#leq E_{Eff} < %.2f TeV"   , CENT_LO[icent],CENT_HI[icent]);
+  sprintf(label, "E_{Eff} #in[%.1f,%.1f) TeV"   , CENT_LO[icent],CENT_HI[icent]);
   std::string ret = label;
   return ret;
 }
 std::string label_trk_peri(int icent) {
   //if (NTRACK_PPB_HI[icent] < 500) sprintf(label, "%d#leq#it{N}_{ ch}^{ pp,periph}<%d", NTRACK_PPB_LO[icent], NTRACK_PPB_HI[icent]);
   //else                            
-  sprintf(label, "%d < N_{ch}^{rec} < %d "   , TRK_LO[icent],TRK_HI[icent]);
-  if(icent == NTRK) sprintf(label, "%d < N_{ch}^{rec}"   , TRK_LO[icent]); //highest peripheral nch bin
+  sprintf(label, "N_{ch}^{rec} #in [%d,%d)"   , TRK_LO[icent],TRK_HI[icent]);
+  //if(icent == NTRK) sprintf(label, "%d < N_{ch}^{rec}"   , TRK_LO[icent]); //highest peripheral nch bin
   std::string ret = label;
   return ret;
 }

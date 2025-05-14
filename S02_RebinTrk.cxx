@@ -22,10 +22,10 @@ void S02_RebinTrk(int Trig =0) {
         }
     }
     else if(Trig ==2){
-        std::cout << "Working on XOR_E2 trigger!" << std::endl;
-        if(Bins::same_side1) base = Form("%s/sameSide/xorE2",base.c_str());
+        std::cout << "Working on XOR trigger!" << std::endl;
+        if(Bins::same_side1) base = Form("%s/sameSide/xor",base.c_str());
         else{
-            base = Form("%s/xorE2",base.c_str());
+            base = Form("%s/xor",base.c_str());
         }
     }
     else{

@@ -1,20 +1,20 @@
-//ploting figures for internal note that related late shower cut based on HAD2 cut
+//ploting figures for internal note that related stability cut
 #include "/gpfs0/citron/users/bargl/ZDC/HI23/AtlasStyle.h"
 #include "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/common.C"
 #include "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/bins.h"
 
 #define sides_uncalib_cuts 
-#define sides_uncalib 
+#define sides_uncalib_cuts_ratio 
+#define stability_error
 #define average_adc 
-#define stability_error 
 
 std::string  base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/lumiblock/Amp";
 //std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/internal-note/fig_pool/ZDC";
-std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/thesis/fig_pool/ana/energy_scale_studies/Had2Cut";
+std::string  figures = "/gpfs0/citron/users/bargl/ZDC/lhcf22/thesis/fig_pool/ana/energy_scale_studies/StabilityCut";
 double X, Y;
 int Size = 20;
 
-void plot_ana_afterHad2Cut(){
+void plot_ana_afterStabilityCut(){
     SetAtlasStyle();
     std::vector<int> lineColors = {kRed+3, kBlue+3};
     std::vector<string> triggers = {"/","/xor/","/minbias/"};
@@ -27,14 +27,14 @@ void plot_ana_afterHad2Cut(){
     //plot zdc sides before and after cut
     #ifdef sides_uncalib_cuts
         for(int side =0; side<2; side++){
-            for(int i=0; i<trigger_name.size(); i++){
-                TFile *input_before = new TFile(Form("%s%shistograms.root",base.c_str(), triggers.at(i).c_str()),"read");
-                TFile *input_after = new TFile(Form("%s%shistograms.Had2Cut.root",base.c_str(), triggers.at(i).c_str()),"read");
+            for(int i=0; i<trigger_name.size() -1; i++){
+                TFile *input_before = new TFile(Form("%s%shistograms.Had2Cut.root",base.c_str(), triggers.at(i).c_str()),"read");
+                TFile *input_after = new TFile(Form("%s%shistograms.stabilityFix.root",base.c_str(), triggers.at(i).c_str()),"read");
                 THStack *hs = new THStack("hs",";ZDC sum [ADC];Events");
-                TH2D *h2_0 = (TH2D*)input_before->Get(Form("hLbAmp%i",side))->Clone("before");
-                TH2D *h2_1 = (TH2D*)input_after->Get(Form("hLbAmp%i",side))->Clone("after");
-                TH1D *h2_0_proj = h2_0->ProjectionY(); h2_0_proj->SetLineColor(lineColors.at(0)); h2_0_proj->SetLineWidth(2);  
-                TH1D *h2_1_proj = h2_1->ProjectionY(); h2_1_proj->SetLineColor(lineColors.at(1)); h2_1_proj->SetLineWidth(2);
+                // TH2D *h2_0 = (TH2D*)input_before->Get(Form("hLbAmp%i",side))->Clone("before");
+                // TH2D *h2_1 = (TH2D*)input_after->Get(Form("hLbAmp%i",side))->Clone("after");
+                TH1D *h2_0_proj =(TH1D*)input_before->Get(Form("hsum%s_uncalib",side_name.at(side).c_str())); h2_0_proj->SetLineColor(lineColors.at(0)); h2_0_proj->SetLineWidth(2);  
+                TH1D *h2_1_proj =(TH1D*)input_after->Get(Form("hsum%s_uncalib",side_name.at(side).c_str())); h2_1_proj->SetLineWidth(2);
                 c0->cd();
                 hs->Add(h2_0_proj);
                 hs->Add(h2_1_proj);
@@ -48,57 +48,25 @@ void plot_ana_afterHad2Cut(){
                 Common::myText2(X, Y, 1, Form("%s trigger",trigger_name.at(i).c_str()), Size, 43); Y -= 0.05;
                 legend0 = new TLegend(0.2,0.2,0.44,0.43);
                 legend0->SetBorderSize(0);
-                legend0->AddEntry(h2_0_proj, "Before cut", "l");
-                legend0->AddEntry(h2_1_proj, "After cut", "l");
+                legend0->AddEntry(h2_0_proj, "Before scaling", "l");
+                legend0->AddEntry(h2_1_proj, "After scaling", "l");
                 legend0->Draw();
                 c0->SaveAs(Form("%s/side%i_%s.pdf",figures.c_str(),side,trigger_name.at(i).c_str()));
             }
         }
     #endif
     //------------------------------------------------------------------------------------------------------------------
-    //plot unclibrated distributions of the sides for each trigger
-    std::vector<string> figures_name = {"sides_AND.pdf","sides_XOR.pdf","sides_minbias.pdf"};
-    lineColors.clear();
-    lineColors = {kBlack, kMagenta};
-    #ifdef sides_uncalib
-        for(int i =0; i<triggers.size(); i++){
-            TFile *input = new TFile(Form("%s%shistograms.Had2Cut.root",base.c_str(), triggers.at(i).c_str()),"read");
-            THStack *hs = new THStack("hs",";ZDC sum [ADC];Events");
-            TH2D *h2_0 = (TH2D*)input->Get(Form("hLbAmp0"))->Clone("side0");
-            TH2D *h2_1 = (TH2D*)input->Get(Form("hLbAmp1"))->Clone("side1");
-            TH1D *h2_0_proj = h2_0->ProjectionY(); h2_0_proj->SetLineColor(lineColors.at(0)); h2_0_proj->SetLineWidth(2);  
-            TH1D *h2_1_proj = h2_1->ProjectionY(); h2_1_proj->SetLineColor(lineColors.at(1)); h2_1_proj->SetLineWidth(2);
-            c0->cd();
-            hs->Add(h2_0_proj);
-            hs->Add(h2_1_proj);
-            hs->Draw("nostack");
-            gPad->SetLogy();
-            X = 0.6, Y = 0.85;
-            Common::myText2(X, Y, 1, "ATLAS ", Size, 73);
-            Common::myText2(X + 0.1, Y, 1, Common::Internal, Size, 43); Y -= 0.05;
-            Common::myText2(X, Y, 1, "#it{pp 22}, #sqrt{#it{s}} = 13.6 TeV", Size, 43); Y -= 0.05;
-            Common::myText2(X, Y, 1, Form("%s trigger",trigger_name.at(i).c_str()), Size, 43); Y -= 0.05;
-            legend0 = new TLegend(0.2,0.2,0.44,0.43);
-            legend0->SetBorderSize(0);
-            legend0->AddEntry(h2_0_proj, "Side C", "l");
-            legend0->AddEntry(h2_1_proj, "Side A", "l");
-            legend0->Draw();
-            c0->SaveAs(Form("%s/%s",figures.c_str(),figures_name.at(i).c_str()));
-        }
-    #endif
-//------------------------------------------------------------------------------------------------------------------
-
 
 //plot the modules <ADC> for different triggers
-lineColors = {kBlue, kRed, kOrange+3};
+lineColors = {kBlue,kRed, kOrange+3};
 gPad->SetLogy(0);
 #ifdef average_adc
     for(int side =0; side <2; side++){
         for(int mod =1; mod<4; mod++){
-            THStack *hs = new THStack("hs",";LB;<ADC>");
-            TFile *input_0 = new TFile(Form("%s/histograms.Had2Cut.root",base.c_str()),"read");
+            THStack *hs = new THStack("hs",";LB;#LT ADC#GT");
+            TFile *input_0 = new TFile(Form("%s/histograms.stabilityFix.root",base.c_str()),"read");
             //TFile *input_1 = new TFile(Form("%s/minbias/histograms.Had2Cut.root",base.c_str()),"read");
-            TFile *input_2 = new TFile(Form("%s/xor/histograms.Had2Cut.root",base.c_str()),"read");
+            TFile *input_2 = new TFile(Form("%s/xor/histograms.stabilityFix.root",base.c_str()),"read");
 
             TH2D *h2_00 = (TH2D*)input_0->Get(Form("h%i_%i",side,mod))->Clone(Form("had%i_side%i_AND",side,mod));
             //TH2D *h2_01 = (TH2D*)input_1->Get(Form("h%i_%i",side,mod))->Clone(Form("had%i_side%i_minbias",side,mod));
@@ -146,9 +114,9 @@ gPad->SetLogy(0);
         for(int side =0; side <2; side++){
             for(int mod =1; mod<4; mod++){
                 THStack *hs = new THStack("hs",";LB;#frac{#LT ADC#GT}{#LT#LT ADC#GT#GT_{center}}");
-                TFile *input_0 = new TFile(Form("%s/histograms.Had2Cut.root",base.c_str()),"read");
+                TFile *input_0 = new TFile(Form("%s/histograms.stabilityFix.root",base.c_str()),"read");
                 //TFile *input_1 = new TFile(Form("%s/minbias/histograms.Had2Cut.root",base.c_str()),"read"); 
-                TFile *input_2 = new TFile(Form("%s/xor/histograms.Had2Cut.root",base.c_str()),"read");
+                TFile *input_2 = new TFile(Form("%s/xor/histograms.stabilityFix.root",base.c_str()),"read");
                 
                 TH2D *h2_00 = (TH2D*)input_0->Get(Form("h%i_%i",side,mod))->Clone(Form("had%i_side%i_AND",side,mod));
                 TH2D *h2_02 = (TH2D*)input_2->Get(Form("h%i_%i",side,mod))->Clone(Form("had%i_side%i_XOR",side,mod));
@@ -193,4 +161,32 @@ gPad->SetLogy(0);
         }
     #endif
     //------------------------------------------------------------------------------------------------------------------
+
+    //plot the ratio of the sides before the scale and after the scale
+    #ifdef sides_uncalib_cuts_ratio
+    for(int side =0; side<2; side++){
+        for(int i=0; i<trigger_name.size() -1; i++){
+            TFile *input_before = new TFile(Form("%s%shistograms.Had2Cut.root",base.c_str(), triggers.at(i).c_str()),"read");
+            TFile *input_after = new TFile(Form("%s%shistograms.stabilityFix.root",base.c_str(), triggers.at(i).c_str()),"read");
+            THStack *hs = new THStack("hs",";ZDC sum [ADC];#frac{Before scaling}{After scaling}");
+            // TH2D *h2_0 = (TH2D*)input_before->Get(Form("hLbAmp%i",side))->Clone("before");
+            // TH2D *h2_1 = (TH2D*)input_after->Get(Form("hLbAmp%i",side))->Clone("after");
+            TH1D *h2_0_proj =(TH1D*)input_before->Get(Form("hsum%s_uncalib",side_name.at(side).c_str())); h2_0_proj->SetLineColor(lineColors.at(0)); h2_0_proj->SetLineWidth(2);  
+            TH1D *h2_1_proj =(TH1D*)input_after->Get(Form("hsum%s_uncalib",side_name.at(side).c_str())); h2_1_proj->SetLineWidth(2);
+            c0->cd();
+            h2_0_proj->SetLineColor(kBlack);
+            h2_0_proj->Divide(h2_1_proj);
+            for(int ibin =0; ibin < h2_0_proj->GetNbinsX(); ibin++){
+                h2_0_proj->SetBinError(ibin+1,0);
+            }
+            hs->Add(h2_0_proj);
+            hs->Draw("nostack;L");
+            gPad->SetGrid();
+            gPad->SetLogy(0);
+            c0->SaveAs(Form("%s/side%i_%s_ratio.pdf",figures.c_str(),side,trigger_name.at(i).c_str()));
+        }
+    }
+#endif
+//------------------------------------------------------------------------------------------------------------------
+gPad->SetGrid(0,0);
 }

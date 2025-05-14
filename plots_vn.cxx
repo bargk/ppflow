@@ -38,18 +38,18 @@ void plots_vn(int Trig     = 0,
     std::string base3;
     if(Trig== 0){
         std::cout << "Working on AND trigger!" << std::endl;
-        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles";
+        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
         base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots";
     }
     else if(Trig == 1){
         std::cout << "Working on Minbias trigger!" << std::endl;
-        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/minbias";
+        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide/minbias";
         base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots/minbias";
     }
     else if(Trig ==2){
         std::cout << "Working on XOR_E2 trigger!" << std::endl;
-        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/xorE2";
-        base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots/xorE2";
+        base1 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide/xor";
+        base3 = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/vn_plots/xor";
     }
     else{
          std::cerr << "Error: no valid trigger index provided" << std::endl;
@@ -103,9 +103,9 @@ void plots_vn(int Trig     = 0,
     //OutFile = new TFile("Rootfiles/Plots.root","update");
     //std::vector<int>cent_periph=Bins::CentBinsPeriph();
     //std::vector<int>trk_periph=Bins::TrkBinsPeriph();
-    std::vector<int>cent_periph = {7};
-    std::vector<int>trk_periph  = {0};
-    Peripheraldep_Centdep(Bins::GetTrkIndex(0,130),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
+    std::vector<int>cent_periph = {21};
+    std::vector<int>trk_periph  = {5};
+    Peripheraldep_Centdep(Bins::GetTrkIndex(0,300),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
     //Peripheraldep_Centdep(Bins::GetTrkIndex(0,10),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
      //Peripheraldep_Centdep(Bins::GetTrkIndex(30,40),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
      //Peripheraldep_Centdep(Bins::GetTrkIndex(100,110),Bins::GetPtaIndex(0.5,5.0),Bins::GetPtbIndex(0.5,5.0),2,Bins::GetDetaIndex(2.0,5.0),cent_periph,trk_periph);
@@ -119,8 +119,8 @@ void Peripheraldep_Centdep(int itrk,int ipt1,int ipt2,int ich, int ideta, std::v
     return ;
   }
  
- //std::vector<int> centbins_central=Bins::GetCentIndex({ 0.68, 1.36, 2.04, 2.72, 3.40, 4.08, 4.76, 5.44, 6.12, 6.80, 7.48, 8.16, 8.84, 9.52, 10.20, 10.88});
- std::vector<int> centbins_central={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+ std::vector<int> centbins_central=Bins::GetCentIndex({ 3.6, 5.1, 6.1, 7.1, 8.1, 9.1, 10.1, 11.1});
+//  std::vector<int> centbins_central={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 
 
   char name [600];

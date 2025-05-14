@@ -35,7 +35,7 @@ float X,Y;
 /*-----------------------------------------------------------------------------
  *  Plot some basic phyisics for analysis (not including Template)
  *-----------------------------------------------------------------------------*/
- std::string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/1.5sigma/sameSide";
+ std::string base = "/gpfs0/citron/users/bargl/ZDC/lhcf22/ppflow/Rootfiles/sameSide";
 void plots_analysis(int Trig1 =0){
     int Trig = Trig1; 
     SetAtlasStyle();
@@ -222,6 +222,7 @@ void plots_analysis(int Trig1 =0){
         h_zdc[i]->SetMarkerStyle(20);
         h_zdc[i]->SetMarkerSize(2.1);
         h_zdc[i]->SetMaximum(maxY * 10.0); // Set Y-axis maximum with some margin
+        h_zdc[i]->SetMinimum(100); // Set Y-axis maximum with some margin
         if (i == 0) h_zdc[i]->Draw("E1");
         else{h_zdc[i]->Draw("E1;SAME");}
     }
@@ -328,7 +329,7 @@ void plots_analysis(int Trig1 =0){
             input = new TFile(Form("%s/xorE2/histograms.root",base.c_str()));
         }
         else{
-            input =new TFile(Form("%s/histograms.root",base.c_str()));
+            input =new TFile(Form("%s/histograms.2.root",base.c_str()));
         }
         c2->Clear();
         c2->Divide(1,1);
@@ -347,9 +348,9 @@ void plots_analysis(int Trig1 =0){
         Common::myText2(X+0.1,Y,1,Common::Internal,70,43);Y=Y-0.05;
         Common::myText2(X       , Y, 1, "#it{pp} #sqrt{#it{s}} = 13.6 TeV", 70, 43);
         legend0->Clear();
-        legend0 = new TLegend(0.5,0.3,0.8,0.4);
-        legend0->AddEntry(h_zdc[0],"side C","lep");
-        legend0->AddEntry(h_zdc[1],"side A","lep");
+        legend0 = new TLegend(0.2,0.3,0.4,0.4);
+        legend0->AddEntry(h_zdc[0],"side C","l");
+        legend0->AddEntry(h_zdc[1],"side A","l");
         legend0->Draw();
         c2->SaveAs(Form("%s/zdc_sides.png",outputpath.c_str()));
 
